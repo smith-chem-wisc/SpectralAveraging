@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpectralAveraging", "SpectralAveraging\SpectralAveraging.csproj", "{8F6B3892-A869-4106-95B9-7718844876DF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpectralAveraging", "SpectralAveraging\SpectralAveraging.csproj", "{8F6B3892-A869-4106-95B9-7718844876DF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Normalization", "..\InstrumentControl\Normalization\Normalization.csproj", "{921AFE30-98FF-4839-AD81-1966D5024539}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Averaging", "..\InstrumentControl\SpectrumAveraging\Averaging.csproj", "{7F3C603A-587D-4AF6-81DA-DADE386A1A9C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{8F6B3892-A869-4106-95B9-7718844876DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F6B3892-A869-4106-95B9-7718844876DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F6B3892-A869-4106-95B9-7718844876DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{921AFE30-98FF-4839-AD81-1966D5024539}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{921AFE30-98FF-4839-AD81-1966D5024539}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{921AFE30-98FF-4839-AD81-1966D5024539}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{921AFE30-98FF-4839-AD81-1966D5024539}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F3C603A-587D-4AF6-81DA-DADE386A1A9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F3C603A-587D-4AF6-81DA-DADE386A1A9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F3C603A-587D-4AF6-81DA-DADE386A1A9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F3C603A-587D-4AF6-81DA-DADE386A1A9C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
