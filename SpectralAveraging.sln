@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpectralAveraging", "SpectralAveraging\SpectralAveraging.csproj", "{8F6B3892-A869-4106-95B9-7718844876DF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{1C777E61-9EE5-41AA-83D6-192DE5656E57}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Normalization", "..\InstrumentControl\Normalization\Normalization.csproj", "{921AFE30-98FF-4839-AD81-1966D5024539}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AveragingIO", "AveragingIO\AveragingIO.csproj", "{2B3D062F-8476-473A-B35D-88BD45757D2E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Averaging", "..\InstrumentControl\SpectrumAveraging\Averaging.csproj", "{7F3C603A-587D-4AF6-81DA-DADE386A1A9C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpectralAveraging", "SpectralAveraging\SpectralAveraging.csproj", "{6ED42FF7-6ABB-438C-9BBF-5103FE4F1BDD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpectralAveragingGUI", "SpectralAveragingGUI\SpectralAveragingGUI.csproj", "{D40A4151-7E9B-4094-AC09-DC0D898E5205}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,18 +17,22 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8F6B3892-A869-4106-95B9-7718844876DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8F6B3892-A869-4106-95B9-7718844876DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8F6B3892-A869-4106-95B9-7718844876DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8F6B3892-A869-4106-95B9-7718844876DF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{921AFE30-98FF-4839-AD81-1966D5024539}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{921AFE30-98FF-4839-AD81-1966D5024539}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{921AFE30-98FF-4839-AD81-1966D5024539}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{921AFE30-98FF-4839-AD81-1966D5024539}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7F3C603A-587D-4AF6-81DA-DADE386A1A9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7F3C603A-587D-4AF6-81DA-DADE386A1A9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7F3C603A-587D-4AF6-81DA-DADE386A1A9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7F3C603A-587D-4AF6-81DA-DADE386A1A9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C777E61-9EE5-41AA-83D6-192DE5656E57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C777E61-9EE5-41AA-83D6-192DE5656E57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C777E61-9EE5-41AA-83D6-192DE5656E57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C777E61-9EE5-41AA-83D6-192DE5656E57}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B3D062F-8476-473A-B35D-88BD45757D2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B3D062F-8476-473A-B35D-88BD45757D2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B3D062F-8476-473A-B35D-88BD45757D2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B3D062F-8476-473A-B35D-88BD45757D2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6ED42FF7-6ABB-438C-9BBF-5103FE4F1BDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6ED42FF7-6ABB-438C-9BBF-5103FE4F1BDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6ED42FF7-6ABB-438C-9BBF-5103FE4F1BDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6ED42FF7-6ABB-438C-9BBF-5103FE4F1BDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D40A4151-7E9B-4094-AC09-DC0D898E5205}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D40A4151-7E9B-4094-AC09-DC0D898E5205}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D40A4151-7E9B-4094-AC09-DC0D898E5205}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D40A4151-7E9B-4094-AC09-DC0D898E5205}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
