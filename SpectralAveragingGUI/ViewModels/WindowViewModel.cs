@@ -42,7 +42,15 @@ namespace SpectralAveragingGUI
         /// </summary>
         private WindowDockPosition mDockPosition = WindowDockPosition.Undocked;
 
+        /// <summary>
+        /// Image used in the upper left of the window and the taskbar icon
+        /// </summary>
         private BitmapImage icon;
+
+        /// <summary>
+        /// Main page view model for data context assignament
+        /// </summary>
+        private AveragingMainPageViewModel averagingMainPageViewModel;
 
         #endregion
 
@@ -52,12 +60,12 @@ namespace SpectralAveragingGUI
         /// <summary>
         /// The smallest width the window can go to
         /// </summary>
-        public double WindowMinimumWidth { get; set; } = 800;
+        public double WindowMinimumWidth { get; set; } = 600;
 
         /// <summary>
         /// The smallest height the window can go to
         /// </summary>
-        public double WindowMinimumHeight { get; set; } = 500;
+        public double WindowMinimumHeight { get; set; } = 600;
 
         /// <summary>
         /// True if the window is currently being moved/dragged
@@ -132,11 +140,23 @@ namespace SpectralAveragingGUI
         /// </summary>
         public bool DimmableOverlayVisible { get; set; }
 
+        /// <summary>
+        /// Image shown in the upper left of the window and the taskbar icon
+        /// </summary>
         public BitmapImage Icon
         {
             get { return icon; }
             set {  icon = value; 
                 OnPropertyChanged(nameof(Icon)); }
+        }
+
+        /// <summary>
+        /// Main page view model for data context assignment
+        /// </summary>
+        public AveragingMainPageViewModel AveragingMainPageViewModel
+        {
+            get { return averagingMainPageViewModel; }
+            set { averagingMainPageViewModel = value; OnPropertyChanged((nameof(AveragingMainPageViewModel))); }
         }
 
         #endregion
@@ -176,6 +196,7 @@ namespace SpectralAveragingGUI
             mWindow = window;
             string filepath = Path.Join(ApplicationPath, @"Images\AveragingIcon.png");
             icon = new BitmapImage(new Uri(filepath));
+            AveragingMainPageViewModel = new();
 
             // Listen out for the window resizing to let whoever is attached to know to adjust
             mWindow.StateChanged += (sender, e) =>

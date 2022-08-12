@@ -11,6 +11,11 @@
         public double MaxSigmaValue { get; set; }
         public double BinSize { get; set; }
 
+        public SpectralAveragingOptions()
+        {
+            SetDefaultValues();
+        }
+
         /// <summary>
         /// Can be used to set the values of the options class in one method call
         /// </summary>

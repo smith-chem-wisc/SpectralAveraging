@@ -59,7 +59,7 @@
 
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{StaticResource BackgroundLightBrush}" />
+                <Setter Property="Background" Value="{StaticResource WordLightBlueBrush}" />
             </Trigger>
         </Style.Triggers>
 
@@ -75,6 +75,23 @@
             </Trigger>
         </Style.Triggers>
 
+    </Style>
+
+    <!-- Spectra Handling Button -->
+    <Style TargetType="{x:Type Button}" x:Key="SpectraHandlingButton" BasedOn="{StaticResource Hoverless}">
+
+        <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True" />
+        <Setter Property="FontFamily" Value="{StaticResource LatoBold}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSmaller}"/>
+        <Setter Property="Background" Value="{StaticResource ButtonBlueBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource WordWhiteColorBrush}" />
+        <Setter Property="Margin" Value="0 5 0 10"></Setter>
+
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource WordLightBlueBrush}" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
 </ResourceDictionary>

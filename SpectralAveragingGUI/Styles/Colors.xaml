@@ -2,6 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:SpectralAveragingGUI">
 
+    <!-- Displayed object colors -->
     <Color x:Key="BackgroundLight">#efefef</Color>
     <SolidColorBrush x:Key="BackgroundLightBrush" Color="{StaticResource BackgroundLight}" />
 
@@ -26,14 +27,15 @@
     <Color x:Key="WordTransparentBlue">#003099c5</Color>
     <SolidColorBrush x:Key="WordTransparentBlueBrush" Color="{StaticResource WordTransparentBlue}" />
 
+    <Color x:Key="ButtonBlue">#0097e6</Color>
+    <SolidColorBrush x:Key="ButtonBlueBrush" Color="{StaticResource ButtonBlue}" />
+
+    <!-- Text colors -->
+    <Color x:Key="WordWhite">#f5f6fa</Color>
+    <SolidColorBrush x:Key="WordWhiteColorBrush" Color="{StaticResource WordWhite}" />
+
     <Color x:Key="WordLightBlue">#45b6e5</Color>
     <SolidColorBrush x:Key="WordLightBlueBrush" Color="{StaticResource WordLightBlue}" />
-
-    <Color x:Key="WordVeryLightBlue">#c3e5f3</Color>
-    <SolidColorBrush x:Key="WordVeryLightBlueBrush" Color="{StaticResource WordVeryLightBlue}" />
-
-    <Color x:Key="WordVeryVeryLightBlue">#ecf6fb</Color>
-    <SolidColorBrush x:Key="WordVeryVeryLightBlueBrush" Color="{StaticResource WordVeryVeryLightBlue}" />
 
     <Color x:Key="WordDarkBlue">#0c6991</Color>
     <SolidColorBrush x:Key="WordDarkBlueBrush" Color="{StaticResource WordDarkBlue}" />

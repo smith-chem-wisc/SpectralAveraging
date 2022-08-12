@@ -12,7 +12,7 @@
         Icon="{Binding Icon}"
         MinHeight="{Binding WindowMinimumHeight}"
         MinWidth="{Binding WindowMinimumWidth}"
-        Title="MainWindow" Height="800" Width="700">
+        Title="MainWindow" Height="600" Width="700">
 
     <Window.Resources>
         <Style TargetType="{x:Type local:MainWindow}">
@@ -64,7 +64,7 @@
                                     </Grid.RowDefinitions>
 
                                     <!-- title bar -->
-                                    <Grid Grid.Column="0" Panel.ZIndex="1" Background="{StaticResource BackgroundLightBrush}">
+                                    <Grid Grid.Column="0" Panel.ZIndex="1" Background="{StaticResource ForegroundLightBrush}">
 
                                         <Grid.ColumnDefinitions>
 
@@ -127,9 +127,9 @@
             />
     </WindowChrome.WindowChrome>
 
-    <Grid >
-        
-    </Grid>
+    <!-- What is being displayed in the window -->
+    <local:AveragingMainPageView DataContext="{Binding AveragingMainPageViewModel}" 
+                                 d:DataContext="{x:Static local:AveragingMainPageModel.Instance}" />
 
 </Window>
 

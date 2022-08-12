@@ -1,4 +1,4 @@
-﻿using SpectralAveraging.Averaging;
+﻿using SpectralAveraging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace SpectralAveraging
 {
-    internal class NormalizationTask : Task
+    internal class NormalizationTask
     {
-        public override void RunTask<T, U>(T options, U data)
+        public  void RunTask<T, U>(T options, U data)
         {
             if (data == null || options == null)
             {
