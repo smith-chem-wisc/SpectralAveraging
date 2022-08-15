@@ -11,9 +11,15 @@
           d:DataContext="{x:Static local:AveragingMainPageModel.Instance}">
 
         <Grid.RowDefinitions>
+            <!-- spectra handling area -->
             <RowDefinition Height="*" />
+            <!-- averaging options label -->
             <RowDefinition Height="Auto" />
+            <!-- averaging options groupboxes -->
             <RowDefinition Height="Auto" />
+            <!-- averaging options boxes -->
+            <RowDefinition Height="Auto" />
+            <!-- bottom buttons -->
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
@@ -93,7 +99,7 @@
                       Opacity="{Binding SpectraFileProcessingType, Converter={local:SpectraFileProcessingTypeToOpacityConverter}}">
                 <StackPanel>
                     <!-- Number of scans to average -->
-                    <StackPanel Style="{StaticResource ValueEnteringStackPanel}">
+                    <StackPanel Style="{StaticResource ValueEnteringStackPanel}" Margin="1">
                         <Label Content="Number of Scans To Average" Width="220"
                                ToolTip="How many scans from the file should be averaged at a time" />
                         <TextBox Text="{Binding NumberOfScansToAverage}" Style="{StaticResource TextBoxStyle}"
@@ -101,7 +107,7 @@
                     </StackPanel>
 
                     <!-- scan overlap -->
-                    <StackPanel Style="{StaticResource ValueEnteringStackPanel}" 
+                    <StackPanel Style="{StaticResource ValueEnteringStackPanel}" Margin="1" 
                                 Opacity="{Binding SpectraFileProcessingType, Converter={local:SpectraFileProcessingTypeToOpacityOverlapConverter}}">
                         <Label Content="Scan Overlap" Width="220"
                                ToolTip="Number of scans that should overlap while averaging" />
@@ -111,39 +117,35 @@
                 </StackPanel>
             </GroupBox>
 
-            <!-- Bin Size -->
-            <StackPanel Style="{StaticResource ValueEnteringStackPanel}">
-                <Label Content="Bin Size" Width="220" 
-                       ToolTip="Size of each bin in Thompson units"/>
-                <TextBox Text="{Binding BinSize}" Style="{StaticResource TextBoxStyle}"/>
-            </StackPanel>
+            <!-- Output Options -->
+            <GroupBox Header="Output Options" Style="{StaticResource GroupBoxStyle}">
+                <ListBox ItemsSource="{Binding OutputTypes}" SelectedItem="{Binding OutputType}">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListBoxItem}">
+                            <Setter Property="Template" >
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                        <ContentPresenter />
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <RadioButton Content="{Binding Converter={local:DataStructureToStringConverter}}" Margin="20 0 0 0">
+                                <RadioButton.IsChecked>
+                                    <Binding Path="IsSelected" RelativeSource="{RelativeSource AncestorType=ListBoxItem}" Mode="TwoWay" />
+                                </RadioButton.IsChecked>
+                            </RadioButton>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </GroupBox>
 
-            <!-- Percentile -->
-            <StackPanel Style="{StaticResource ValueEnteringStackPanel}"
-                        Opacity="{Binding RejectionType, Converter={local:OutlierRejectionTypeToPercentileOpacityConverter}}">
-                <Label Content="Percentile" Width="220"
-                       ToolTip="Distance away from the mean in percentile units before the point is rejected as an outlier in Percentile Clipping"/>
-                <TextBox Text="{Binding Percentile}" Style="{StaticResource TextBoxStyle}" 
-                         IsReadOnly="{Binding RejectionType, Converter={local:OutlierRejectionTypeToPercentileReadOnlyConverter}}"/>
-            </StackPanel>
+            
 
-            <!-- Min Sigma Value -->
-            <StackPanel Style="{StaticResource ValueEnteringStackPanel}"
-                        Opacity="{Binding RejectionType, Converter={local:OutlierRejectionTypeToSigmaOpacityConverter}}">
-                <Label Content="Minimum Sigma Value" Width="220"
-                       ToolTip="Minimum distance in standard deviation units allowed before the point is rejected as an outlier"/>
-                <TextBox Text="{Binding MinSigmaVale}" Style="{StaticResource TextBoxStyle}"
-                         IsReadOnly="{Binding RejectionType, Converter={local:OutlierRejectionTypeToSigmaReadOnlyConverter}}"/>
-            </StackPanel>
-
-            <!-- Max Sigma Value -->
-            <StackPanel Style="{StaticResource ValueEnteringStackPanel}"
-                        Opacity="{Binding RejectionType, Converter={local:OutlierRejectionTypeToSigmaOpacityConverter}}">
-                <Label Content="Maximum Sigma Value" Width="220" 
-                       ToolTip="Maximum distance in standard deviation units allowed before the point is rejected as an outlier"/>
-                <TextBox Text="{Binding MaxSigmaValue}" Style="{StaticResource TextBoxStyle}"
-                         IsReadOnly="{Binding RejectionType, Converter={local:OutlierRejectionTypeToSigmaReadOnlyConverter}}"/>
-            </StackPanel>
+            
 
         </StackPanel>
 
@@ -213,8 +215,53 @@
             </GroupBox>
         </StackPanel>
 
+        <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"  DataContext="{Binding AveragingOptionsViewModel}"
+                    HorizontalAlignment="Stretch" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <!-- Bin Size -->
+                <StackPanel Style="{StaticResource ValueEnteringStackPanel}">
+                    <Label Content="Bin Size" Width="160" 
+                           ToolTip="Size of each bin in Thompson units"/>
+                    <TextBox Text="{Binding BinSize}" Style="{StaticResource TextBoxStyle}"/>
+                </StackPanel>
+
+                <!-- Percentile -->
+                <StackPanel Style="{StaticResource ValueEnteringStackPanel}"
+                            Opacity="{Binding RejectionType, Converter={local:OutlierRejectionTypeToPercentileOpacityConverter}}">
+                    <Label Content="Percentile" Width="160"
+                           ToolTip="Distance away from the mean in percentile units before the point is rejected as an outlier in Percentile Clipping"/>
+                    <TextBox Text="{Binding Percentile}" Style="{StaticResource TextBoxStyle}" 
+                             IsReadOnly="{Binding RejectionType, Converter={local:OutlierRejectionTypeToPercentileReadOnlyConverter}}"/>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Grid.Column="1"  >
+                <!-- Min Sigma Value -->
+                <StackPanel Style="{StaticResource ValueEnteringStackPanel}"
+                            Opacity="{Binding RejectionType, Converter={local:OutlierRejectionTypeToSigmaOpacityConverter}}">
+                    <Label Content="Minimum Sigma Value" Width="160"
+                           ToolTip="Minimum distance in standard deviation units allowed before the point is rejected as an outlier"/>
+                    <TextBox Text="{Binding MinSigmaVale}" Style="{StaticResource TextBoxStyle}"
+                             IsReadOnly="{Binding RejectionType, Converter={local:OutlierRejectionTypeToSigmaReadOnlyConverter}}"/>
+                </StackPanel>
+
+                <!-- Max Sigma Value -->
+                <StackPanel Style="{StaticResource ValueEnteringStackPanel}"
+                            Opacity="{Binding RejectionType, Converter={local:OutlierRejectionTypeToSigmaOpacityConverter}}">
+                    <Label Content="Maximum Sigma Value" Width="160" 
+                           ToolTip="Maximum distance in standard deviation units allowed before the point is rejected as an outlier"/>
+                    <TextBox Text="{Binding MaxSigmaValue}" Style="{StaticResource TextBoxStyle}"
+                             IsReadOnly="{Binding RejectionType, Converter={local:OutlierRejectionTypeToSigmaReadOnlyConverter}}"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+
         <!-- Bottom Buttons -->
-        <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Content="Save As Default" Style="{StaticResource SpectraHandlingButton}" Width="130" Height="25"
                     Command="{Binding SaveAsDefaultCommand}" Margin="5"/>
             <Button Content="Average Spectra" Style="{StaticResource SpectraHandlingButton}" Width="180" Height="40"

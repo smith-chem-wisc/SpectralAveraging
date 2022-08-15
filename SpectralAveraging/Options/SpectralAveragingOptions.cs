@@ -1,4 +1,7 @@
-﻿namespace SpectralAveraging
+﻿using System.Text;
+using ThermoFisher.CommonCore.Data.Business;
+
+namespace SpectralAveraging
 {
     public class SpectralAveragingOptions 
     {
@@ -18,6 +21,8 @@
         public SpectraFileProcessingType SpectraFileProcessingType { get; set; }
         public double NumberOfScansToAverage { get; set; }
         public double ScanOverlap { get; set; }
+        public OutputType OutputType { get; set; }
+        public bool OutputOptions { get; set; }
 
         #endregion
 
@@ -36,7 +41,8 @@
         public void SetValues(RejectionType rejectionType = RejectionType.NoRejection,
             WeightingType intensityWeighingType = WeightingType.NoWeight, SpectrumMergingType spectrumMergingType = SpectrumMergingType.SpectrumBinning,
             bool performNormalization = true, double percentile = 0.1, double minSigma = 1.5, double maxSigma = 1.5, double binSize = 0.01,
-            SpectraFileProcessingType spectraFileProcessingType = SpectraFileProcessingType.AverageAll, double numberOfScansToAverage = 5, double scanOverlap = 2)
+            SpectraFileProcessingType spectraFileProcessingType = SpectraFileProcessingType.AverageAll, double numberOfScansToAverage = 5, 
+            double scanOverlap = 2, OutputType outputType = OutputType.mzML, bool outputOptions = false)
         {
             RejectionType = rejectionType;
             WeightingType = intensityWeighingType;
@@ -49,6 +55,8 @@
             SpectraFileProcessingType = spectraFileProcessingType;
             NumberOfScansToAverage = numberOfScansToAverage;
             ScanOverlap = scanOverlap;
+            OutputType = outputType;
+            OutputOptions = outputOptions;
         }
 
         /// <summary>
@@ -67,6 +75,46 @@
             SpectraFileProcessingType = SpectraFileProcessingType.AverageAll;
             NumberOfScansToAverage = 5;
             ScanOverlap = 2;
+            OutputType = OutputType.mzML;
+            OutputOptions = false;
+        }
+
+        /// <summary>
+        /// Override for the ToString method that can be used for file output naming
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.Append(RejectionType.ToString() + '_');
+            stringBuilder.Append(WeightingType.ToString() + '_');
+            if (PerformNormalization)
+                stringBuilder.Append("Normalized_");
+
+            // rejection type specific 
+            if (RejectionType == RejectionType.PercentileClipping)
+                stringBuilder.Append("Percentile:" + Percentile + '_');
+            if (RejectionType is RejectionType.WinsorizedSigmaClipping or RejectionType.AveragedSigmaClipping
+                or RejectionType.SigmaClipping)
+            {
+                stringBuilder.Append("MinSigma:" + MinSigmaValue + '_');
+                stringBuilder.Append("MaxSigma:" + MaxSigmaValue + '_');
+            }
+
+            stringBuilder.Append("BinSize:" + BinSize + '_');
+
+            // file processing specific
+            stringBuilder.Append(SpectraFileProcessingType + '_');
+            if (SpectraFileProcessingType != SpectraFileProcessingType.AverageAll)
+            {
+                stringBuilder.Append("Averaged" + NumberOfScansToAverage + "Scans_");
+                if (SpectraFileProcessingType.ToString().Contains("Overlap"))
+                {
+                    stringBuilder.Append("ScanOverlap:" + ScanOverlap);
+                }
+            }
+
+            return stringBuilder.ToString();
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -13,7 +14,9 @@ namespace SpectralAveragingGUI
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             string val = value.ToString();
-            if (((SpectraFileProcessingType[])Enum.GetValues(typeof(SpectraFileProcessingType))).Any(p => p.ToString() == value.ToString()))
+
+            // spectra file processing specific
+            if (value.GetType() == typeof(SpectraFileProcessingType))
             {
                 if (val == "AverageEverynScans")
                     return "Average Every n Scans";
@@ -25,8 +28,21 @@ namespace SpectralAveragingGUI
                     return "Average DDA Scans with Overlap";
             }
 
+            // output type specific
+            if (value.GetType() == typeof(OutputType))
+            {
+                if (val == "txt")
+                    return "Text File";
+                else if (val == "mzML")
+                    return "MzML file";
+            }
+
+
+            // empty
             if (string.IsNullOrWhiteSpace(val))
                     return "";
+
+            // split all others at the capital letter
             StringBuilder newText = new StringBuilder(val.Length * 2);
             newText.Append(val[0]);
             for (int i = 1; i < val.Length; i++)

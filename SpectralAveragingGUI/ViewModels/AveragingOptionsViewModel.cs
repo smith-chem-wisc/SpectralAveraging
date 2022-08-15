@@ -82,10 +82,16 @@ namespace SpectralAveragingGUI
             set { spectralAveragingOptions.ScanOverlap = value; OnPropertyChanged(nameof(ScanOverlap)); }
         }
 
-        public SpectraFileProcessingType[] SpectraFileProcessingTypes { get; set; }
+        public OutputType OutputType
+        {
+            get { return spectralAveragingOptions.OutputType; }
+            set { spectralAveragingOptions.OutputType = value; OnPropertyChanged(nameof(OutputType)); }
+        }
 
         public RejectionType[] RejectionTypes { get; set; }
         public WeightingType[] WeightingTypes { get; set; }
+        public SpectraFileProcessingType[] SpectraFileProcessingTypes { get; set; }
+        public OutputType[] OutputTypes { get; set; }
 
         #endregion
 
@@ -102,6 +108,7 @@ namespace SpectralAveragingGUI
             RejectionTypes = ((RejectionType[])Enum.GetValues(typeof(RejectionType))).Where(p => p != RejectionType.Thermo).ToArray();
             WeightingTypes = ((WeightingType[])Enum.GetValues(typeof(WeightingType)));
             SpectraFileProcessingTypes = ((SpectraFileProcessingType[])Enum.GetValues(typeof(SpectraFileProcessingType)));
+            OutputTypes = ((OutputType[])Enum.GetValues(typeof(OutputType)));
 
             // command assignment
         }
@@ -129,6 +136,7 @@ namespace SpectralAveragingGUI
             OnPropertyChanged(nameof(SpectraFileProcessingType));
             OnPropertyChanged((nameof(NumberOfScansToAverage)));
             OnPropertyChanged(nameof(ScanOverlap));
+            OnPropertyChanged(nameof(OutputType));
         }
 
         #endregion

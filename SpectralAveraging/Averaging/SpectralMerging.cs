@@ -31,6 +31,12 @@ namespace SpectralAveraging
             return compositeSpectrum;
         }
 
+        public static MzSpectrum CombineSpectra(MultiScanDataObject multiScanDataObject, SpectralAveragingOptions options)
+        {
+            return CombineSpectra(multiScanDataObject.XArrays, multiScanDataObject.YArrays,
+                multiScanDataObject.ScansToProcess, options);
+        }
+
         /// <summary>
         /// Merges spectra into a two dimensional array of (m/z, int) values based upon their bin 
         /// </summary>

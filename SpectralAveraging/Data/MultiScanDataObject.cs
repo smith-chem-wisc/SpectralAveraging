@@ -22,10 +22,7 @@ namespace SpectralAveraging
             GetMaxX(scanList);
             ProcessDataList(scanList); 
         }
-        public MultiScanDataObject()
-        {
 
-        }
         private void ProcessDataList(List<SingleScanDataObject> scanList)
         {
             ScansToProcess = scanList.Count;
@@ -40,6 +37,7 @@ namespace SpectralAveraging
                 TotalIonCurrent[i] = scanList[i].TotalIonCurrent;
             }
         }
+
         private void GetMinX(List<SingleScanDataObject> scanList)
         {
             MinX = scanList.Select(i => i.MinX).Aggregate((c,d) => c < d ? c : d); 

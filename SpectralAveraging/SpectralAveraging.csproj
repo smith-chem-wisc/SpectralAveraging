@@ -11,4 +11,8 @@
     <PackageReference Include="mzLib" Version="1.0.532" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AveragingIO\AveragingIO.csproj" />
+  </ItemGroup>
+
 </Project>

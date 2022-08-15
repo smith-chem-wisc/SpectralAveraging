@@ -10,6 +10,5 @@ namespace SpectralAveraging
     {
         txt,
         mzML,
-        MzSpectrumObject
     }
 }

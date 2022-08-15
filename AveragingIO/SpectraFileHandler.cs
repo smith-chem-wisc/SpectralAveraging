@@ -28,9 +28,34 @@ namespace AveragingIO
 			}
             else
 			{
-				throw new MzLibException("Cannot load spectra");
+				throw new ArgumentException("Cannot load spectra");
 			}
 			return scans;
+		}
+
+		/// <summary>
+		/// Gets the source file for the spectra file at designated path
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="filepath"></param>
+		/// <returns></returns>
+		/// <exception cref="MzLibException"></exception>
+        public static SourceFile GetSourceFile(string filepath)
+        {
+            List<MsDataScan> scans = new();
+            if (filepath.EndsWith(".mzML"))
+            {
+                return Mzml.LoadAllStaticData(filepath).SourceFile;
+            }
+            else if (filepath.EndsWith(".raw"))
+            {
+                return ThermoRawFileReader.LoadAllStaticData(filepath).SourceFile;
+            }
+            else
+            {
+                throw new ArgumentException("Cannot access SourceFile");
+            }
+
 		}
 
 		/// <summary>

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AveragingIO;
 using System.Windows;
 using System.Windows.Input;
+using MassSpectrometry;
 using SpectralAveraging;
 
 namespace SpectralAveragingGUI
@@ -186,6 +187,7 @@ namespace SpectralAveragingGUI
         private void RemoveAllSpectra()
         {
             spectraFilePaths = new();
+            SelectedSpectra.Clear();
             OnPropertyChanged(nameof(SpectraFilePaths));
             OnPropertyChanged(nameof(SpectraNames));
         }
@@ -195,7 +197,24 @@ namespace SpectralAveragingGUI
         /// </summary>
         private void AverageSpectra()
         {
-            throw new NotImplementedException();
+            StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine("Errors occurred while attempting to average the following files:");
+            foreach (var file in SpectraFilePaths)
+            {
+                try
+                {
+                    List<MsDataScan> scans = SpectraFileHandler.LoadAllScansFromFile(file);
+                    SpectraFileProcessing.ProcessSpectra(scans, AveragingOptionsViewModel.SpectralAveragingOptions, file);
+                }
+                catch (Exception e)
+                {
+                    stringBuilder.AppendLine(Path.GetFileNameWithoutExtension(file) + ": " + e.Message);
+                }
+            }
+
+            if (stringBuilder.Length > 66) // length of the "Errors occurred..." string
+                MessageBox.Show(stringBuilder.ToString());
+
         }
 
         /// <summary>
@@ -243,6 +262,8 @@ namespace SpectralAveragingGUI
 
             foreach (var spectrum in removedSpectra)
             {
+                if (spectrum == "{DependencyProperty.UnsetValue}")
+                    continue;
                 SelectedSpectra.Remove(SpectraFilePaths.First(p => p.Contains(spectrum)));
             }
 
