@@ -16,11 +16,17 @@ namespace AveragingIO
 		public static List<MsDataScan> LoadAllScansFromFile(string filepath)
 		{
 			List<MsDataScan> scans = new();
-			if (filepath.EndsWith(".mzML"))
-				scans = Mzml.LoadAllStaticData(filepath).GetAllScansList();
-			else if (filepath.EndsWith(".raw"))
-				scans = ThermoRawFileReader.LoadAllStaticData(filepath).GetAllScansList();
-			else
+            if (filepath.EndsWith(".mzML"))
+            {
+                var temp = Mzml.LoadAllStaticData(filepath);
+                scans = temp.GetAllScansList();
+			}
+            else if (filepath.EndsWith(".raw"))
+            {
+                var temp = ThermoRawFileReader.LoadAllStaticData(filepath);
+                scans = temp.GetAllScansList();
+			}
+            else
 			{
 				throw new MzLibException("Cannot load spectra");
 			}

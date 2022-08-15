@@ -1,4 +1,5 @@
 ﻿using AveragingIO;
+using IO.ThermoRawFileReader;
 using MassSpectrometry;
 using Newtonsoft.Json;
 

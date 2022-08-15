@@ -22,4 +22,229 @@
     <ProjectReference Include="..\SpectralAveraging\SpectralAveraging.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_0\CentroidCount.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_0\centroids\Bools.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_0\centroids\CentroidMzInt.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_0\centroids\Ints.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_0\ChargeEnvelopes.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_0\DetectorName.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_0\Header.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_0\NoiseBand.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_0\NoiseCount.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_0\StatusLog.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_0\Trailer.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_0\TuneData.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_1\CentroidCount.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_1\centroids\Bools.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_1\centroids\CentroidMzInt.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_1\centroids\Ints.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_1\ChargeEnvelopes.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_1\DetectorName.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_1\Header.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_1\NoiseBand.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_1\NoiseCount.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_1\StatusLog.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_1\Trailer.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_1\TuneData.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_2\CentroidCount.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_2\centroids\Bools.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_2\centroids\CentroidMzInt.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_2\centroids\Ints.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_2\ChargeEnvelopes.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_2\DetectorName.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_2\Header.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_2\NoiseBand.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_2\NoiseCount.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_2\StatusLog.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_2\Trailer.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_2\TuneData.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_3\CentroidCount.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_3\centroids\Bools.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_3\centroids\CentroidMzInt.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_3\centroids\Ints.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_3\ChargeEnvelopes.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_3\DetectorName.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_3\Header.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_3\NoiseBand.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_3\NoiseCount.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_3\StatusLog.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_3\Trailer.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_3\TuneData.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_4\CentroidCount.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_4\centroids\Bools.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_4\centroids\CentroidMzInt.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_4\centroids\Ints.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_4\ChargeEnvelopes.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_4\DetectorName.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_4\Header.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_4\NoiseBand.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_4\NoiseCount.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_4\StatusLog.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_4\Trailer.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_4\TuneData.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_5\CentroidCount.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_5\centroids\Bools.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_5\centroids\CentroidMzInt.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_5\centroids\Ints.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_5\ChargeEnvelopes.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_5\DetectorName.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_5\Header.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_5\NoiseBand.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_5\NoiseCount.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_5\StatusLog.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_5\Trailer.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\IMsScansSerialized\ScanNum_5\TuneData.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\TDYeastFractionMMResult.psmtsv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\TDYeastFractionMS1.mzML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

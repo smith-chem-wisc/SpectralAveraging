@@ -5,13 +5,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SpectralAveragingGUI"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="700">
+             d:DesignHeight="700" d:DesignWidth="700">
 
     <Grid Background="{StaticResource BackgroundLightBrush}" 
           d:DataContext="{x:Static local:AveragingMainPageModel.Instance}">
 
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
@@ -22,7 +23,7 @@
         </Grid.ColumnDefinitions>
         
         <!-- Specta File Handling Area -->
-        <Grid Grid.Column="0" Grid.Row="0">
+        <Grid Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*" />
@@ -45,7 +46,7 @@
             </Border>
 
             <!-- Spectra Handling Buttons -->
-            <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 0 10">
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10">
                 <Button Name="AddSpectraButton" Style="{StaticResource SpectraHandlingButton}" Content="Add" 
                         Command="{Binding AddSpectraCommand}"/>
                 <Button Name="RemoveSpectraButton" Style="{StaticResource SpectraHandlingButton}" Content="Remove"
@@ -54,25 +55,110 @@
                         Command="{Binding RemoveAllSpectraCommand}" />
             </StackPanel>
         </Grid>
+
+        <Label Grid.Row="1" Content="Averaging Options"></Label>
         
-        <!-- Spectra Details / General Selection Settings -->
-        <Grid Grid.Row="0" Grid.Column="1">
-            <Label Content="Specta Details / General Selection Settings" FontFamily="{StaticResource LatoRegular}" 
-                   Margin="5 0 0 0"/>
-        </Grid>
-        
+        <!-- Averaging Options Text Boxes -->
+        <StackPanel Name="OptionsBoxesStackPanel" Grid.Row="2" Grid.Column="0" DataContext="{Binding AveragingOptionsViewModel}" 
+                    HorizontalAlignment="Stretch">
+
+            <!-- File Averaging Type -->
+            <GroupBox Header="File Averaging Type" Style="{StaticResource GroupBoxStyle}" >
+                <ListBox ItemsSource="{Binding SpectraFileProcessingTypes}" SelectedItem="{Binding SpectraFileProcessingType}">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListBoxItem}">
+                            <Setter Property="Template" >
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                        <ContentPresenter />
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <RadioButton Content="{Binding Converter={local:DataStructureToStringConverter}}" Margin="20 0 0 0">
+                                <RadioButton.IsChecked>
+                                    <Binding Path="IsSelected" RelativeSource="{RelativeSource AncestorType=ListBoxItem}" Mode="TwoWay" />
+                                </RadioButton.IsChecked>
+                            </RadioButton>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </GroupBox>
+
+            <!-- File Averaging Specific Options -->
+            <GroupBox Header="File Type Specific Options" Style="{StaticResource GroupBoxStyle}" 
+                      Opacity="{Binding SpectraFileProcessingType, Converter={local:SpectraFileProcessingTypeToOpacityConverter}}">
+                <StackPanel>
+                    <!-- Number of scans to average -->
+                    <StackPanel Style="{StaticResource ValueEnteringStackPanel}">
+                        <Label Content="Number of Scans To Average" Width="220"
+                               ToolTip="How many scans from the file should be averaged at a time" />
+                        <TextBox Text="{Binding NumberOfScansToAverage}" Style="{StaticResource TextBoxStyle}"
+                                 IsReadOnly="{Binding SpectraFileProcessingType, Converter={local:SpectraFileProcessingTypeToNumberToAverageReadOnlyConverter}}"/>
+                    </StackPanel>
+
+                    <!-- scan overlap -->
+                    <StackPanel Style="{StaticResource ValueEnteringStackPanel}" 
+                                Opacity="{Binding SpectraFileProcessingType, Converter={local:SpectraFileProcessingTypeToOpacityOverlapConverter}}">
+                        <Label Content="Scan Overlap" Width="220"
+                               ToolTip="Number of scans that should overlap while averaging" />
+                        <TextBox Text="{Binding ScanOverlap}" Style="{StaticResource TextBoxStyle}"
+                                 IsReadOnly="{Binding SpectraFileProcessingType, Converter={local:SpectraFileProcessingTypeToOverlapReadOnlyConverter}}"/>
+                    </StackPanel>
+                </StackPanel>
+            </GroupBox>
+
+            <!-- Bin Size -->
+            <StackPanel Style="{StaticResource ValueEnteringStackPanel}">
+                <Label Content="Bin Size" Width="220" 
+                       ToolTip="Size of each bin in Thompson units"/>
+                <TextBox Text="{Binding BinSize}" Style="{StaticResource TextBoxStyle}"/>
+            </StackPanel>
+
+            <!-- Percentile -->
+            <StackPanel Style="{StaticResource ValueEnteringStackPanel}"
+                        Opacity="{Binding RejectionType, Converter={local:OutlierRejectionTypeToPercentileOpacityConverter}}">
+                <Label Content="Percentile" Width="220"
+                       ToolTip="Distance away from the mean in percentile units before the point is rejected as an outlier in Percentile Clipping"/>
+                <TextBox Text="{Binding Percentile}" Style="{StaticResource TextBoxStyle}" 
+                         IsReadOnly="{Binding RejectionType, Converter={local:OutlierRejectionTypeToPercentileReadOnlyConverter}}"/>
+            </StackPanel>
+
+            <!-- Min Sigma Value -->
+            <StackPanel Style="{StaticResource ValueEnteringStackPanel}"
+                        Opacity="{Binding RejectionType, Converter={local:OutlierRejectionTypeToSigmaOpacityConverter}}">
+                <Label Content="Minimum Sigma Value" Width="220"
+                       ToolTip="Minimum distance in standard deviation units allowed before the point is rejected as an outlier"/>
+                <TextBox Text="{Binding MinSigmaVale}" Style="{StaticResource TextBoxStyle}"
+                         IsReadOnly="{Binding RejectionType, Converter={local:OutlierRejectionTypeToSigmaReadOnlyConverter}}"/>
+            </StackPanel>
+
+            <!-- Max Sigma Value -->
+            <StackPanel Style="{StaticResource ValueEnteringStackPanel}"
+                        Opacity="{Binding RejectionType, Converter={local:OutlierRejectionTypeToSigmaOpacityConverter}}">
+                <Label Content="Maximum Sigma Value" Width="220" 
+                       ToolTip="Maximum distance in standard deviation units allowed before the point is rejected as an outlier"/>
+                <TextBox Text="{Binding MaxSigmaValue}" Style="{StaticResource TextBoxStyle}"
+                         IsReadOnly="{Binding RejectionType, Converter={local:OutlierRejectionTypeToSigmaReadOnlyConverter}}"/>
+            </StackPanel>
+
+        </StackPanel>
+
         <!-- Averaging Radio Buttons -->
-        <StackPanel Name="OptionsContentStackPanel"  Grid.Row="1" Grid.Column="0" DataContext="{Binding AveragingOptionsViewModel}">
-            <Label Content="Averaging Options"></Label>
+        <StackPanel Name="OptionsContentStackPanel"  Grid.Row="2" Grid.Column="1" DataContext="{Binding AveragingOptionsViewModel}"
+                    HorizontalAlignment="Stretch">
 
             <!-- Normalization -->
-            <GroupBox Header="Normalization" Style="{StaticResource GroupBoxStyle}" Margin="5"  Background="{StaticResource BackgroundVeryLightBrush}">
+            <GroupBox Header="Normalization" Style="{StaticResource GroupBoxStyle}">
                 <CheckBox Content="Perform Normalization" Margin="20 0 0 0" IsChecked="{Binding PerformNormalization}"
                           Background="{StaticResource BackgroundVeryLightBrush}"/>
             </GroupBox>
 
-            <!-- Outlier Rejection --> 
-            <GroupBox Header="Outlier Rejection" Style="{StaticResource GroupBoxStyle}" Margin="5">
+            <!-- Outlier Rejection -->
+            <GroupBox Header="Outlier Rejection" Style="{StaticResource GroupBoxStyle}">
 
                 <ListBox ItemsSource="{Binding RejectionTypes}" SelectedItem="{Binding RejectionType}">
                     <ListBox.ItemContainerStyle>
@@ -88,7 +174,7 @@
                     </ListBox.ItemContainerStyle>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <RadioButton Content="{Binding}" Margin="20 0 0 0">
+                            <RadioButton Content="{Binding Converter={local:DataStructureToStringConverter}}" Margin="20 0 0 0">
                                 <RadioButton.IsChecked>
                                     <Binding Path="IsSelected" RelativeSource="{RelativeSource AncestorType=ListBoxItem}" Mode="TwoWay" />
                                 </RadioButton.IsChecked>
@@ -96,12 +182,12 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                
+
 
             </GroupBox>
 
             <!-- Bin Weighting -->
-            <GroupBox Header="Bin Weighting" Style="{StaticResource GroupBoxStyle}" Margin="5">
+            <GroupBox Header="Bin Weighting" Style="{StaticResource GroupBoxStyle}">
                 <ListBox ItemsSource="{Binding WeightingTypes}" SelectedItem="{Binding WeightingType}">
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="{x:Type ListBoxItem}">
@@ -113,10 +199,10 @@
                                 </Setter.Value>
                             </Setter>
                         </Style>
-                    </ListBox.ItemContainerStyle>    
+                    </ListBox.ItemContainerStyle>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <RadioButton Content="{Binding}" Margin="20 0 0 0">
+                            <RadioButton Content="{Binding Converter={local:DataStructureToStringConverter}}" Margin="20 0 0 0">
                                 <RadioButton.IsChecked>
                                     <Binding Path="IsSelected" RelativeSource="{RelativeSource AncestorType=ListBoxItem}" Mode="TwoWay" />
                                 </RadioButton.IsChecked>
@@ -125,44 +211,10 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
             </GroupBox>
-         </StackPanel>
-        
-        <!-- Averaging Options Text Boxes -->
-        <StackPanel Name="OptionsBoxesStackPanel" Grid.Row="1" Grid.Column="1" Margin="0 20 0 0 "
-                    DataContext="{Binding AveragingOptionsViewModel}" HorizontalAlignment="Center">
-
-            <!-- Bin Size -->
-            <StackPanel Orientation="Horizontal" Margin="5">
-                <Label Content="Bin Size" Width="160" 
-                       ToolTip="Size of each bin in Thompson units"/>
-                <TextBox Text="{Binding BinSize}" Style="{StaticResource TextBoxStyle}" />
-            </StackPanel>
-
-            <!-- Percentile -->
-            <StackPanel Orientation="Horizontal" Margin="5">
-                <Label Content="Percentile" Width="160"
-                       ToolTip="Distance away from the mean in percentile units before the point is rejected as an outlier in Percentile Clipping"/>
-                <TextBox Text="{Binding Percentile}" Style="{StaticResource TextBoxStyle}" />
-            </StackPanel>
-
-            <!-- Min Sigma Value -->
-            <StackPanel Orientation="Horizontal" Margin="5">
-                <Label Content="Minimum Sigma Value" Width="160"
-                       ToolTip="Minimum distance in standard deviation units allowed before the point is rejected as an outlier"/>
-                <TextBox Text="{Binding MinSigmaVale}" Style="{StaticResource TextBoxStyle}" />
-            </StackPanel>
-
-            <!-- Max Sigma Value -->
-            <StackPanel Orientation="Horizontal" Margin="5">
-                <Label Content="Maximum Sigma Value" Width="160" 
-                       ToolTip="Maximum distance in standard deviation units allowed before the point is rejected as an outlier"/>
-                <TextBox Text="{Binding MaxSigmaValue}" Style="{StaticResource TextBoxStyle}" />
-            </StackPanel>
-
         </StackPanel>
 
         <!-- Bottom Buttons -->
-        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Content="Save As Default" Style="{StaticResource SpectraHandlingButton}" Width="130" Height="25"
                     Command="{Binding SaveAsDefaultCommand}" Margin="5"/>
             <Button Content="Average Spectra" Style="{StaticResource SpectraHandlingButton}" Width="180" Height="40"

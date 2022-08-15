@@ -1,7 +1,8 @@
 ﻿namespace SpectralAveraging
 {
-    public class SpectralAveragingOptions
+    public class SpectralAveragingOptions 
     {
+        #region Averaging Options
         public RejectionType RejectionType { get; set; }
         public WeightingType WeightingType { get; set; }
         public SpectrumMergingType SpectrumMergingType { get; set; }
@@ -10,6 +11,16 @@
         public double MinSigmaValue { get; set; }
         public double MaxSigmaValue { get; set; }
         public double BinSize { get; set; }
+
+        #endregion
+
+        #region File Processing Options
+        public SpectraFileProcessingType SpectraFileProcessingType { get; set; }
+        public double NumberOfScansToAverage { get; set; }
+        public double ScanOverlap { get; set; }
+
+        #endregion
+
 
         public SpectralAveragingOptions()
         {
@@ -24,7 +35,8 @@
         /// <param name="sigma">sigma value for sigma clipping rejection types</param>
         public void SetValues(RejectionType rejectionType = RejectionType.NoRejection,
             WeightingType intensityWeighingType = WeightingType.NoWeight, SpectrumMergingType spectrumMergingType = SpectrumMergingType.SpectrumBinning,
-            bool performNormalization = true, double percentile = 0.1, double minSigma = 1.5, double maxSigma = 1.5, double binSize = 0.01)
+            bool performNormalization = true, double percentile = 0.1, double minSigma = 1.5, double maxSigma = 1.5, double binSize = 0.01,
+            SpectraFileProcessingType spectraFileProcessingType = SpectraFileProcessingType.AverageAll, double numberOfScansToAverage = 5, double scanOverlap = 2)
         {
             RejectionType = rejectionType;
             WeightingType = intensityWeighingType;
@@ -34,6 +46,9 @@
             MinSigmaValue = minSigma;
             MaxSigmaValue = maxSigma;
             BinSize = binSize;
+            SpectraFileProcessingType = spectraFileProcessingType;
+            NumberOfScansToAverage = numberOfScansToAverage;
+            ScanOverlap = scanOverlap;
         }
 
         /// <summary>
@@ -49,6 +64,9 @@
             MinSigmaValue = 1.5;
             MaxSigmaValue = 1.5;
             BinSize = 0.01;
+            SpectraFileProcessingType = SpectraFileProcessingType.AverageAll;
+            NumberOfScansToAverage = 5;
+            ScanOverlap = 2;
         }
     }
 

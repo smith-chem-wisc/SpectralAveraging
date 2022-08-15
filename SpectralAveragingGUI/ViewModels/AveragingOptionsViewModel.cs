@@ -64,6 +64,26 @@ namespace SpectralAveragingGUI
             set { spectralAveragingOptions.BinSize = value; OnPropertyChanged(nameof(BinSize)); }
         }
 
+        public SpectraFileProcessingType SpectraFileProcessingType
+        {
+            get { return spectralAveragingOptions.SpectraFileProcessingType; }
+            set { spectralAveragingOptions.SpectraFileProcessingType = value; OnPropertyChanged(nameof(SpectraFileProcessingType)); }
+        }
+
+        public double NumberOfScansToAverage
+        {
+            get { return spectralAveragingOptions.NumberOfScansToAverage; }
+            set { spectralAveragingOptions.NumberOfScansToAverage = value; OnPropertyChanged(nameof(NumberOfScansToAverage)); }
+        }
+
+        public double ScanOverlap
+        {
+            get { return spectralAveragingOptions.ScanOverlap; }
+            set { spectralAveragingOptions.ScanOverlap = value; OnPropertyChanged(nameof(ScanOverlap)); }
+        }
+
+        public SpectraFileProcessingType[] SpectraFileProcessingTypes { get; set; }
+
         public RejectionType[] RejectionTypes { get; set; }
         public WeightingType[] WeightingTypes { get; set; }
 
@@ -81,6 +101,7 @@ namespace SpectralAveragingGUI
             spectralAveragingOptions = options;
             RejectionTypes = ((RejectionType[])Enum.GetValues(typeof(RejectionType))).Where(p => p != RejectionType.Thermo).ToArray();
             WeightingTypes = ((WeightingType[])Enum.GetValues(typeof(WeightingType)));
+            SpectraFileProcessingTypes = ((SpectraFileProcessingType[])Enum.GetValues(typeof(SpectraFileProcessingType)));
 
             // command assignment
         }
@@ -92,6 +113,11 @@ namespace SpectralAveragingGUI
         public void ResetDefaults()
         {
             SpectralAveragingOptions.SetDefaultValues();
+            UpdateVisualRepresentation();
+        }
+
+        private void UpdateVisualRepresentation()
+        {
             OnPropertyChanged(nameof(SpectralAveragingOptions));
             OnPropertyChanged(nameof(RejectionType));
             OnPropertyChanged(nameof(WeightingType));
@@ -100,6 +126,9 @@ namespace SpectralAveragingGUI
             OnPropertyChanged(nameof(MinSigmaVale));
             OnPropertyChanged(nameof(MaxSigmaValue));
             OnPropertyChanged(nameof(BinSize));
+            OnPropertyChanged(nameof(SpectraFileProcessingType));
+            OnPropertyChanged((nameof(NumberOfScansToAverage)));
+            OnPropertyChanged(nameof(ScanOverlap));
         }
 
         #endregion
