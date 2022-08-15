@@ -8,7 +8,7 @@ using SpectralAveraging;
 
 namespace SpectralAveragingGUI
 {
-    public class SpectraFileProcessingTypeToOpacityOverlapConverter : BaseValueConverter<SpectraFileProcessingTypeToOpacityOverlapConverter>
+    public class SpectraFileProcessingTypeToOverlapOpacityConverter : BaseValueConverter<SpectraFileProcessingTypeToOverlapOpacityConverter>
     {
         private double doNotDisplay = 0.5;
 
