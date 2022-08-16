@@ -17,33 +17,30 @@ namespace SpectralAveraging
     public static class SpectraFileProcessing
     {
         #region Averaging
-        public static void ProcessSpectra(List<MsDataScan> scans, SpectralAveragingOptions options, string spectraPath)
+        public static MsDataScan[] ProcessSpectra(List<MsDataScan> scans, SpectralAveragingOptions options)
         {
             switch (options.SpectraFileProcessingType)
             {
                 case SpectraFileProcessingType.AverageAll:
-                    AverageAll(scans, options, spectraPath);
-                    break;
+                    return AverageAll(scans, options);
 
                 case SpectraFileProcessingType.AverageEverynScans:
-                    AverageEverynScans(scans, options, spectraPath);
-                    break;
+                    return AverageEverynScans(scans, options);
 
                 case SpectraFileProcessingType.AverageEverynScansWithOverlap:
-                    AverageEverynScans(scans, options, spectraPath);
-                    break;
+                    return AverageEverynScans(scans, options);
 
                 case SpectraFileProcessingType.AverageDDAScans:
-                    AverageDDAScans(scans, options, spectraPath);
-                    break;
+                    return AverageDDAScans(scans, options);
 
                 case SpectraFileProcessingType.AverageDDAScansWithOverlap:
-                    AverageDDAScans(scans, options, spectraPath);
-                    break;
+                    return AverageDDAScans(scans, options);
+
+                default: throw new ArgumentOutOfRangeException(nameof(options));
             }
         }
 
-        public static void AverageAll(List<MsDataScan> scans, SpectralAveragingOptions options, string spectraPath)
+        public static MsDataScan[] AverageAll(List<MsDataScan> scans, SpectralAveragingOptions options)
         {
             // average spectrum
             MsDataScan representativeScan = scans.First();
@@ -56,10 +53,10 @@ namespace SpectralAveraging
                 averagedSpectrum.Range, null, representativeScan.MzAnalyzer, (double)multiScanDataObject.AverageIonCurrent,
                 representativeScan.InjectionTime, null, representativeScan.NativeId);
             MsDataScan[] msDataScans = new MsDataScan[] { averagedScan };
-            OutputAveragedScans(msDataScans, options, spectraPath);
+            return msDataScans;
         }
 
-        public static void AverageEverynScans(List<MsDataScan> scans, SpectralAveragingOptions options, string spectraPath)
+        public static MsDataScan[] AverageEverynScans(List<MsDataScan> scans, SpectralAveragingOptions options)
         {
             List<MsDataScan> averagedScans = new();
             int scanNumberIndex = 1;
@@ -93,87 +90,61 @@ namespace SpectralAveraging
                 scanNumberIndex++;
             }
 
-            OutputAveragedScans(averagedScans.ToArray(), options, spectraPath);
-
+            return averagedScans.ToArray();
         }
 
-        public static void AverageDDAScans(List<MsDataScan> scans, SpectralAveragingOptions options, string spectraPath)
+        public static MsDataScan[] AverageDDAScans(List<MsDataScan> scans, SpectralAveragingOptions options)
         {
-            throw new NotImplementedException();
-        }
+            List<MsDataScan> averagedScans = new();
+            List<MsDataScan> ms1Scans = scans.Where(p => p.MsnOrder == 1).ToList();
+            List<MsDataScan> ms2Scans = scans.Where(p => p.MsnOrder == 2).ToList();
+            List<MsDataScan> scansToProcess = new();
 
-        #endregion
-
-        #region Output
-
-        public static void OutputAveragedScans(MsDataScan[] averagedScans, SpectralAveragingOptions options,
-            string spectraPath)
-        {
-            switch (options.OutputType)
+            int scanNumberIndex = 1;
+            for (int i = 0; i < ms1Scans.Count; i += options.NumberOfScansToAverage - options.ScanOverlap)
             {
-                case OutputType.mzML:
-                    OutputAveragedSpectraAsMzML(averagedScans, options, spectraPath);
-                    break;
-
-                case OutputType.txt:
-                    OutputAveragedSpectraAsTxtFile(averagedScans, options, spectraPath);
-                    break;
-
-                default: throw new NotImplementedException("Output type not implemented");
-            }
-
-            if (options.OutputOptions)
-            {
-                string directoryPath = Path.GetDirectoryName(spectraPath);
-                string optionsPath = Path.Combine(directoryPath, options.ToString() + ".txt");
-                JsonSerializerDeserializer.SerializeToNewFile(options, optionsPath);
-            }
-
-        }
-
-        public static void OutputAveragedSpectraAsMzML(MsDataScan[] averagedScans, SpectralAveragingOptions options, 
-            string spectraPath)
-        {
-            SourceFile sourceFile = SpectraFileHandler.GetSourceFile(spectraPath);
-            MsDataFile msDataFile = new(averagedScans, sourceFile);
-            string spectraDirectory = Path.GetDirectoryName(spectraPath);
-            string averagedPath = Path.Combine(spectraDirectory,
-                "Averaged_" + Path.GetFileNameWithoutExtension(spectraPath) + options + ".mzML");
-
-            MzmlMethods.CreateAndWriteMyMzmlWithCalibratedSpectra(msDataFile, averagedPath, true);
-        }
-
-        public static void OutputAveragedSpectraAsTxtFile(MsDataScan[] averagedScans, SpectralAveragingOptions options,
-            string spectraPath)
-        {
-            string spectraDirectory = Path.GetDirectoryName(spectraPath);
-            if (options.SpectraFileProcessingType != SpectraFileProcessingType.AverageAll)
-            {
-                spectraDirectory = Path.Combine(spectraDirectory, "AveragedSpectra");
-                if (!Directory.Exists(spectraDirectory))
-                    Directory.CreateDirectory(spectraDirectory);
-            }
-
-            string averagedPath = Path.Combine(spectraDirectory,
-                "Averaged_" + Path.GetFileNameWithoutExtension(spectraPath) + options + ".txt");
-
-            foreach (var scan in averagedScans)
-            {
-                if (options.SpectraFileProcessingType != SpectraFileProcessingType.AverageAll)
-                    averagedPath = Path.Combine(spectraDirectory,
-                        "Averaged_" + Path.GetFileNameWithoutExtension(spectraPath) + "_" + scan.OneBasedScanNumber + options + ".txt");
-                using (StreamWriter writer = new StreamWriter(File.Create(averagedPath)))
+                // get the scans to be averaged
+                scansToProcess.Clear();
+                if (i <= options.ScanOverlap) // very start of the file
                 {
+                    scansToProcess = ms1Scans.GetRange(i, options.NumberOfScansToAverage);
+                }
+                else if (i + options.NumberOfScansToAverage > ms1Scans.Count) // very end of the file
+                {
+                    break;
+                }
+                else // anywhere in the middle of the file
+                {
+                    scansToProcess = ms1Scans.GetRange(i, options.NumberOfScansToAverage);
+                }
 
-                    for (int i = 0; i < scan.MassSpectrum.XArray.Length; i++)
-                    {
-                        writer.WriteLine(scan.MassSpectrum.XArray[i] + "\t" + scan.MassSpectrum.YArray[i]);
-                    }
+                // average scans and add to averaged list
+                MsDataScan representativeScan = scansToProcess.First();
+                MultiScanDataObject multiScanDataObject = new(SingleScanDataObject.ConvertMSDataScansInBulk(scansToProcess));
+                MzSpectrum averagedSpectrum = SpectralMerging.CombineSpectra(multiScanDataObject, options);
+                MsDataScan averagedScan = new(averagedSpectrum, scanNumberIndex, 1,
+                    representativeScan.IsCentroid, representativeScan.Polarity, scans.Select(p => p.RetentionTime).Average(),
+                    averagedSpectrum.Range, null, representativeScan.MzAnalyzer, (double)multiScanDataObject.AverageIonCurrent,
+                    scansToProcess.Select(p => p.InjectionTime).Average(), null, representativeScan.NativeId);
+                averagedScans.Add(averagedScan);
+                scanNumberIndex++;
+
+                // add the respective Ms2 scans
+                IEnumerable<MsDataScan> ms2ScansFromAveragedScans = ms2Scans.Where(p =>
+                    scansToProcess.Any(m => m.OneBasedScanNumber == p.OneBasedScanNumber));
+                foreach (var scan in ms2ScansFromAveragedScans)
+                {
+                    scan.SetOneBasedScanNumber(scanNumberIndex);
+                    scanNumberIndex++;
                 }
             }
+
+            return averagedScans.ToArray();
         }
 
         #endregion
+
+
 
 
     }

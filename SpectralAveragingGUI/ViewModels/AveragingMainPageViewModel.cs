@@ -261,7 +261,8 @@ namespace SpectralAveragingGUI
                 try
                 {
                     List<MsDataScan> scans = SpectraFileHandler.LoadAllScansFromFile(SpectraFilePaths[i]);
-                    SpectraFileProcessing.ProcessSpectra(scans, AveragingOptionsViewModel.SpectralAveragingOptions, SpectraFilePaths[i]);
+                    MsDataScan[] averagedScans = SpectraFileProcessing.ProcessSpectra(scans, AveragingOptionsViewModel.SpectralAveragingOptions);
+                    AveragedSpectraOutputter.OutputAveragedScans(averagedScans, AveragingOptionsViewModel.SpectralAveragingOptions, SpectraFilePaths[i]);
                 }
                 catch (Exception ex)
                 {
