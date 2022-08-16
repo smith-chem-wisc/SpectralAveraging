@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -7,6 +10,7 @@ using System.Threading.Tasks;
 using AveragingIO;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using MassSpectrometry;
 using SpectralAveraging;
 
@@ -21,11 +25,17 @@ namespace SpectralAveragingGUI
 
         #region Private Members
 
-        private List<string> spectraFilePaths;
-        private List<string> selectedSpectra;
+        private int spectraProcessingComblete;
+        private ObservableCollection<string> spectraFilePaths;
+        private ObservableCollection<string> selectedSpectra;
         private AveragingOptionsViewModel averagingOptionsViewModel;
         private string defaultOptionsDirectoryPath = Path.Combine(SpectralAveragingGUIGlobalSettings.DataDirectory,
             @"DefaultOptions");
+        private bool progressBarVisisbilty;
+        private List<string> errors;
+        private readonly BackgroundWorker worker = new BackgroundWorker(){WorkerReportsProgress = true};
+        private string processingText;
+        private Stopwatch stopwatch;
 
         #endregion
 
@@ -34,7 +44,7 @@ namespace SpectralAveragingGUI
         /// <summary>
         /// List of spectra file paths to be displayed in the SpectraFileBorder
         /// </summary>
-        public List<string> SpectraFilePaths
+        public ObservableCollection<string> SpectraFilePaths
         {
             get { return spectraFilePaths; }
             set { spectraFilePaths = value; OnPropertyChanged(nameof(SpectraFilePaths));
@@ -52,17 +62,40 @@ namespace SpectralAveragingGUI
         /// <summary>
         /// List of spectra that are selected in the displayed list
         /// </summary>
-        public List<string> SelectedSpectra
+        public ObservableCollection<string> SelectedSpectra
         {
             get { return selectedSpectra; }
-            set { selectedSpectra = value;
-                OnPropertyChanged(nameof(SelectedSpectra)); }
+            set { selectedSpectra = value; OnPropertyChanged(nameof(SelectedSpectra)); }
         }
 
+        /// <summary>
+        /// visual representation of the averaging options
+        /// </summary>
         public AveragingOptionsViewModel AveragingOptionsViewModel
         {
             get { return averagingOptionsViewModel; }
             set { averagingOptionsViewModel = value; OnPropertyChanged(nameof(AveragingOptionsViewModel)); }
+        }
+
+        /// <summary>
+        /// The number of spectra where processing is complete, for progress bar display
+        /// </summary>
+        public int SpectraProcessingComplete
+        {
+            get { return spectraProcessingComblete; }
+            set { spectraProcessingComblete = value; OnPropertyChanged(nameof(SpectraProcessingComplete)); }
+        }
+
+        public bool ProgressBarVisibility
+        {
+            get { return progressBarVisisbilty; }
+            set { progressBarVisisbilty = value; OnPropertyChanged(nameof(ProgressBarVisibility)); }
+        }
+
+        public string ProcessingText
+        {
+            get { return processingText; }
+            set { processingText = value; OnPropertyChanged(nameof(ProcessingText)); }
         }
 
         #endregion
@@ -74,6 +107,7 @@ namespace SpectralAveragingGUI
         public ICommand AverageSpectraCommand { get; set; }
         public ICommand SaveAsDefaultCommand { get; set; }
         public ICommand ResetDefaultsCommand { get; set; }
+        public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
 
         #endregion
 
@@ -84,7 +118,9 @@ namespace SpectralAveragingGUI
             // value initialization
             spectraFilePaths = new();
             selectedSpectra = new();
-
+            errors = new();
+            progressBarVisisbilty = false;
+            stopwatch = new();
 
             SpectralAveragingOptions options;
             string optionsPath = Path.Combine(defaultOptionsDirectoryPath, "defaultOptions.txt");
@@ -105,6 +141,8 @@ namespace SpectralAveragingGUI
             AverageSpectraCommand = new RelayCommand(() => AverageSpectra());
             SaveAsDefaultCommand = new RelayCommand(() => SaveAsDefault());
             ResetDefaultsCommand = new RelayCommand(() => ResetDefaults());
+            worker.DoWork += Worker_AverageSpectra;
+            worker.ProgressChanged += Worker_ReportProgress;
         }
 
         #endregion
@@ -163,9 +201,7 @@ namespace SpectralAveragingGUI
             }
 
             // Update Visual Representation
-            OnPropertyChanged(nameof(SpectraFilePaths));
-            OnPropertyChanged(nameof(SpectraNames));
-            
+            UpdateSpectraFileRelatedFields();
         }
 
         /// <summary>
@@ -177,8 +213,8 @@ namespace SpectralAveragingGUI
             {
                 SpectraFilePaths.Remove(SpectraFilePaths.First(p => p.Contains(spectrumToRemove)));
             }
-            OnPropertyChanged(nameof(SpectraFilePaths));
-            OnPropertyChanged(nameof(SpectraNames));
+
+            UpdateSpectraFileRelatedFields();
         }
 
         /// <summary>
@@ -188,8 +224,7 @@ namespace SpectralAveragingGUI
         {
             spectraFilePaths = new();
             SelectedSpectra.Clear();
-            OnPropertyChanged(nameof(SpectraFilePaths));
-            OnPropertyChanged(nameof(SpectraNames));
+            UpdateSpectraFileRelatedFields();
         }
 
         /// <summary>
@@ -197,24 +232,54 @@ namespace SpectralAveragingGUI
         /// </summary>
         private void AverageSpectra()
         {
-            StringBuilder stringBuilder = new();
-            stringBuilder.AppendLine("Errors occurred while attempting to average the following files:");
-            foreach (var file in SpectraFilePaths)
+            List<string> errors = new();
+            ProgressBarVisibility = true;
+            ProcessingText = "Starting Averaging";
+            errors.Clear();
+            worker.RunWorkerAsync();
+
+            if (errors.Any())
+            {
+                StringBuilder sb = new();
+                sb.AppendLine("Errors occurred while attempting to average the following files:");
+                foreach (var error in errors)
+                {
+                    sb.AppendLine(error);
+                }
+
+                MessageBox.Show(sb.ToString());
+            }
+
+        }
+
+        private void Worker_AverageSpectra(object sender, DoWorkEventArgs e)
+        {
+            stopwatch.Reset();
+            stopwatch.Start();
+            for (int i = 0; i < SpectraFilePaths.Count; i++)
             {
                 try
                 {
-                    List<MsDataScan> scans = SpectraFileHandler.LoadAllScansFromFile(file);
-                    SpectraFileProcessing.ProcessSpectra(scans, AveragingOptionsViewModel.SpectralAveragingOptions, file);
+                    List<MsDataScan> scans = SpectraFileHandler.LoadAllScansFromFile(SpectraFilePaths[i]);
+                    SpectraFileProcessing.ProcessSpectra(scans, AveragingOptionsViewModel.SpectralAveragingOptions, SpectraFilePaths[i]);
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    stringBuilder.AppendLine(Path.GetFileNameWithoutExtension(file) + ": " + e.Message);
+                    errors.Add(Path.GetFileNameWithoutExtension(SpectraFilePaths[i]) + ": " + ex.Message);
                 }
+                worker.ReportProgress(i + 1);
             }
 
-            if (stringBuilder.Length > 66) // length of the "Errors occurred..." string
-                MessageBox.Show(stringBuilder.ToString());
+            stopwatch.Stop();
+        }
 
+        private void Worker_ReportProgress(object sender, ProgressChangedEventArgs e)
+        {
+            SpectraProcessingComplete = e.ProgressPercentage;
+            if (e.ProgressPercentage == SpectraFilePaths.Count)
+                ProcessingText = $"Averaging Finished - Elapsed Time: {stopwatch.Elapsed}";
+            else
+                ProcessingText = $"Averaged {SpectraProcessingComplete}/{SpectraFilePaths.Count} Spectra";
         }
 
         /// <summary>
@@ -270,7 +335,15 @@ namespace SpectralAveragingGUI
             OnPropertyChanged(nameof(SelectedSpectra));
         }
 
-  
+        /// <summary>
+        /// Updates the visual representation of the fields that have to do with spectra file handling
+        /// </summary>
+        private void UpdateSpectraFileRelatedFields()
+        {
+            OnPropertyChanged(nameof(SpectraFilePaths));
+            OnPropertyChanged(nameof(SpectraNames));
+        }
+        
 
         #endregion
 

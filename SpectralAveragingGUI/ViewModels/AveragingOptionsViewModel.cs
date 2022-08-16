@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using SpectralAveraging;
+using ThermoFisher.CommonCore.Data.Business;
 
 namespace SpectralAveragingGUI
 {
@@ -12,6 +14,7 @@ namespace SpectralAveragingGUI
         #region Private Members
 
         private SpectralAveragingOptions spectralAveragingOptions;
+        private int previousOverlap;
 
         #endregion
 
@@ -67,19 +70,45 @@ namespace SpectralAveragingGUI
         public SpectraFileProcessingType SpectraFileProcessingType
         {
             get { return spectralAveragingOptions.SpectraFileProcessingType; }
-            set { spectralAveragingOptions.SpectraFileProcessingType = value; OnPropertyChanged(nameof(SpectraFileProcessingType)); }
+            set { spectralAveragingOptions.SpectraFileProcessingType = value;
+                if ((SpectraFileProcessingType)value is SpectraFileProcessingType.AverageDDAScans
+                    or SpectraFileProcessingType.AverageEverynScans)
+                {
+                    if (previousOverlap == 0)
+                    {
+                        previousOverlap = ScanOverlap;
+                    }
+
+                    ScanOverlap = 0;
+                }
+                else if (previousOverlap != 0)
+                {
+                    ScanOverlap = previousOverlap;
+                }
+                
+                OnPropertyChanged(nameof(SpectraFileProcessingType));
+            }
         }
 
-        public double NumberOfScansToAverage
+        public int NumberOfScansToAverage
         {
             get { return spectralAveragingOptions.NumberOfScansToAverage; }
             set { spectralAveragingOptions.NumberOfScansToAverage = value; OnPropertyChanged(nameof(NumberOfScansToAverage)); }
         }
 
-        public double ScanOverlap
+        public int ScanOverlap
         {
             get { return spectralAveragingOptions.ScanOverlap; }
-            set { spectralAveragingOptions.ScanOverlap = value; OnPropertyChanged(nameof(ScanOverlap)); }
+            set
+            {
+                if (value >= NumberOfScansToAverage)
+                    MessageBox.Show("Overlap cannot be greater than or equal to the number of spectra averaged");
+                else
+                {
+                    spectralAveragingOptions.ScanOverlap = value;
+                    OnPropertyChanged(nameof(ScanOverlap));
+                }
+            }
         }
 
         public OutputType OutputType

@@ -19,8 +19,8 @@ namespace SpectralAveraging
 
         #region File Processing Options
         public SpectraFileProcessingType SpectraFileProcessingType { get; set; }
-        public double NumberOfScansToAverage { get; set; }
-        public double ScanOverlap { get; set; }
+        public int NumberOfScansToAverage { get; set; }
+        public int ScanOverlap { get; set; }
         public OutputType OutputType { get; set; }
         public bool OutputOptions { get; set; }
 
@@ -41,8 +41,8 @@ namespace SpectralAveraging
         public void SetValues(RejectionType rejectionType = RejectionType.NoRejection,
             WeightingType intensityWeighingType = WeightingType.NoWeight, SpectrumMergingType spectrumMergingType = SpectrumMergingType.SpectrumBinning,
             bool performNormalization = true, double percentile = 0.1, double minSigma = 1.5, double maxSigma = 1.5, double binSize = 0.01,
-            SpectraFileProcessingType spectraFileProcessingType = SpectraFileProcessingType.AverageAll, double numberOfScansToAverage = 5, 
-            double scanOverlap = 2, OutputType outputType = OutputType.mzML, bool outputOptions = false)
+            SpectraFileProcessingType spectraFileProcessingType = SpectraFileProcessingType.AverageAll, int numberOfScansToAverage = 5, 
+            int scanOverlap = 2, OutputType outputType = OutputType.mzML, bool outputOptions = false)
         {
             RejectionType = rejectionType;
             WeightingType = intensityWeighingType;
@@ -93,15 +93,15 @@ namespace SpectralAveraging
 
             // rejection type specific 
             if (RejectionType == RejectionType.PercentileClipping)
-                stringBuilder.Append("Percentile:" + Percentile + '_');
+                stringBuilder.Append("Percentile-" + Percentile + '_');
             if (RejectionType is RejectionType.WinsorizedSigmaClipping or RejectionType.AveragedSigmaClipping
                 or RejectionType.SigmaClipping)
             {
-                stringBuilder.Append("MinSigma:" + MinSigmaValue + '_');
-                stringBuilder.Append("MaxSigma:" + MaxSigmaValue + '_');
+                stringBuilder.Append("MinSigma-" + MinSigmaValue + '_');
+                stringBuilder.Append("MaxSigma-" + MaxSigmaValue + '_');
             }
 
-            stringBuilder.Append("BinSize:" + BinSize + '_');
+            stringBuilder.Append("BinSize-" + BinSize + '_');
 
             // file processing specific
             stringBuilder.Append(SpectraFileProcessingType + '_');
@@ -110,7 +110,7 @@ namespace SpectralAveraging
                 stringBuilder.Append("Averaged" + NumberOfScansToAverage + "Scans_");
                 if (SpectraFileProcessingType.ToString().Contains("Overlap"))
                 {
-                    stringBuilder.Append("ScanOverlap:" + ScanOverlap);
+                    stringBuilder.Append("ScanOverlap-" + ScanOverlap);
                 }
             }
 

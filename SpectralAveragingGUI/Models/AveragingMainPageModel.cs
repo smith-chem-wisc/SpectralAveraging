@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace SpectralAveragingGUI
 {
@@ -24,6 +25,9 @@ namespace SpectralAveragingGUI
 
             SelectedSpectra.Add(path1);
             SelectedSpectra.Add(path2);
+            SpectraProcessingComplete = 1;
+            ProcessingText = $"Averaged {SpectraProcessingComplete}/{SpectraFilePaths.Count} Files";
+            ProgressBarVisibility = true;
         }
 
     }

@@ -5,7 +5,73 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SpectralAveragingGUI"
              mc:Ignorable="d" 
-             d:DesignHeight="700" d:DesignWidth="700">
+             d:DesignHeight="750" d:DesignWidth="700">
+    <UserControl.Resources>
+        <SolidColorBrush x:Key="ProgressBar.Progress" Color="#FF06B025"/>
+        <SolidColorBrush x:Key="ProgressBar.Background" Color="#FFE6E6E6"/>
+        <SolidColorBrush x:Key="ProgressBar.Border" Color="#FFBCBCBC"/>
+        <Style x:Key="ProgressBarStyle1" TargetType="{x:Type ProgressBar}">
+            <Setter Property="Foreground" Value="{StaticResource ProgressBar.Progress}"/>
+            <Setter Property="Background" Value="{StaticResource ProgressBar.Background}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource ProgressBar.Border}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ProgressBar}">
+                        <Grid x:Name="TemplateRoot">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Determinate"/>
+                                    <VisualState x:Name="Indeterminate">
+                                        <Storyboard RepeatBehavior="Forever">
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Animation" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
+                                                <EasingDoubleKeyFrame KeyTime="0" Value="0.25"/>
+                                                <EasingDoubleKeyFrame KeyTime="0:0:1" Value="0.25"/>
+                                                <EasingDoubleKeyFrame KeyTime="0:0:2" Value="0.25"/>
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <PointAnimationUsingKeyFrames Storyboard.TargetName="Animation" Storyboard.TargetProperty="(UIElement.RenderTransformOrigin)">
+                                                <EasingPointKeyFrame KeyTime="0" Value="-0.5,0.5"/>
+                                                <EasingPointKeyFrame KeyTime="0:0:1" Value="0.5,0.5"/>
+                                                <EasingPointKeyFrame KeyTime="0:0:2" Value="1.5,0.5"/>
+                                            </PointAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" 
+                                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10"/>
+                            <Rectangle x:Name="PART_Track"/>
+                            <Grid x:Name="PART_Indicator" ClipToBounds="true" HorizontalAlignment="Left">
+                                <Rectangle x:Name="Indicator" Fill="{TemplateBinding Foreground}" RadiusX="10" RadiusY="10"/>
+                                <Rectangle x:Name="Animation" Fill="{TemplateBinding Foreground}" RenderTransformOrigin="0.5,0.5" RadiusX="10" RadiusY="10">
+                                    <Rectangle.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform/>
+                                            <SkewTransform/>
+                                            <RotateTransform/>
+                                            <TranslateTransform/>
+                                        </TransformGroup>
+                                    </Rectangle.RenderTransform>
+                                </Rectangle>
+                            </Grid>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Orientation" Value="Vertical">
+                                <Setter Property="LayoutTransform" TargetName="TemplateRoot">
+                                    <Setter.Value>
+                                        <RotateTransform Angle="-90"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsIndeterminate" Value="true">
+                                <Setter Property="Visibility" TargetName="Indicator" Value="Collapsed"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
 
     <Grid Background="{StaticResource BackgroundLightBrush}" 
           d:DataContext="{x:Static local:AveragingMainPageModel.Instance}">
@@ -13,6 +79,8 @@
         <Grid.RowDefinitions>
             <!-- spectra handling area -->
             <RowDefinition Height="*" />
+            <!-- progress bar -->
+            <RowDefinition Height="Auto" />
             <!-- averaging options label -->
             <RowDefinition Height="Auto" />
             <!-- averaging options groupboxes -->
@@ -62,10 +130,28 @@
             </StackPanel>
         </Grid>
 
-        <Label Grid.Row="1" Content="Averaging Options"></Label>
+        <!-- Averaging progress bar -->
+        <Grid x:Name="ProgressBarDockPanel" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch"
+                   Visibility="{Binding ProgressBarVisibility, Converter={local:BooleanToVisibilityConverter}}" >
+
+            <ProgressBar Style="{DynamicResource ProgressBarStyle1}"  Value="{Binding SpectraProcessingComplete}" Minimum="0" 
+                          Maximum="{Binding SpectraFilePaths.Count}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                           Foreground="{StaticResource WordLightBlueBrush}"
+                          Margin="10 0 10 0"/>
+
+
+            <TextBlock  Style="{StaticResource ProgressTextBlockStyle}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Text="{Binding ProcessingText}" />
+
+
+
+        </Grid>
+
+        <!-- Averaging options label  -->
+        <Label Content="Averaging Options" Grid.Row="2" Grid.Column="0"></Label>
         
         <!-- Averaging Options Text Boxes -->
-        <StackPanel Name="OptionsBoxesStackPanel" Grid.Row="2" Grid.Column="0" DataContext="{Binding AveragingOptionsViewModel}" 
+        <StackPanel Name="OptionsBoxesStackPanel" Grid.Row="3" Grid.Column="0" DataContext="{Binding AveragingOptionsViewModel}" 
                     HorizontalAlignment="Stretch">
 
             <!-- File Averaging Type -->
@@ -146,21 +232,16 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
             </GroupBox>
-
-            
-
-            
-
         </StackPanel>
 
         <!-- Averaging Radio Buttons -->
-        <StackPanel Name="OptionsContentStackPanel"  Grid.Row="2" Grid.Column="1" DataContext="{Binding AveragingOptionsViewModel}"
+        <StackPanel Name="OptionsContentStackPanel"  Grid.Row="3" Grid.Column="1" DataContext="{Binding AveragingOptionsViewModel}"
                     HorizontalAlignment="Stretch">
 
             <!-- Normalization -->
             <GroupBox Header="Normalization" Style="{StaticResource GroupBoxStyle}">
                 <CheckBox Content="Perform Normalization" Margin="20 0 0 0" IsChecked="{Binding PerformNormalization}"
-                          Background="{StaticResource BackgroundVeryLightBrush}"/>
+                          Background="{StaticResource BackgroundLightBrush}"/>
             </GroupBox>
 
             <!-- Outlier Rejection -->
@@ -219,7 +300,7 @@
             </GroupBox>
         </StackPanel>
 
-        <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"  DataContext="{Binding AveragingOptionsViewModel}"
+        <Grid Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"  DataContext="{Binding AveragingOptionsViewModel}"
                     HorizontalAlignment="Stretch" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -265,7 +346,7 @@
         </Grid>
 
         <!-- Bottom Buttons -->
-        <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Content="Save As Default" Style="{StaticResource SpectraHandlingButton}" Width="130" Height="25"
                     Command="{Binding SaveAsDefaultCommand}" Margin="5"/>
             <Button Content="Average Spectra" Style="{StaticResource SpectraHandlingButton}" Width="180" Height="40"

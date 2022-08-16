@@ -14,13 +14,13 @@ namespace SpectralAveraging
         /// Calls the specific merging function based upon the current static field SpecrumMergingType
         /// </summary>
         /// <param name="scans"></param>
-        public static MzSpectrum CombineSpectra(double[][] xArrays, double[][] yArrays, int numSpectra, SpectralAveragingOptions options)
+        public static MzSpectrum CombineSpectra(double[][] xArrays, double[][] yArrays, double[] totalIonCurrents, int numSpectra, SpectralAveragingOptions options)
         {
             MzSpectrum compositeSpectrum = null;
             switch (options.SpectrumMergingType)
             {
                 case SpectrumMergingType.SpectrumBinning:
-                    compositeSpectrum = SpectrumBinning(xArrays, yArrays, options.BinSize, numSpectra, options);
+                    compositeSpectrum = SpectrumBinning(xArrays, yArrays, totalIonCurrents, options.BinSize, numSpectra, options);
                     break;
 
 
@@ -33,7 +33,7 @@ namespace SpectralAveraging
 
         public static MzSpectrum CombineSpectra(MultiScanDataObject multiScanDataObject, SpectralAveragingOptions options)
         {
-            return CombineSpectra(multiScanDataObject.XArrays, multiScanDataObject.YArrays,
+            return CombineSpectra(multiScanDataObject.XArrays, multiScanDataObject.YArrays, multiScanDataObject.TotalIonCurrent,
                 multiScanDataObject.ScansToProcess, options);
         }
 
@@ -42,9 +42,18 @@ namespace SpectralAveraging
         /// </summary>
         /// <param name="scans">scans to be combined</param>
         /// <returns>MSDataScan with merged values</returns>
-        public static MzSpectrum SpectrumBinning(double[][] xArrays, double[][] yArrays, double binSize, int numSpectra,
+        public static MzSpectrum SpectrumBinning(double[][] xArrays, double[][] yArrays, double[] totalIonCurrents, double binSize, int numSpectra,
             SpectralAveragingOptions options)
         {
+            // normalize if selected
+            if (options.PerformNormalization)
+            {
+                for (int i = 0; i < xArrays.Length; i++)
+                {
+                    SpectrumNormalization.NormalizeSpectrumToTic(yArrays[i], totalIonCurrents[i], totalIonCurrents.Average());
+                }
+            }
+
             // calculate the bins to be utilizied
             double min = 100000;
             double max = 0;
