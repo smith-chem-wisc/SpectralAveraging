@@ -36,7 +36,7 @@ namespace SpectralAveraging
             }
         }
 
-        public static void OutputAveragedSpectraAsMzML(MsDataScan[] averagedScans, SpectralAveragingOptions options,
+        private static void OutputAveragedSpectraAsMzML(MsDataScan[] averagedScans, SpectralAveragingOptions options,
             string spectraPath)
         {
             SourceFile sourceFile = SpectraFileHandler.GetSourceFile(spectraPath);
@@ -48,7 +48,7 @@ namespace SpectralAveraging
             MzmlMethods.CreateAndWriteMyMzmlWithCalibratedSpectra(msDataFile, averagedPath, true);
         }
 
-        public static void OutputAveragedSpectraAsTxtFile(MsDataScan[] averagedScans, SpectralAveragingOptions options,
+        private static void OutputAveragedSpectraAsTxtFile(MsDataScan[] averagedScans, SpectralAveragingOptions options,
             string spectraPath)
         {
             string spectraDirectory = Path.GetDirectoryName(spectraPath);

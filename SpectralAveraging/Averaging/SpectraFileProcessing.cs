@@ -16,7 +16,6 @@ namespace SpectralAveraging
     /// </summary>
     public static class SpectraFileProcessing
     {
-        #region Averaging
         public static MsDataScan[] ProcessSpectra(List<MsDataScan> scans, SpectralAveragingOptions options)
         {
             switch (options.SpectraFileProcessingType)
@@ -25,12 +24,14 @@ namespace SpectralAveraging
                     return AverageAll(scans, options);
 
                 case SpectraFileProcessingType.AverageEverynScans:
+                    options.ScanOverlap = 0;
                     return AverageEverynScans(scans, options);
 
                 case SpectraFileProcessingType.AverageEverynScansWithOverlap:
                     return AverageEverynScans(scans, options);
 
                 case SpectraFileProcessingType.AverageDDAScans:
+                    options.ScanOverlap = 0;
                     return AverageDDAScans(scans, options);
 
                 case SpectraFileProcessingType.AverageDDAScansWithOverlap:
@@ -40,7 +41,7 @@ namespace SpectralAveraging
             }
         }
 
-        public static MsDataScan[] AverageAll(List<MsDataScan> scans, SpectralAveragingOptions options)
+        private static MsDataScan[] AverageAll(List<MsDataScan> scans, SpectralAveragingOptions options)
         {
             // average spectrum
             MsDataScan representativeScan = scans.First();
@@ -56,7 +57,7 @@ namespace SpectralAveraging
             return msDataScans;
         }
 
-        public static MsDataScan[] AverageEverynScans(List<MsDataScan> scans, SpectralAveragingOptions options)
+        private static MsDataScan[] AverageEverynScans(List<MsDataScan> scans, SpectralAveragingOptions options)
         {
             List<MsDataScan> averagedScans = new();
             int scanNumberIndex = 1;
@@ -93,7 +94,7 @@ namespace SpectralAveraging
             return averagedScans.ToArray();
         }
 
-        public static MsDataScan[] AverageDDAScans(List<MsDataScan> scans, SpectralAveragingOptions options)
+        private static MsDataScan[] AverageDDAScans(List<MsDataScan> scans, SpectralAveragingOptions options)
         {
             List<MsDataScan> averagedScans = new();
             List<MsDataScan> ms1Scans = scans.Where(p => p.MsnOrder == 1).ToList();
@@ -127,25 +128,24 @@ namespace SpectralAveraging
                     averagedSpectrum.Range, null, representativeScan.MzAnalyzer, (double)multiScanDataObject.AverageIonCurrent,
                     scansToProcess.Select(p => p.InjectionTime).Average(), null, representativeScan.NativeId);
                 averagedScans.Add(averagedScan);
+                int precursorScanIndex = scanNumberIndex;
                 scanNumberIndex++;
 
                 // add the respective Ms2 scans
                 IEnumerable<MsDataScan> ms2ScansFromAveragedScans = ms2Scans.Where(p =>
-                    scansToProcess.Any(m => m.OneBasedScanNumber == p.OneBasedScanNumber));
+                    scansToProcess.Any(m => m.OneBasedScanNumber == p.OneBasedPrecursorScanNumber));
                 foreach (var scan in ms2ScansFromAveragedScans)
                 {
-                    scan.SetOneBasedScanNumber(scanNumberIndex);
+                    MsDataScan newScan = new(scan.MassSpectrum, scanNumberIndex, scan.MsnOrder, scan.IsCentroid,
+                        scan.Polarity, scan.RetentionTime, scan.ScanWindowRange, scan.ScanFilter, scan.MzAnalyzer,
+                        scan.TotalIonCurrent, scan.InjectionTime, scan.NoiseData, scan.NativeId,
+                        oneBasedPrecursorScanNumber: precursorScanIndex);
+                    averagedScans.Add(newScan);
                     scanNumberIndex++;
                 }
             }
 
             return averagedScans.ToArray();
         }
-
-        #endregion
-
-
-
-
     }
 }
