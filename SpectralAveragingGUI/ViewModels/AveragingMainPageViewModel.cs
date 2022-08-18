@@ -33,7 +33,7 @@ namespace SpectralAveragingGUI
             @"DefaultOptions");
         private bool progressBarVisisbilty;
         private List<string> errors;
-        private readonly BackgroundWorker worker = new BackgroundWorker(){WorkerReportsProgress = true};
+        private readonly BackgroundWorker worker;
         private string processingText;
         private Stopwatch stopwatch;
 
@@ -98,6 +98,11 @@ namespace SpectralAveragingGUI
             set { processingText = value; OnPropertyChanged(nameof(ProcessingText)); }
         }
 
+        public bool IsAveraging
+        {
+            get { return worker.IsBusy; }
+        }
+
         #endregion
 
         #region Commands
@@ -121,6 +126,7 @@ namespace SpectralAveragingGUI
             errors = new();
             progressBarVisisbilty = false;
             stopwatch = new();
+            worker = new BackgroundWorker() { WorkerReportsProgress = true };
 
             SpectralAveragingOptions options;
             string optionsPath = Path.Combine(defaultOptionsDirectoryPath, "defaultOptions.txt");
@@ -143,6 +149,7 @@ namespace SpectralAveragingGUI
             ResetDefaultsCommand = new RelayCommand(() => ResetDefaults());
             worker.DoWork += Worker_AverageSpectra;
             worker.ProgressChanged += Worker_ReportProgress;
+            worker.RunWorkerCompleted += Worker_RunWorkerComplete;
         }
 
         #endregion
@@ -209,9 +216,10 @@ namespace SpectralAveragingGUI
         /// </summary>
         private void RemoveSpectra()
         {
-            foreach (var spectrumToRemove in SelectedSpectra)
+            for (int i = SelectedSpectra.Count; i > 0; i--)
             {
-                SpectraFilePaths.Remove(SpectraFilePaths.First(p => p.Contains(spectrumToRemove)));
+                SpectraFilePaths.Remove(SpectraFilePaths.First(p => p.Contains(SelectedSpectra[i - 1])));
+                SelectedSpectra.Remove(SelectedSpectra[i - 1]);
             }
 
             UpdateSpectraFileRelatedFields();
@@ -237,6 +245,7 @@ namespace SpectralAveragingGUI
             ProcessingText = "Starting Averaging";
             errors.Clear();
             worker.RunWorkerAsync();
+            OnPropertyChanged(nameof(IsAveraging));
 
             if (errors.Any())
             {
@@ -249,7 +258,6 @@ namespace SpectralAveragingGUI
 
                 MessageBox.Show(sb.ToString());
             }
-
         }
 
         private void Worker_AverageSpectra(object sender, DoWorkEventArgs e)
@@ -261,7 +269,8 @@ namespace SpectralAveragingGUI
                 try
                 {
                     List<MsDataScan> scans = SpectraFileHandler.LoadAllScansFromFile(SpectraFilePaths[i]);
-                    SpectraFileProcessing.ProcessSpectra(scans, AveragingOptionsViewModel.SpectralAveragingOptions, SpectraFilePaths[i]);
+                    MsDataScan[] averagedScans = SpectraFileProcessing.ProcessSpectra(scans, AveragingOptionsViewModel.SpectralAveragingOptions);
+                    AveragedSpectraOutputter.OutputAveragedScans(averagedScans, AveragingOptionsViewModel.SpectralAveragingOptions, SpectraFilePaths[i]);
                 }
                 catch (Exception ex)
                 {
@@ -269,7 +278,6 @@ namespace SpectralAveragingGUI
                 }
                 worker.ReportProgress(i + 1);
             }
-
             stopwatch.Stop();
         }
 
@@ -277,9 +285,19 @@ namespace SpectralAveragingGUI
         {
             SpectraProcessingComplete = e.ProgressPercentage;
             if (e.ProgressPercentage == SpectraFilePaths.Count)
+            {
                 ProcessingText = $"Averaging Finished - Elapsed Time: {stopwatch.Elapsed}";
+            }
             else
+            {
                 ProcessingText = $"Averaged {SpectraProcessingComplete}/{SpectraFilePaths.Count} Spectra";
+            }
+        }
+
+        private void Worker_RunWorkerComplete(object sender, EventArgs e)
+        {
+            OnPropertyChanged(nameof(IsAveraging));
+            worker.Dispose();
         }
 
         /// <summary>

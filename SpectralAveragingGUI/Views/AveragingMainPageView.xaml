@@ -6,75 +6,10 @@
              xmlns:local="clr-namespace:SpectralAveragingGUI"
              mc:Ignorable="d" 
              d:DesignHeight="750" d:DesignWidth="700">
-    <UserControl.Resources>
-        <SolidColorBrush x:Key="ProgressBar.Progress" Color="#FF06B025"/>
-        <SolidColorBrush x:Key="ProgressBar.Background" Color="#FFE6E6E6"/>
-        <SolidColorBrush x:Key="ProgressBar.Border" Color="#FFBCBCBC"/>
-        <Style x:Key="ProgressBarStyle1" TargetType="{x:Type ProgressBar}">
-            <Setter Property="Foreground" Value="{StaticResource ProgressBar.Progress}"/>
-            <Setter Property="Background" Value="{StaticResource ProgressBar.Background}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource ProgressBar.Border}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type ProgressBar}">
-                        <Grid x:Name="TemplateRoot">
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroup x:Name="CommonStates">
-                                    <VisualState x:Name="Determinate"/>
-                                    <VisualState x:Name="Indeterminate">
-                                        <Storyboard RepeatBehavior="Forever">
-                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Animation" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
-                                                <EasingDoubleKeyFrame KeyTime="0" Value="0.25"/>
-                                                <EasingDoubleKeyFrame KeyTime="0:0:1" Value="0.25"/>
-                                                <EasingDoubleKeyFrame KeyTime="0:0:2" Value="0.25"/>
-                                            </DoubleAnimationUsingKeyFrames>
-                                            <PointAnimationUsingKeyFrames Storyboard.TargetName="Animation" Storyboard.TargetProperty="(UIElement.RenderTransformOrigin)">
-                                                <EasingPointKeyFrame KeyTime="0" Value="-0.5,0.5"/>
-                                                <EasingPointKeyFrame KeyTime="0:0:1" Value="0.5,0.5"/>
-                                                <EasingPointKeyFrame KeyTime="0:0:2" Value="1.5,0.5"/>
-                                            </PointAnimationUsingKeyFrames>
-                                        </Storyboard>
-                                    </VisualState>
-                                </VisualStateGroup>
-                            </VisualStateManager.VisualStateGroups>
-                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" 
-                                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10"/>
-                            <Rectangle x:Name="PART_Track"/>
-                            <Grid x:Name="PART_Indicator" ClipToBounds="true" HorizontalAlignment="Left">
-                                <Rectangle x:Name="Indicator" Fill="{TemplateBinding Foreground}" RadiusX="10" RadiusY="10"/>
-                                <Rectangle x:Name="Animation" Fill="{TemplateBinding Foreground}" RenderTransformOrigin="0.5,0.5" RadiusX="10" RadiusY="10">
-                                    <Rectangle.RenderTransform>
-                                        <TransformGroup>
-                                            <ScaleTransform/>
-                                            <SkewTransform/>
-                                            <RotateTransform/>
-                                            <TranslateTransform/>
-                                        </TransformGroup>
-                                    </Rectangle.RenderTransform>
-                                </Rectangle>
-                            </Grid>
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="Orientation" Value="Vertical">
-                                <Setter Property="LayoutTransform" TargetName="TemplateRoot">
-                                    <Setter.Value>
-                                        <RotateTransform Angle="-90"/>
-                                    </Setter.Value>
-                                </Setter>
-                            </Trigger>
-                            <Trigger Property="IsIndeterminate" Value="true">
-                                <Setter Property="Visibility" TargetName="Indicator" Value="Collapsed"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </UserControl.Resources>
 
     <Grid Background="{StaticResource BackgroundLightBrush}" 
-          d:DataContext="{x:Static local:AveragingMainPageModel.Instance}">
+          d:DataContext="{x:Static local:AveragingMainPageModel.Instance}" 
+          IsEnabled="{Binding IsAveraging, Converter={local:InverseBooleanConverter}}">
 
         <Grid.RowDefinitions>
             <!-- spectra handling area -->
@@ -111,10 +46,10 @@
                 <DataGrid   AllowDrop="True"  Background="{StaticResource BackgroundVeryLightBrush}"
                             local:FileDragDropHelper.IsFileDragDropEnabled="True" AutoGenerateColumns="False"
                             local:FileDragDropHelper.FileDragDropTarget="{Binding}"
-                            ItemsSource="{Binding SpectraNames}" VerticalScrollBarVisibility="Visible"
-                            HeadersVisibility="None" SelectedCellsChanged="DataGrid_OnSelectedCellsChanged">
+                            ItemsSource="{Binding SpectraNames, Mode=OneWay, UpdateSourceTrigger=Explicit}" VerticalScrollBarVisibility="Visible"
+                            HeadersVisibility="None" SelectedCellsChanged="DataGrid_OnSelectedCellsChanged" >
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="File Name" Binding="{Binding}" Width="*" />
+                        <DataGridTextColumn Header="File Name" Binding="{Binding Mode=OneWay}" Width="*"  />
                     </DataGrid.Columns>
                 </DataGrid>
             </Border>
@@ -122,26 +57,36 @@
             <!-- Spectra Handling Buttons -->
             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10">
                 <Button Name="AddSpectraButton" Style="{StaticResource SpectraHandlingButton}" Content="Add" 
-                        Command="{Binding AddSpectraCommand}"/>
+                        Command="{Binding AddSpectraCommand}" 
+                        IsEnabled="{Binding IsAveraging, Converter={local:InverseBooleanConverter}}"/>
                 <Button Name="RemoveSpectraButton" Style="{StaticResource SpectraHandlingButton}" Content="Remove"
-                        Command="{Binding RemoveSpectraCommand}" />
+                        Command="{Binding RemoveSpectraCommand}" 
+                        IsEnabled="{Binding IsAveraging, Converter={local:InverseBooleanConverter}}"/>
                 <Button Name="RemoveAllSpectraButton" Style="{StaticResource SpectraHandlingButton}" Content="Remove All"
-                        Command="{Binding RemoveAllSpectraCommand}" />
+                        Command="{Binding RemoveAllSpectraCommand}" 
+                        IsEnabled="{Binding IsAveraging, Converter={local:InverseBooleanConverter}}" />
             </StackPanel>
         </Grid>
 
         <!-- Averaging progress bar -->
-        <Grid x:Name="ProgressBarDockPanel" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch"
-                   Visibility="{Binding ProgressBarVisibility, Converter={local:BooleanToVisibilityConverter}}" >
+        <Grid x:Name="ProgressBarDockPanel" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch">
 
-            <ProgressBar Style="{DynamicResource ProgressBarStyle1}"  Value="{Binding SpectraProcessingComplete}" Minimum="0" 
-                          Maximum="{Binding SpectraFilePaths.Count}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                           Foreground="{StaticResource WordLightBlueBrush}"
-                          Margin="10 0 10 0"/>
+            <!-- averaging progress --> 
+            <ProgressBar Style="{DynamicResource WholeProgressBarStyle}"  Value="{Binding SpectraProcessingComplete}" 
+                         Minimum="0" Maximum="{Binding SpectraFilePaths.Count}" Margin="10 0 10 0"
+                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Foreground="{StaticResource WordLightBlueBrush}"
+                         Visibility="{Binding ProgressBarVisibility, Converter={local:BooleanToVisibilityConverter}}"/>
 
+            <!-- continuous scroll progress bar --> 
+            <ProgressBar Style="{DynamicResource WholeProgressBarStyle}"   Minimum="0" 
+                         Maximum="100" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                         Foreground="{StaticResource WordVeryLightBlueBrush}" IsIndeterminate="True"
+                         Margin="10 0 10 0" Background="Transparent" 
+                         Visibility="{Binding IsAveraging, Converter={local:BooleanToVisibilityConverter}}"/>
 
             <TextBlock  Style="{StaticResource ProgressTextBlockStyle}" HorizontalAlignment="Center" VerticalAlignment="Center"
-                        Text="{Binding ProcessingText}" />
+                        Text="{Binding ProcessingText}" 
+                        Visibility="{Binding ProgressBarVisibility, Converter={local:BooleanToVisibilityConverter}}" />
 
 
 
@@ -301,7 +246,7 @@
         </StackPanel>
 
         <Grid Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"  DataContext="{Binding AveragingOptionsViewModel}"
-                    HorizontalAlignment="Stretch" >
+                    HorizontalAlignment="Stretch"  >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
@@ -348,11 +293,14 @@
         <!-- Bottom Buttons -->
         <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Content="Save As Default" Style="{StaticResource SpectraHandlingButton}" Width="130" Height="25"
-                    Command="{Binding SaveAsDefaultCommand}" Margin="5"/>
+                    Command="{Binding SaveAsDefaultCommand}" Margin="5" 
+                    IsEnabled="{Binding IsAveraging, Converter={local:InverseBooleanConverter}}"/>
             <Button Content="Average Spectra" Style="{StaticResource SpectraHandlingButton}" Width="180" Height="40"
-                    Command="{Binding AverageSpectraCommand}" Margin="5"/>
+                    Command="{Binding AverageSpectraCommand}" Margin="5" 
+                    IsEnabled="{Binding IsAveraging, Converter={local:InverseBooleanConverter}}"/>
             <Button Content="Reset Defaults" Style="{StaticResource SpectraHandlingButton}" Width="130" Height="25"
-                    Command="{Binding ResetDefaultsCommand}" Margin="5"/>
+                    Command="{Binding ResetDefaultsCommand}" Margin="5" 
+                    IsEnabled="{Binding IsAveraging, Converter={local:InverseBooleanConverter}}"/>
         </StackPanel>
 
     </Grid>

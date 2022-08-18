@@ -14,7 +14,7 @@ namespace SpectralAveragingGUI
         {
             foreach (var character in e.Text)
             {
-                if (!Char.IsDigit(character))
+                if (!char.IsDigit(character))
                 {
                     e.Handled = true;
                     return;

@@ -104,7 +104,7 @@ namespace SpectralAveraging
             stringBuilder.Append("BinSize-" + BinSize + '_');
 
             // file processing specific
-            stringBuilder.Append(SpectraFileProcessingType + '_');
+            stringBuilder.Append(SpectraFileProcessingType.ToString() + '_');
             if (SpectraFileProcessingType != SpectraFileProcessingType.AverageAll)
             {
                 stringBuilder.Append("Averaged" + NumberOfScansToAverage + "Scans_");
