@@ -43,7 +43,7 @@ namespace SpectralAveraging
             MsDataFile msDataFile = new(averagedScans, sourceFile);
             string spectraDirectory = Path.GetDirectoryName(spectraPath);
             string averagedPath = Path.Combine(spectraDirectory,
-                "Averaged_" + Path.GetFileNameWithoutExtension(spectraPath) + options + ".mzML");
+                "Averaged_" + Path.GetFileNameWithoutExtension(spectraPath) + ".mzML");
 
             MzmlMethods.CreateAndWriteMyMzmlWithCalibratedSpectra(msDataFile, averagedPath, true);
         }

@@ -83,7 +83,7 @@ namespace SpectralAveraging
                 MultiScanDataObject multiScanDataObject = new(SingleScanDataObject.ConvertMSDataScansInBulk(scansToProcess));
                 MzSpectrum averagedSpectrum = SpectralMerging.CombineSpectra(multiScanDataObject, options);
                 MsDataScan averagedScan = new(averagedSpectrum, scanNumberIndex, 1,
-                    representativeScan.IsCentroid, representativeScan.Polarity, scans.Select(p => p.RetentionTime).Average(),
+                    representativeScan.IsCentroid, representativeScan.Polarity, scansToProcess.Select(p => p.RetentionTime).Minimum(),
                     averagedSpectrum.Range, null, representativeScan.MzAnalyzer, (double)multiScanDataObject.AverageIonCurrent,
                     scansToProcess.Select(p => p.InjectionTime).Average(), null, representativeScan.NativeId);
 
@@ -124,9 +124,12 @@ namespace SpectralAveraging
                 MultiScanDataObject multiScanDataObject = new(SingleScanDataObject.ConvertMSDataScansInBulk(scansToProcess));
                 MzSpectrum averagedSpectrum = SpectralMerging.CombineSpectra(multiScanDataObject, options);
                 MsDataScan averagedScan = new(averagedSpectrum, scanNumberIndex, 1,
-                    representativeScan.IsCentroid, representativeScan.Polarity, scans.Select(p => p.RetentionTime).Average(),
+                    representativeScan.IsCentroid, representativeScan.Polarity, representativeScan.RetentionTime,
                     averagedSpectrum.Range, null, representativeScan.MzAnalyzer, (double)multiScanDataObject.AverageIonCurrent,
-                    scansToProcess.Select(p => p.InjectionTime).Average(), null, representativeScan.NativeId);
+                    scansToProcess.Select(p => p.InjectionTime).Average(), representativeScan.NoiseData, 
+                    representativeScan.NativeId, representativeScan.SelectedIonMZ, representativeScan.SelectedIonChargeStateGuess, 
+                    representativeScan.SelectedIonIntensity, representativeScan.IsolationMz, representativeScan.IsolationWidth, 
+                    representativeScan.DissociationType, representativeScan.OneBasedPrecursorScanNumber, representativeScan.SelectedIonMonoisotopicGuessIntensity);
                 averagedScans.Add(averagedScan);
                 int precursorScanIndex = scanNumberIndex;
                 scanNumberIndex++;
@@ -138,13 +141,15 @@ namespace SpectralAveraging
                 {
                     MsDataScan newScan = new(scan.MassSpectrum, scanNumberIndex, scan.MsnOrder, scan.IsCentroid,
                         scan.Polarity, scan.RetentionTime, scan.ScanWindowRange, scan.ScanFilter, scan.MzAnalyzer,
-                        scan.TotalIonCurrent, scan.InjectionTime, scan.NoiseData, scan.NativeId,
-                        oneBasedPrecursorScanNumber: precursorScanIndex);
+                        scan.TotalIonCurrent, scan.InjectionTime, scan.NoiseData, scan.NativeId, scan.SelectedIonMZ, 
+                        scan.SelectedIonChargeStateGuess, scan.SelectedIonIntensity, scan.IsolationMz, scan.IsolationWidth, 
+                        scan.DissociationType, precursorScanIndex, scan.SelectedIonMonoisotopicGuessMz);
                     averagedScans.Add(newScan);
                     scanNumberIndex++;
                 }
             }
 
+            var test = averagedScans.Select(p => (p.OneBasedScanNumber, p.OneBasedPrecursorScanNumber));
             return averagedScans.ToArray();
         }
     }

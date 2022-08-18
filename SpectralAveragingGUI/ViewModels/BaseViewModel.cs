@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -39,7 +38,7 @@ namespace SpectralAveragingGUI
         {
             get
             {
-                if (String.IsNullOrEmpty(AppDomain.CurrentDomain.RelativeSearchPath))
+                if (string.IsNullOrEmpty(AppDomain.CurrentDomain.RelativeSearchPath))
                 {
                     //exe folder for WinForms, Consoles, Windows Services
                     return AppDomain.CurrentDomain.BaseDirectory;
