@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using SpectralAveraging;
 
 namespace SpectralAveragingGUI
 {
@@ -28,6 +29,10 @@ namespace SpectralAveragingGUI
             SpectraProcessingComplete = 1;
             ProcessingText = $"Averaged {SpectraProcessingComplete}/{SpectraFilePaths.Count} Files";
             ProgressBarVisibility = true;
+
+            SavedAveragingOptions.Add( new AveragingOptionsViewModel(new SpectralAveragingOptions()) {SavedPath = "tacos.toml"});
+            SavedAveragingOptions.Add( new AveragingOptionsViewModel(new SpectralAveragingOptions()) { SavedPath = "tacos.toml" });
+            SavedAveragingOptions.Add( new AveragingOptionsViewModel(new SpectralAveragingOptions()) { SavedPath = "tacos.toml" });
         }
 
     }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AveragingIO;
 using IO.MzML;
 using MassSpectrometry;
+using Nett;
 
 namespace SpectralAveraging
 {
@@ -31,8 +32,8 @@ namespace SpectralAveraging
             if (options.OutputOptions)
             {
                 string directoryPath = Path.GetDirectoryName(spectraPath);
-                string optionsPath = Path.Combine(directoryPath, options.ToString() + ".txt");
-                JsonSerializerDeserializer.SerializeToNewFile(options, optionsPath);
+                string optionsPath = Path.Combine(directoryPath, options.ToString() + ".toml");
+                Toml.WriteFile(options, optionsPath);
             }
         }
 

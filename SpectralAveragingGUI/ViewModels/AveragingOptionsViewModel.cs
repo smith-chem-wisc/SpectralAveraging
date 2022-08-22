@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using Nett;
 using SpectralAveraging;
 using ThermoFisher.CommonCore.Data.Business;
 
@@ -15,6 +17,7 @@ namespace SpectralAveragingGUI
 
         private SpectralAveragingOptions spectralAveragingOptions;
         private int previousOverlap;
+        private string? savedPath;
 
         #endregion
 
@@ -111,6 +114,23 @@ namespace SpectralAveragingGUI
             }
         }
 
+        public string Name
+        {
+            get
+            {
+                if (savedPath != null)
+                    return Path.GetFileNameWithoutExtension(savedPath);
+                else
+                    return "Default Options";
+            }
+        }
+
+        public string SavedPath
+        {
+            get => savedPath;
+            set { savedPath = value; OnPropertyChanged(nameof(SavedPath)); }
+        }
+
         public OutputType OutputType
         {
             get { return spectralAveragingOptions.OutputType; }
@@ -152,7 +172,7 @@ namespace SpectralAveragingGUI
             UpdateVisualRepresentation();
         }
 
-        private void UpdateVisualRepresentation()
+        public void UpdateVisualRepresentation()
         {
             OnPropertyChanged(nameof(SpectralAveragingOptions));
             OnPropertyChanged(nameof(RejectionType));
@@ -166,6 +186,17 @@ namespace SpectralAveragingGUI
             OnPropertyChanged((nameof(NumberOfScansToAverage)));
             OnPropertyChanged(nameof(ScanOverlap));
             OnPropertyChanged(nameof(OutputType));
+            OnPropertyChanged(nameof(Name));
+        }
+
+        public void SaveOptions()
+        {
+            Toml.WriteFile(spectralAveragingOptions, savedPath);
+        }
+
+        public void DeleteOptions()
+        {
+            File.Delete(savedPath);
         }
 
         #endregion

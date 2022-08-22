@@ -86,7 +86,9 @@ namespace SpectralAveraging
                     representativeScan.IsCentroid, representativeScan.Polarity, scansToProcess.Select(p => p.RetentionTime).Minimum(),
                     averagedSpectrum.Range, null, representativeScan.MzAnalyzer, (double)multiScanDataObject.AverageIonCurrent,
                     scansToProcess.Select(p => p.InjectionTime).Average(), null, representativeScan.NativeId);
-
+                string newNativeID =
+                    averagedScan.NativeId.Replace(averagedScan.NativeId.Split("=").Last(), scanNumberIndex.ToString());
+                averagedScan.SetNativeID(newNativeID);
                 averagedScans.Add(averagedScan);
                 scanNumberIndex++;
             }
@@ -130,6 +132,9 @@ namespace SpectralAveraging
                     representativeScan.NativeId, representativeScan.SelectedIonMZ, representativeScan.SelectedIonChargeStateGuess, 
                     representativeScan.SelectedIonIntensity, representativeScan.IsolationMz, representativeScan.IsolationWidth, 
                     representativeScan.DissociationType, representativeScan.OneBasedPrecursorScanNumber, representativeScan.SelectedIonMonoisotopicGuessIntensity);
+                string newNativeID =
+                    averagedScan.NativeId.Replace(averagedScan.NativeId.Split("=").Last(), scanNumberIndex.ToString());
+                averagedScan.SetNativeID(newNativeID);
                 averagedScans.Add(averagedScan);
                 int precursorScanIndex = scanNumberIndex;
                 scanNumberIndex++;
@@ -144,6 +149,9 @@ namespace SpectralAveraging
                         scan.TotalIonCurrent, scan.InjectionTime, scan.NoiseData, scan.NativeId, scan.SelectedIonMZ, 
                         scan.SelectedIonChargeStateGuess, scan.SelectedIonIntensity, scan.IsolationMz, scan.IsolationWidth, 
                         scan.DissociationType, precursorScanIndex, scan.SelectedIonMonoisotopicGuessMz);
+                    newNativeID =
+                        newScan.NativeId.Replace(newScan.NativeId.Split("=").Last(), scanNumberIndex.ToString());
+                    newScan.SetNativeID(newNativeID);
                     averagedScans.Add(newScan);
                     scanNumberIndex++;
                 }

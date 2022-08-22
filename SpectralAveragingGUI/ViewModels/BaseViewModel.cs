@@ -141,7 +141,7 @@ namespace SpectralAveragingGUI
 
     #endregion
 
-    #region Private Helpers
+    #region Helpers
 
     #endregion
 

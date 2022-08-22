@@ -32,7 +32,7 @@
         </Grid.ColumnDefinitions>
         
         <!-- Specta File Handling Area -->
-        <Grid Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2">
+        <Grid Grid.Column="0" Grid.Row="0" >
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*" />
@@ -40,14 +40,14 @@
             </Grid.ColumnDefinitions>
 
             <!-- File List -->
-            <Label Content="Specta Files" FontFamily="{StaticResource LatoRegular}" Margin="5 0 0 0"/>
+            <Label Grid.Row="0" Grid.Column="0" Content="Specta Files" FontFamily="{StaticResource LatoRegular}" Margin="5 0 0 0"/>
             <Border Grid.Column="0" Grid.Row="0"  Margin="10 24 10 10" BorderThickness="2"
                     BorderBrush="{StaticResource ForegroundMainBrush}">
                 <DataGrid   AllowDrop="True"  Background="{StaticResource BackgroundVeryLightBrush}"
-                            local:FileDragDropHelper.IsFileDragDropEnabled="True" AutoGenerateColumns="False"
+                            local:FileDragDropHelper.IsFileDragDropEnabled="True" AutoGenerateColumns="False" x:Name="SpectraGrid"
                             local:FileDragDropHelper.FileDragDropTarget="{Binding}"
                             ItemsSource="{Binding SpectraNames, Mode=OneWay, UpdateSourceTrigger=Explicit}" VerticalScrollBarVisibility="Visible"
-                            HeadersVisibility="None" SelectedCellsChanged="DataGrid_OnSelectedCellsChanged" >
+                            HeadersVisibility="None" SelectedCellsChanged="SpectraGrid_OnSelectedCellsChanged" >
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="File Name" Binding="{Binding Mode=OneWay}" Width="*"  />
                     </DataGrid.Columns>
@@ -55,7 +55,7 @@
             </Border>
 
             <!-- Spectra Handling Buttons -->
-            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10">
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="5">
                 <Button Name="AddSpectraButton" Style="{StaticResource SpectraHandlingButton}" Content="Add" 
                         Command="{Binding AddSpectraCommand}" 
                         IsEnabled="{Binding IsAveraging, Converter={local:InverseBooleanConverter}}"/>
@@ -64,6 +64,50 @@
                         IsEnabled="{Binding IsAveraging, Converter={local:InverseBooleanConverter}}"/>
                 <Button Name="RemoveAllSpectraButton" Style="{StaticResource SpectraHandlingButton}" Content="Remove All"
                         Command="{Binding RemoveAllSpectraCommand}" 
+                        IsEnabled="{Binding IsAveraging, Converter={local:InverseBooleanConverter}}" />
+            </StackPanel>
+        </Grid>
+
+        <!-- saved options handling --> 
+        <Grid Grid.Row="0" Grid.Column="1">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Row="0" Grid.Column="0" Content="Saved Averaging Options" FontFamily="{StaticResource LatoRegular}" Margin="5 0 0 0"/>
+            <Border Grid.Column="0" Grid.Row="0"  Margin="10 24 10 10" BorderThickness="2"
+                    BorderBrush="{StaticResource ForegroundMainBrush}">
+                <DataGrid   AllowDrop="True"  Background="{StaticResource BackgroundVeryLightBrush}"
+                            local:FileDragDropHelper.IsFileDragDropEnabled="True" AutoGenerateColumns="False" x:Name="OptionsGrid"
+                            local:FileDragDropHelper.FileDragDropTarget="{Binding}"
+                            ItemsSource="{Binding OptionsNames, Mode=OneWay, UpdateSourceTrigger=Explicit}" VerticalScrollBarVisibility="Visible"
+                            HeadersVisibility="None" SelectedCellsChanged="OptionsGrid_OnSelectedCellsChanged" >
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="File Name" Binding="{Binding Mode=OneWay}" Width="*"  />
+                    </DataGrid.Columns>
+                    <DataGrid.RowStyle>
+                        <Style TargetType="{x:Type DataGridRow}">
+                            <EventSetter Event="MouseDoubleClick" Handler="EventSetter_OnHandler"></EventSetter>
+                        </Style>
+                    </DataGrid.RowStyle>
+                </DataGrid>
+            </Border>
+
+            <!-- Options Handling Buttons -->
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="5">
+                <Button Name="AddOptionsButton" Style="{StaticResource SpectraHandlingButton}" Content="Add" 
+                        Command="{Binding AddOptionsCommand}" 
+                        IsEnabled="{Binding IsAveraging, Converter={local:InverseBooleanConverter}}"/>
+                <Button Name="RemoveOptionsButton" Style="{StaticResource SpectraHandlingButton}" Content="Remove"
+                        Command="{Binding RemoveOptionsCommand}" 
+                        IsEnabled="{Binding IsAveraging, Converter={local:InverseBooleanConverter}}"/>
+                <Button Name="RemoveAllOptionsButton" Style="{StaticResource SpectraHandlingButton}" Content="Remove All"
+                        Command="{Binding RemoveAllOptionsCommand}" 
+                        IsEnabled="{Binding IsAveraging, Converter={local:InverseBooleanConverter}}" />
+                <Button Name="CreateNewOptionsButton" Style="{StaticResource SpectraHandlingButton}" Content="Create New"
+                        Command="{Binding CreateNewDefaultOptionsCommand}" 
                         IsEnabled="{Binding IsAveraging, Converter={local:InverseBooleanConverter}}" />
             </StackPanel>
         </Grid>
@@ -292,13 +336,13 @@
 
         <!-- Bottom Buttons -->
         <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Content="Save As Default" Style="{StaticResource SpectraHandlingButton}" Width="130" Height="25"
-                    Command="{Binding SaveAsDefaultCommand}" Margin="5" 
+            <Button Content="Save Current Options" Style="{StaticResource SpectraHandlingButton}" Width="135" Height="25"
+                    Command="{Binding SaveOptionsCommand}" Margin="5" 
                     IsEnabled="{Binding IsAveraging, Converter={local:InverseBooleanConverter}}"/>
             <Button Content="Average Spectra" Style="{StaticResource SpectraHandlingButton}" Width="180" Height="40"
                     Command="{Binding AverageSpectraCommand}" Margin="5" 
                     IsEnabled="{Binding IsAveraging, Converter={local:InverseBooleanConverter}}"/>
-            <Button Content="Reset Defaults" Style="{StaticResource SpectraHandlingButton}" Width="130" Height="25"
+            <Button Content="Reset Current Option" Style="{StaticResource SpectraHandlingButton}" Width="135" Height="25"
                     Command="{Binding ResetDefaultsCommand}" Margin="5" 
                     IsEnabled="{Binding IsAveraging, Converter={local:InverseBooleanConverter}}"/>
         </StackPanel>

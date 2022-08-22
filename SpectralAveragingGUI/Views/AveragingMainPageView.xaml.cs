@@ -26,16 +26,23 @@ namespace SpectralAveragingGUI
             InitializeComponent();
         }
 
-        private void Selector_OnSelected(object sender, RoutedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void DataGrid_OnSelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        private void SpectraGrid_OnSelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
         {
             string[] addedSpectra = e.AddedCells.Select(p => p.Item.ToString()).ToArray();
             string[] removedSpectra = e.RemovedCells.Select(p => p.Item.ToString()).ToArray();
             ((AveragingMainPageViewModel)DataContext).SelectedSpectraChanged(addedSpectra, removedSpectra);
+        }
+
+        private void OptionsGrid_OnSelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        {
+            string[] addedOptions = e.AddedCells.Select(p => p.Item.ToString()).ToArray();
+            string[] removedOptions = e.RemovedCells.Select(p => p.Item.ToString()).ToArray();
+            ((AveragingMainPageViewModel)DataContext).SelectedOptionsChanged(addedOptions, removedOptions);
+        }
+
+        private void EventSetter_OnHandler(object sender, MouseButtonEventArgs e)
+        {
+            ((AveragingMainPageViewModel)DataContext).OptionsDoubleClicked();
         }
     }
 }

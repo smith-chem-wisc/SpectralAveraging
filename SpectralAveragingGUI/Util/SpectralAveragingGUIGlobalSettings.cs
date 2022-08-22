@@ -10,7 +10,7 @@ namespace SpectralAveragingGUI
 {
     public static class SpectralAveragingGUIGlobalSettings
     {
-        public static string[] AcceptableSpectraFileTypes { get; set; } = { ".mzML", ".raw" };
+        public static string[] AcceptableSpectraFileTypes { get; set; } = { ".mzML", ".raw", ".toml" };
         public static string DataDirectory { get; set; }
 
         static SpectralAveragingGUIGlobalSettings()

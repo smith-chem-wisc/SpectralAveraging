@@ -12,6 +12,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using MassSpectrometry;
+using Nett;
 using SpectralAveraging;
 
 namespace SpectralAveragingGUI
@@ -28,9 +29,11 @@ namespace SpectralAveragingGUI
         private int spectraProcessingComblete;
         private ObservableCollection<string> spectraFilePaths;
         private ObservableCollection<string> selectedSpectra;
+        private ObservableCollection<AveragingOptionsViewModel> savedAveragingOptions;
+        private ObservableCollection<AveragingOptionsViewModel> selectedOptions;
         private AveragingOptionsViewModel averagingOptionsViewModel;
-        private string defaultOptionsDirectoryPath = Path.Combine(SpectralAveragingGUIGlobalSettings.DataDirectory,
-            @"DefaultOptions");
+        private string savedOptionsDirectoryPath = Path.Combine(SpectralAveragingGUIGlobalSettings.DataDirectory,
+            @"SavedOptions");
         private bool progressBarVisisbilty;
         private List<string> errors;
         private readonly BackgroundWorker worker;
@@ -77,6 +80,23 @@ namespace SpectralAveragingGUI
             set { averagingOptionsViewModel = value; OnPropertyChanged(nameof(AveragingOptionsViewModel)); }
         }
 
+        public ObservableCollection<AveragingOptionsViewModel> SavedAveragingOptions
+        {
+            get => savedAveragingOptions;
+            set { savedAveragingOptions = value; OnPropertyChanged(nameof(SavedAveragingOptions)); }
+        }
+
+        public List<string> OptionsNames
+        {
+            get => savedAveragingOptions.Select(p => p.Name).ToList();
+        }
+
+        public ObservableCollection<AveragingOptionsViewModel> SelectedOptions
+        {
+            get => selectedOptions;
+            set { selectedOptions = value; OnPropertyChanged(nameof(SelectedOptions)); }
+        }
+
         /// <summary>
         /// The number of spectra where processing is complete, for progress bar display
         /// </summary>
@@ -110,9 +130,14 @@ namespace SpectralAveragingGUI
         public ICommand RemoveSpectraCommand { get; set; }
         public ICommand RemoveAllSpectraCommand { get; set; }
         public ICommand AverageSpectraCommand { get; set; }
-        public ICommand SaveAsDefaultCommand { get; set; }
+        public ICommand SaveOptionsCommand { get; set; }
         public ICommand ResetDefaultsCommand { get; set; }
         public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
+        public ICommand AddOptionsCommand { get; set; }
+        public ICommand RemoveOptionsCommand { get; set; }
+        public ICommand RemoveAllOptionsCommand { get; set; }
+        public ICommand OptionsDoubleClickedCommand { get; set; }
+        public ICommand CreateNewDefaultOptionsCommand { get; set; }
 
         #endregion
 
@@ -123,30 +148,55 @@ namespace SpectralAveragingGUI
             // value initialization
             spectraFilePaths = new();
             selectedSpectra = new();
+            savedAveragingOptions = new();
+            selectedOptions = new();
             errors = new();
             progressBarVisisbilty = false;
             stopwatch = new();
             worker = new BackgroundWorker() { WorkerReportsProgress = true };
 
             SpectralAveragingOptions options;
-            string optionsPath = Path.Combine(defaultOptionsDirectoryPath, "defaultOptions.txt");
-            if (File.Exists(optionsPath))
+            if (Directory.Exists(savedOptionsDirectoryPath))
             {
-                options = JsonSerializerDeserializer.Deserialize<SpectralAveragingOptions>(optionsPath, true);
+                foreach (var file in Directory.EnumerateFiles(savedOptionsDirectoryPath))
+                {
+                    SpectralAveragingOptions option = Toml.ReadFile<SpectralAveragingOptions>(file);
+                    savedAveragingOptions.Add(new AveragingOptionsViewModel(option) {SavedPath = file});
+                }
+
+                if (savedAveragingOptions.Count > 0)
+                    AveragingOptionsViewModel = savedAveragingOptions.First();
+                else
+                    AveragingOptionsViewModel = new(new SpectralAveragingOptions());
+                
             }
             else
             {
-                options = new();
+                AveragingOptionsViewModel = new AveragingOptionsViewModel(new SpectralAveragingOptions());
             }
-            AveragingOptionsViewModel = new AveragingOptionsViewModel(options);
+
+            // if no options are saved, create a default
+            if (savedAveragingOptions.Count == 0)
+            {
+                savedAveragingOptions.Add(AveragingOptionsViewModel);
+                string optionsPath = Path.Combine(savedOptionsDirectoryPath, AveragingOptionsViewModel.Name + ".toml");
+                AveragingOptionsViewModel.SavedPath = optionsPath;
+                Toml.WriteFile(AveragingOptionsViewModel.SpectralAveragingOptions, optionsPath);
+            }
+                
 
             // command assignment
-            AddSpectraCommand = new RelayCommand(() => AddSpectra());
-            RemoveSpectraCommand = new RelayCommand(() => RemoveSpectra()); 
-            RemoveAllSpectraCommand = new RelayCommand(() => RemoveAllSpectra());
-            AverageSpectraCommand = new RelayCommand(() => AverageSpectra());
-            SaveAsDefaultCommand = new RelayCommand(() => SaveAsDefault());
-            ResetDefaultsCommand = new RelayCommand(() => ResetDefaults());
+            AddSpectraCommand = new RelayCommand(AddSpectra);
+            RemoveSpectraCommand = new RelayCommand(RemoveSpectra); 
+            RemoveAllSpectraCommand = new RelayCommand(RemoveAllSpectra);
+            AverageSpectraCommand = new RelayCommand(AverageSpectra);
+            SaveOptionsCommand = new RelayCommand(SaveOptions);
+            ResetDefaultsCommand = new RelayCommand(ResetDefaults);
+            AddOptionsCommand = new RelayCommand(AddOptions);
+            RemoveOptionsCommand = new RelayCommand(RemoveOptions);
+            RemoveAllOptionsCommand = new RelayCommand(RemoveAllOptions);
+            OptionsDoubleClickedCommand = new RelayCommand(OptionsDoubleClicked);
+            CreateNewDefaultOptionsCommand = new RelayCommand(CreateNewDefaultOption);
             worker.DoWork += Worker_AverageSpectra;
             worker.ProgressChanged += Worker_ReportProgress;
             worker.RunWorkerCompleted += Worker_RunWorkerComplete;
@@ -159,56 +209,27 @@ namespace SpectralAveragingGUI
         /// <summary>
         /// Method ran when the AddSpectraButton is clicked
         /// </summary>
-        private void AddSpectra(string[] files = null)
+        private void AddSpectra()
         {
-            if (files == null)
+            // open file finder dialog
+            string filterString = string.Join(";", SpectralAveragingGUIGlobalSettings.AcceptableSpectraFileTypes.Select(p => "*" + p));
+            Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
-                // open file finder dialog
-                string filterString = string.Join(";", SpectralAveragingGUIGlobalSettings.AcceptableSpectraFileTypes.Select(p => "*" + p));
-                Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog
-                {
-                    Filter = "Spectra Files(" + filterString + ")|" + filterString,
-                    FilterIndex = 1,
-                    RestoreDirectory = true,
-                    Multiselect = true
-                };
+                Filter = "Spectra Files(" + filterString + ")|" + filterString,
+                FilterIndex = 1,
+                RestoreDirectory = true,
+                Multiselect = true
+            };
 
-                if (openFileDialog.ShowDialog() == true)
-                    files = openFileDialog.FileNames;
-                else
-                    return;
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string[] files = openFileDialog.FileNames;
+                OnFileDrop(files);
             }
+            else
+                return;
             
-            // Check file type, load if acceptable
-            List<string> errors = new();
-            foreach (var file in files)
-            {
-                if (SpectralAveragingGUIGlobalSettings.AcceptableSpectraFileTypes.Any(p => file.Contains(p)))
-                {
-                    SpectraFilePaths.Add(file);
-                }
-                else
-                {
-                    errors.Add(file);
-                }
-            }
-
-            // Display errors
-            if (errors.Any())
-            {
-                StringBuilder sb = new();
-                sb.AppendLine("Files not in correct format");
-                sb.AppendLine("Acceptable file formats are " + String.Join(',', SpectralAveragingGUIGlobalSettings.AcceptableSpectraFileTypes));
-                sb.AppendLine("");
-                foreach (var error in errors)
-                {
-                    sb.AppendLine(error);
-                }
-                MessageBox.Show(sb.ToString());
-            }
-
-            // Update Visual Representation
-            UpdateSpectraFileRelatedFields();
+            UpdateFileRelatedFields();
         }
 
         /// <summary>
@@ -216,13 +237,16 @@ namespace SpectralAveragingGUI
         /// </summary>
         private void RemoveSpectra()
         {
-            for (int i = SelectedSpectra.Count; i > 0; i--)
+            if (SelectedSpectra.Count > 0)
             {
-                SpectraFilePaths.Remove(SpectraFilePaths.First(p => p.Contains(SelectedSpectra[i - 1])));
-                SelectedSpectra.Remove(SelectedSpectra[i - 1]);
-            }
+                for (int i = SelectedSpectra.Count; i > 0; i--)
+                {
+                    SpectraFilePaths.Remove(SpectraFilePaths.First(p => p.Contains(SelectedSpectra[i - 1])));
+                    SelectedSpectra.Remove(SelectedSpectra[i - 1]);
+                }
 
-            UpdateSpectraFileRelatedFields();
+                UpdateFileRelatedFields();
+            }
         }
 
         /// <summary>
@@ -232,7 +256,7 @@ namespace SpectralAveragingGUI
         {
             spectraFilePaths = new();
             SelectedSpectra.Clear();
-            UpdateSpectraFileRelatedFields();
+            UpdateFileRelatedFields();
         }
 
         /// <summary>
@@ -303,13 +327,24 @@ namespace SpectralAveragingGUI
         /// <summary>
         /// Saves currently selected options as default
         /// </summary>
-        private void SaveAsDefault()
+        private void SaveOptions()
         {
-            if (!Directory.Exists(defaultOptionsDirectoryPath))
-                Directory.CreateDirectory(defaultOptionsDirectoryPath);
+            if (!Directory.Exists(savedOptionsDirectoryPath))
+                Directory.CreateDirectory(savedOptionsDirectoryPath);
 
-            string optionsPath = Path.Combine(defaultOptionsDirectoryPath, "defaultOptions.txt");
-            JsonSerializerDeserializer.SerializeToNewFile(AveragingOptionsViewModel.SpectralAveragingOptions, optionsPath);
+            string name = AveragingOptionsViewModel.Name;
+            var optionsNameDialog = new TextResponseDialogWindow() {ResponseText = name};
+            if (optionsNameDialog.ShowDialog() == true)
+            {
+                AveragingOptionsViewModel.DeleteOptions();
+                SavedAveragingOptions.Remove(AveragingOptionsViewModel);
+                SelectedOptions.Remove(AveragingOptionsViewModel);
+                string optionsPath = Path.Combine(savedOptionsDirectoryPath, optionsNameDialog.ResponseText + ".toml");
+                AveragingOptionsViewModel.SavedPath = optionsPath;
+                AveragingOptionsViewModel.SaveOptions();
+                OnFileDrop(new string[] { optionsPath});
+            }
+            UpdateFileRelatedFields();
         }
 
         /// <summary>
@@ -317,10 +352,99 @@ namespace SpectralAveragingGUI
         /// </summary>
         private void ResetDefaults()
         {
-            string optionsPath = Path.Combine(defaultOptionsDirectoryPath, "defaultOptions.txt");
+            string optionsPath = Path.Combine(savedOptionsDirectoryPath, "defaultOptions.txt");
             if (File.Exists(optionsPath))
                 File.Delete(optionsPath);
             AveragingOptionsViewModel.ResetDefaults();
+        }
+
+        private void AddOptions()
+        {
+            // open file finder dialog
+            string filterString = string.Join(";", SpectralAveragingGUIGlobalSettings.AcceptableSpectraFileTypes.Select(p => "*" + p));
+            Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = "Spectra Files(" + filterString + ")|" + filterString,
+                FilterIndex = 1,
+                RestoreDirectory = true,
+                Multiselect = true
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string[] files = openFileDialog.FileNames;
+                OnFileDrop(files);
+            }
+            else
+                return;
+
+            UpdateFileRelatedFields();
+        }
+
+        private void RemoveOptions()
+        {
+            if (SelectedOptions.Count > 0)
+            {
+                for (int i = SelectedOptions.Count; i > 0; i--)
+                {
+                    SavedAveragingOptions.Remove(SavedAveragingOptions.First(p => p.Name.Equals(SelectedOptions[i - 1].Name)));
+                    SelectedOptions[i - 1].DeleteOptions();
+                    SelectedOptions.Remove(SelectedOptions[i - 1]);
+                }
+
+                if (SavedAveragingOptions.Count > 0)
+                {
+                    AveragingOptionsViewModel = SavedAveragingOptions.First();
+                }
+                else
+                {
+                    AveragingOptionsViewModel = new(new SpectralAveragingOptions());
+                }
+
+                AveragingOptionsViewModel.UpdateVisualRepresentation();
+                UpdateFileRelatedFields();
+            }
+        }
+
+        private void RemoveAllOptions()
+        {
+            SavedAveragingOptions.Clear();
+            UpdateFileRelatedFields();
+
+            foreach (var option in SavedAveragingOptions)
+            {
+                option.DeleteOptions();
+            }
+
+            AveragingOptionsViewModel = new(new SpectralAveragingOptions());
+            AveragingOptionsViewModel.UpdateVisualRepresentation();
+        }
+
+        public void OptionsDoubleClicked()
+        {
+            if (SelectedOptions.Count == 1)
+            {
+                AveragingOptionsViewModel = SelectedOptions.First();
+                UpdateFileRelatedFields();
+                AveragingOptionsViewModel.UpdateVisualRepresentation();
+            }
+            else
+            {
+                // alert developer of error
+                Debugger.Break();
+            }
+        }
+
+        private void CreateNewDefaultOption()
+        {
+            SpectralAveragingOptions options = new();
+            AveragingOptionsViewModel optionsViewModel = new(options);
+            optionsViewModel.SavedPath = Path.Combine(savedOptionsDirectoryPath, optionsViewModel.Name + ".toml");
+            AveragingOptionsViewModel = optionsViewModel;
+            AveragingOptionsViewModel.SaveOptions();
+            savedAveragingOptions.Add(AveragingOptionsViewModel);
+            UpdateFileRelatedFields();
+            AveragingOptionsViewModel.UpdateVisualRepresentation();
         }
 
         #endregion
@@ -333,7 +457,57 @@ namespace SpectralAveragingGUI
         /// <param name="filepaths">paths of files dropped</param>
         public void OnFileDrop(string[] filepaths)
         {
-            AddSpectra(filepaths);
+            List<string> errors = new();
+            foreach (var path in filepaths)
+            {
+                string extension = Path.GetExtension(path);
+                if (extension == ".mzML" || extension == ".raw")
+                {
+                    // Check file type, load if acceptable
+                    if (SpectralAveragingGUIGlobalSettings.AcceptableSpectraFileTypes.Any(p => path.Contains(p)))
+                    {
+                        SpectraFilePaths.Add(path);
+                    }
+                    else
+                    {
+                        errors.Add(path);
+                    }
+                }
+
+                if (extension == ".toml")
+                {
+                    try
+                    {
+                        SpectralAveragingOptions option = Toml.ReadFile<SpectralAveragingOptions>(path);
+                        string optionsPath = Path.Combine(savedOptionsDirectoryPath, Path.GetFileNameWithoutExtension(path) + ".toml");
+                        AveragingOptionsViewModel optionsViewModel = new AveragingOptionsViewModel(option) { SavedPath = optionsPath };
+                        SavedAveragingOptions.Add(optionsViewModel);
+                        if (!File.Exists(optionsPath))
+                            optionsViewModel.SaveOptions();
+                    }
+                    catch (Exception e)
+                    {
+                        errors.Add("Options file " + Path.GetFileNameWithoutExtension(path) + " could not load properly");
+                    }
+                }
+            }
+
+            // Display errors
+            if (errors.Any())
+            {
+                StringBuilder sb = new();
+                sb.AppendLine("Files not in correct format");
+                sb.AppendLine("Acceptable file formats are " + String.Join(", ", SpectralAveragingGUIGlobalSettings.AcceptableSpectraFileTypes));
+                sb.AppendLine("");
+                foreach (var error in errors)
+                {
+                    sb.AppendLine(error);
+                }
+                MessageBox.Show(sb.ToString());
+            }
+
+            // Update Visual Representation
+            UpdateFileRelatedFields();
         }
 
         public void SelectedSpectraChanged(string[] addedSpectra, string[] removedSpectra)
@@ -353,13 +527,30 @@ namespace SpectralAveragingGUI
             OnPropertyChanged(nameof(SelectedSpectra));
         }
 
+        public void SelectedOptionsChanged(string[] addedOptions, string[] removedOptions)
+        {
+            foreach (var option in addedOptions)
+            {
+                SelectedOptions.Add(SavedAveragingOptions.First(p => p.Name.Contains(option)));
+            }
+
+            foreach (var option in removedOptions)
+            {
+                if (option == "{DependencyProperty.UnsetValue}")
+                    continue;
+                SelectedOptions.Remove(SavedAveragingOptions.First(p => p.Name.Contains(option)));
+            }
+        }
+
         /// <summary>
         /// Updates the visual representation of the fields that have to do with spectra file handling
         /// </summary>
-        private void UpdateSpectraFileRelatedFields()
+        private void UpdateFileRelatedFields()
         {
             OnPropertyChanged(nameof(SpectraFilePaths));
             OnPropertyChanged(nameof(SpectraNames));
+            OnPropertyChanged(nameof(SavedAveragingOptions));
+            OnPropertyChanged(nameof(OptionsNames));
         }
         
 
