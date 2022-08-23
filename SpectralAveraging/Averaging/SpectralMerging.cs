@@ -54,7 +54,7 @@ namespace SpectralAveraging
                 }
             }
 
-            // calculate the bins to be utilizied
+            // calculate the bins to be utilized
             double min = 100000;
             double max = 0;
             for (int i = 0; i < numSpectra; i++)
@@ -86,11 +86,13 @@ namespace SpectralAveraging
             yValuesBin = yValuesBin.Where(p => p != null).ToArray();
 
             // average the remaining arrays to create the composite spectrum
-            // this will clipping and avereraging for y values as indicated in the settings
+            // this will clipping and averaging for y values as indicated in the settings
             double[] xArray = new double[xValuesBin.Length];
             double[] yArray = new double[yValuesBin.Length];
+            // target for optimization here
             for (int i = 0; i < yValuesBin.Length; i++)
             {
+                // linq is probably slow 
                 xArray[i] = xValuesBin[i].Where(p => p != 0).Average();
                 yArray[i] = ProcessSingleMzArray(yValuesBin[i], options);
             }
@@ -120,15 +122,12 @@ namespace SpectralAveraging
 
             if (intInitialArray.Where(p => p != 0).Count() <= 1)
                 return 0;
-            else
-            {
-                trimmedArray = OutlierRejection.RejectOutliers(intInitialArray, options);
-                if (trimmedArray.Where(p => p != 0).Count() <= 1)
-                    return 0;
-                weights = BinWeighting.CalculateWeights(trimmedArray, options.WeightingType);
-                average = MergePeakValuesToAverage(trimmedArray, weights);
 
-            }
+            trimmedArray = OutlierRejection.RejectOutliers(intInitialArray, options);
+            if (trimmedArray.Where(p => p != 0).Count() <= 1)
+                return 0;
+            weights = BinWeighting.CalculateWeights(trimmedArray, options.WeightingType);
+            average = MergePeakValuesToAverage(trimmedArray, weights);
             return average;
         }
 

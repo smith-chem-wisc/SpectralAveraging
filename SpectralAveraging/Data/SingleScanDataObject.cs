@@ -26,6 +26,7 @@ namespace SpectralAveraging
             YArray = newYarray; 
         }
 
+        // TODO: Target for optimization 
         public static List<SingleScanDataObject> ConvertMSDataScansInBulk(List<MsDataScan> scans)
         {
             List<SingleScanDataObject> singleScanDataObjects = new List<SingleScanDataObject>();
