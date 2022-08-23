@@ -29,7 +29,7 @@ namespace Tests
             double[] weights = new double[test.Length];
             BinWeighting.WeightByNormalDistribution(test, ref weights);
             double weightedAverage = SpectralMerging.MergePeakValuesToAverage(test, weights);
-            Assert.That(Math.Round(weightedAverage, 4), Is.EqualTo(5.0244));
+            Assert.That(Math.Round(weightedAverage, 4), Is.EqualTo(4.5460));
 
             weights = new double[test.Length];
             BinWeighting.WeightByCauchyDistribution(test, ref weights);
@@ -39,12 +39,12 @@ namespace Tests
             weights = new double[test.Length];
             BinWeighting.WeightByPoissonDistribution(test, ref weights);
             weightedAverage = SpectralMerging.MergePeakValuesToAverage(test, weights);
-            Assert.That(Math.Round(weightedAverage, 4), Is.EqualTo(4.2679));
+            Assert.That(Math.Round(weightedAverage, 4), Is.EqualTo(5.0244));
 
             weights = new double[test.Length];
             BinWeighting.WeightByGammaDistribution(test, ref weights);
             weightedAverage = SpectralMerging.MergePeakValuesToAverage(test, weights);
-            Assert.That(Math.Round(weightedAverage, 4), Is.EqualTo(4.1638));
+            Assert.That(Math.Round(weightedAverage, 4), Is.EqualTo(4.7196));
         }
 	}
 }

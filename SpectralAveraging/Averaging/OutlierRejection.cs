@@ -58,9 +58,7 @@ namespace SpectralAveraging
             double max = initialValues.Max();
             double min = initialValues.Min();
 
-            double[] clippedValues = initialValues.Where(p => p < max && p > min).ToArray();
-            //CheckValuePassed(clippedValues);
-            return clippedValues;
+            return initialValues.Where(p => p < max && p > min).ToArray();
         }
 
         /// <summary>
@@ -71,9 +69,13 @@ namespace SpectralAveraging
         /// <returns>list of mz values with outliers rejected</returns>
         public static double[] PercentileClipping(double[] initialValues, double percentile)
         {
-            double median = BasicStatistics.CalculateNonZeroMedian(initialValues);
-            double[] clippedValues = initialValues.Where(p => (median - p) / median > -percentile && (median - p) / median < percentile).ToArray();
-            return clippedValues;
+            double trim = (1 - percentile) / 2;
+            double highPercentile = 1 - trim;
+            double median = BasicStatistics.CalculateMedian(initialValues);
+            double highCutoff = median * (1 + highPercentile);
+            double lowCutoff = median * (1 - highPercentile); 
+            // round to 4-6 decimal places
+            return initialValues.Where(p => highCutoff > p && p > lowCutoff).ToArray();
         }
 
         /// <summary>
@@ -136,15 +138,14 @@ namespace SpectralAveraging
                     toProcess.Winsorize(medianLeftBound, medianRightBound);
                     median = BasicStatistics.CalculateMedian(toProcess);
                     windsorizedStandardDeviation = standardDeviation;
-                    standardDeviation = averageAbsoluteDeviation > 1 ? BasicStatistics.CalculateStandardDeviation(toProcess) * averageAbsoluteDeviation : BasicStatistics.CalculateStandardDeviation(toProcess) * 1.05;
-                    double value = Math.Abs(standardDeviation - windsorizedStandardDeviation) / windsorizedStandardDeviation;
-
+                    // TODO: Annotate magic value.
+                    // Technically, the magic value is some derivation from a normal distribution
+                    standardDeviation = BasicStatistics.CalculateStandardDeviation(toProcess) * 1.05;
                 } while (Math.Abs(standardDeviation - windsorizedStandardDeviation) / windsorizedStandardDeviation > iterationLimitforHuberLoop);
 
                 n = 0;
                 for (int i = 0; i < values.Count; i++)
                 {
-                    double temp = (values[i] - median) / standardDeviation;
                     if (SigmaClipping(values[i], median, standardDeviation, sValueMin, sValueMax))
                     {
 
@@ -154,8 +155,7 @@ namespace SpectralAveraging
                     }
                 }
             } while (n > 0);
-            double[] val = values.ToArray();
-            return val;
+            return values.ToArray();
         }
 
         /// <summary>
@@ -190,8 +190,7 @@ namespace SpectralAveraging
                     }
                 }
             } while (n > 0);
-            double[] val = values.ToArray();
-            return val;
+            return values.ToArray();
         }
 
         /// <summary>
