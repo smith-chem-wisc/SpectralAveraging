@@ -6,7 +6,7 @@ namespace Tests
     public static class TestOutlierRejection
     {
         [Test]
-		public static void TestClippingFunctions()
+		public static void TestMinMaxClipping()
         {
 			#region Min Max Clipping
 
@@ -16,87 +16,98 @@ namespace Tests
 			Assert.That(minMaxClipped, Is.EqualTo(expected));
 
 			#endregion
+        }
 
-			#region Percentile Clipping
+        [Test]
+        public static void TestPercentileClipping()
+        {
+            #region Percentile Clipping
 
-			test = new double[] { 100, 95, 90, 80, 70, 60, 50, 40, 30, 20, 10, 5, 0 };
-			expected = new double[] { 90, 80, 70, 60, 50, 40, 30, 20, 10 };
-			double[] percentileClipped = OutlierRejection.PercentileClipping(test, 0.9);
-			Assert.That(percentileClipped, Is.EqualTo(expected));
+            double[] test = new double[] { 100, 95, 90, 80, 70, 60, 50, 40, 30, 20, 10, 5, 0 };
+            double[] expected = new double[] { 95, 90, 80, 70, 60, 50, 40, 30, 20, 10, 5 };
+            double[] percentileClipped = OutlierRejection.PercentileClipping(test, 0.9);
+            Assert.That(percentileClipped, Is.EqualTo(expected));
 
-			test = new double[] { 100, 80, 60, 50, 40, 30, 20, 10, 0 };
-			expected = new double[] { 60, 50, 40, 30, 20, 10 };
-			percentileClipped = OutlierRejection.PercentileClipping(test, 0.9);
-			Assert.That(percentileClipped, Is.EqualTo(expected));
+            test = new double[] { 100, 80, 60, 50, 40, 30, 20, 10, 0 };
+            expected = new double[] { 60, 50, 40, 30, 20, 10 };
+            percentileClipped = OutlierRejection.PercentileClipping(test, 0.9);
+            Assert.That(percentileClipped, Is.EqualTo(expected));
 
-			#endregion
+            #endregion
 
-			#region Sigma Clipping
+		}
 
-			test = new double[] { 100, 80, 60, 50, 40, 30, 20, 10, 0 };
-			double[] sigmaClipped = OutlierRejection.SigmaClipping(test, 1.5, 1.5);
-			expected = new double[] { 50, 40, 30, 20, 10 };
-			Assert.That(sigmaClipped, Is.EqualTo(expected));
+        [Test]
+        public static void TestSigmaClipping()
+        {
+            #region Sigma Clipping
 
-			test = new double[] { 100, 95, 90, 80, 70, 60, 50, 40, 30, 20, 10, 5, 0 };
-			sigmaClipped = OutlierRejection.SigmaClipping(test, 1, 1);
-			expected = new double[] { 50 };
-			Assert.That(sigmaClipped, Is.EqualTo(expected));
+            var test = new double[] { 100, 80, 60, 50, 40, 30, 20, 10, 0 };
+            double[] sigmaClipped = OutlierRejection.SigmaClipping(test, 1.5, 1.5);
+            var expected = new double[] { 50, 40, 30, 20, 10 };
+            Assert.That(sigmaClipped, Is.EqualTo(expected));
 
-			sigmaClipped = OutlierRejection.SigmaClipping(test, 1.3, 1.3);
-			expected = new double[] { 60, 50, 40 };
-			Assert.That(sigmaClipped, Is.EqualTo(expected));
+            test = new double[] { 100, 95, 90, 80, 70, 60, 50, 40, 30, 20, 10, 5, 0 };
+            sigmaClipped = OutlierRejection.SigmaClipping(test, 1, 1);
+            expected = new double[] { 50 };
+            Assert.That(sigmaClipped, Is.EqualTo(expected));
 
-			sigmaClipped = OutlierRejection.SigmaClipping(test, 1.5, 1.5);
-			expected = new double[] { 100, 95, 90, 80, 70, 60, 50, 40, 30, 20, 10, 5, 0 };
-			Assert.That(sigmaClipped, Is.EqualTo(expected));
+            sigmaClipped = OutlierRejection.SigmaClipping(test, 1.3, 1.3);
+            expected = new double[] { 60, 50, 40 };
+            Assert.That(sigmaClipped, Is.EqualTo(expected));
 
-			#endregion
+            sigmaClipped = OutlierRejection.SigmaClipping(test, 1.5, 1.5);
+            expected = new double[] { 100, 95, 90, 80, 70, 60, 50, 40, 30, 20, 10, 5, 0 };
+            Assert.That(sigmaClipped, Is.EqualTo(expected));
 
-			#region Windsorized Sigma Clipping
+            #endregion
+		}
 
-			test = new double[] { 100, 80, 60, 50, 40, 30, 20, 10, 0 };
-			double[] windsorizedSigmaClipped = OutlierRejection.WinsorizedSigmaClipping(test, 1.5, 1.5);
-			expected = new double[] { 60, 50, 40, 30, 20, 10, 0 };
-			Assert.That(windsorizedSigmaClipped, Is.EqualTo(expected));
+        [Test]
+        public static void TestWinsorizedSigmaClipping()
+        {
+            #region Windsorized Sigma Clipping
 
-			test = new double[] { 100, 95, 90, 80, 70, 60, 50, 40, 30, 20, 10, 5, 0 };
-			windsorizedSigmaClipped = OutlierRejection.WinsorizedSigmaClipping(test, 1, 1);
-			expected = new double[] { 60, 50, 40 };
-			Assert.That(windsorizedSigmaClipped, Is.EqualTo(expected));
+            var test = new double[] { 100, 80, 60, 50, 40, 30, 20, 10, 0 };
+            double[] windsorizedSigmaClipped = OutlierRejection.WinsorizedSigmaClipping(test, 1.5, 1.5);
+            var expected = new double[] { 60, 50, 40, 30, 20, 10 };
+            Assert.That(windsorizedSigmaClipped, Is.EqualTo(expected));
 
-			windsorizedSigmaClipped = OutlierRejection.WinsorizedSigmaClipping(test, 1.3, 1.3);
-			expected = new double[] { 60, 50, 40 };
-			Assert.That(windsorizedSigmaClipped, Is.EqualTo(expected));
+            test = new double[] { 100, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 30, 15 };
+            expected = new double[] { 63d, 62d, 61d, 60d, 59d, 58d };
+            windsorizedSigmaClipped = OutlierRejection.WinsorizedSigmaClipping(test, 1.5, 1.5);
+            Assert.That(windsorizedSigmaClipped, Is.EqualTo(expected));
 
-			windsorizedSigmaClipped = OutlierRejection.WinsorizedSigmaClipping(test, 1.5, 1.5);
-			expected = new double[] { 100, 95, 90, 80, 70, 60, 50, 40, 30, 20, 10, 5, 0 };
-			Assert.That(windsorizedSigmaClipped, Is.EqualTo(expected));
+            windsorizedSigmaClipped = OutlierRejection.WinsorizedSigmaClipping(test, 1.3, 1.3);
+            expected = new double[] { 64d, 63d, 62d, 61d, 60d, 59d, 58d, 57, 56 };
+            Assert.That(windsorizedSigmaClipped, Is.EqualTo(expected));
 
-			#endregion
+            #endregion
+		}
 
-			#region Averaged Sigma Clipping
+        [Test]
+        public static void TestAveragedSigmaClipping()
+        {
+            #region Averaged Sigma Clipping
 
-			test = new double[] { 100, 80, 60, 50, 40, 30, 20, 10, 0 };
-			double[] averagedSigmaClipping = OutlierRejection.AveragedSigmaClipping(test, 3, 3);
-			expected = new double[] { 80, 60, 50, 40, 30, 20, 10, 0 };
-			Assert.That(averagedSigmaClipping, Is.EqualTo(expected));
+            var test = new double[] { 120, 65, 64, 63, 62, 61, 60, 59, 59, 58, 57, 56, 30, 15 };
+            double[] averagedSigmaClipping = OutlierRejection.AveragedSigmaClipping(test, 3, 3);
+            var expected = test[1..test.Length];
+            Assert.That(averagedSigmaClipping, Is.EqualTo(expected));
 
-			test = new double[] { 100, 95, 90, 80, 70, 60, 50, 40, 30, 20, 10, 5, 0 };
-			averagedSigmaClipping = OutlierRejection.AveragedSigmaClipping(test, 1, 1);
-			expected = new double[] { 70, 60, 50, 40, 30, };
-			Assert.That(averagedSigmaClipping, Is.EqualTo(expected));
+            averagedSigmaClipping = OutlierRejection.AveragedSigmaClipping(test, 1, 1);
+            expected = test[1..^2];
+            Assert.That(averagedSigmaClipping, Is.EqualTo(expected));
 
-			averagedSigmaClipping = OutlierRejection.AveragedSigmaClipping(test, 1.3, 1.3);
-			expected = new double[] { 80, 70, 60, 50, 40, 30, 20 };
-			Assert.That(averagedSigmaClipping, Is.EqualTo(expected));
+            averagedSigmaClipping = OutlierRejection.AveragedSigmaClipping(test, 1.3, 1.3);
+            expected = test[1..^2];
+            Assert.That(averagedSigmaClipping, Is.EqualTo(expected));
 
-			averagedSigmaClipping = OutlierRejection.AveragedSigmaClipping(test, 1.5, 1.5);
-			expected = new double[] { 80, 70, 60, 50, 40, 30, 20 };
-			Assert.That(averagedSigmaClipping, Is.EqualTo(expected));
+            averagedSigmaClipping = OutlierRejection.AveragedSigmaClipping(test, 1.5, 1.5);
+            expected = test[1..^2];
+            Assert.That(averagedSigmaClipping, Is.EqualTo(expected));
 
-			#endregion
-
+            #endregion
 		}
 
 
@@ -108,9 +119,9 @@ namespace Tests
 			options.SetDefaultValues();
 			Assert.That(options.RejectionType == RejectionType.NoRejection);
 			Assert.That(options.WeightingType == WeightingType.NoWeight);
-			Assert.That(0.9, Is.EqualTo(options.Percentile));
-			Assert.That(1.3, Is.EqualTo(options.MinSigmaValue));
-			Assert.That(1.3, Is.EqualTo(options.MaxSigmaValue));
+			Assert.That(0.1, Is.EqualTo(options.Percentile));
+			Assert.That(1.5, Is.EqualTo(options.MinSigmaValue));
+			Assert.That(1.5, Is.EqualTo(options.MaxSigmaValue));
 
 			options.SetValues(RejectionType.MinMaxClipping, WeightingType.NoWeight, SpectrumMergingType.SpectrumBinning, true, .8, 2, 4);
 			Assert.That(options.RejectionType == RejectionType.MinMaxClipping);

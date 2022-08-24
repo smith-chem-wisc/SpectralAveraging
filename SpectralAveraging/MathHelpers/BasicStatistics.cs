@@ -15,7 +15,7 @@ namespace SpectralAveraging
         /// <returns>double representation of the median</returns>
         internal static double CalculateMedian(IEnumerable<double> toCalc)
         {
-            IEnumerable<double> sortedValues = toCalc.OrderByDescending(p => p);
+            IEnumerable<double> sortedValues = toCalc.OrderByDescending(p => p).ToList();
             double median;
             int count = sortedValues.Count();
             if (count % 2 == 0)
@@ -27,13 +27,11 @@ namespace SpectralAveraging
 
         internal static double CalculateNonZeroMedian(IEnumerable<double> toCalc)
         {
-            toCalc = toCalc.Where(p => p != 0);
-            if (toCalc.Count() == 0)
+            toCalc = toCalc.Where(p => p != 0).ToList();
+            if (!toCalc.Any())
                 return 0;
-            else
-            {
-                return CalculateMedian(toCalc.ToList());
-            }
+
+            return CalculateMedian(toCalc);
         }
 
         /// <summary>
@@ -48,9 +46,10 @@ namespace SpectralAveraging
 
             if (toCalc.Any())
             {
-                average = average == 0 ? toCalc.Average() : average;
-                double sum = toCalc.Sum(x => Math.Pow(x - average, 2));
-                deviation = Math.Sqrt(sum / toCalc.Count() - 1);
+                List<double> calcList = toCalc.ToList();
+                average = calcList.Average();
+                double sum = calcList.Sum(x => Math.Pow(x - average, 2));
+                deviation = Math.Sqrt(sum / calcList.Count() - 1);
             }
             return deviation;
         }
@@ -62,11 +61,10 @@ namespace SpectralAveraging
 
         internal static double CalculateNonZeroStandardDeviation(IEnumerable<double> toCalc, double average = 0)
         {
-            toCalc = toCalc.Where(p => p != 0);
-            if (toCalc.Count() == 0)
+            toCalc = toCalc.Where(p => p != 0).ToList();
+            if (!toCalc.Any())
                 return 0;
-            else
-                return CalculateStandardDeviation(toCalc, average);
+            return CalculateStandardDeviation(toCalc, average);
         }
     }
 }
