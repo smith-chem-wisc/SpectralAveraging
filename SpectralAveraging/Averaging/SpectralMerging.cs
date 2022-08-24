@@ -94,7 +94,7 @@ namespace SpectralAveraging
             {
                 // linq is probably slow 
                 xArray[i] = xValuesBin[i].Where(p => p != 0).Average();
-                yArray[i] = ProcessSingleMzArray(yValuesBin[i], options);
+                yArray[i] = ProcessSingleMzArray(yValuesBin[i].OrderBy(p => p).ToArray(), options);
             }
 
             // Create new MsDataScan to return

@@ -68,19 +68,20 @@ namespace Tests
         {
             #region Windsorized Sigma Clipping
 
-            var test = new double[] { 100, 80, 60, 50, 40, 30, 20, 10, 0 };
+            var test = new double[] { 0, 10, 20, 30, 40 ,50, 60, 70, 80, 90, 100  };
             double[] windsorizedSigmaClipped = OutlierRejection.WinsorizedSigmaClipping(test, 1.5, 1.5);
-            var expected = new double[] { 60, 50, 40, 30, 20, 10 };
+            var expected = new double[] { 30, 40, 50, 60, 70 };
             Assert.That(windsorizedSigmaClipped, Is.EqualTo(expected));
 
             test = new double[] { 100, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 30, 15 };
-            expected = new double[] { 63d, 62d, 61d, 60d, 59d, 58d };
+            test = new double[] { 15, 30, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 100 };
+            expected = new double[] { 58d, 59d, 60d, 61d, 62d, 63d };
             windsorizedSigmaClipped = OutlierRejection.WinsorizedSigmaClipping(test, 1.5, 1.5);
             Assert.That(windsorizedSigmaClipped, Is.EqualTo(expected));
 
             windsorizedSigmaClipped = OutlierRejection.WinsorizedSigmaClipping(test, 1.3, 1.3);
-            expected = new double[] { 64d, 63d, 62d, 61d, 60d, 59d, 58d, 57, 56 };
-            Assert.That(windsorizedSigmaClipped, Is.EqualTo(expected));
+			expected = new double[] { 58d, 59d, 60d, 61d, 62d };
+			Assert.That(windsorizedSigmaClipped, Is.EqualTo(expected));
 
             #endregion
 		}
