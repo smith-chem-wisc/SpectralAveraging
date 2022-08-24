@@ -122,9 +122,7 @@ namespace SpectralAveraging
             double iterationLimitforHuberLoop = 0.00005;
             double medianLeftBound;
             double medianRightBound;
-            double windsorizedStandardDeviation;
-            int breakpoint = 0;
-            do
+            double windsorizedStandardDeviation;            do
             {
                 if (!values.Any())
                     break;

@@ -395,7 +395,6 @@ namespace Tests
             SpectralAveragingOptions.NumberOfScansToAverage = 3;
             SpectralAveragingOptions.ScanOverlap = 2;
             averagedScans = SpectraFileProcessing.ProcessSpectra(DummyDDAScansOutOfOrder, SpectralAveragingOptions);
-            var test = averagedScans.Select(p => (p.OneBasedScanNumber, p.OneBasedPrecursorScanNumber)).ToList();
             Assert.That(averagedScans.Count(p => p.MsnOrder == 1) == 3);
             Assert.That(averagedScans.Count(p => p.MsnOrder == 2) == 15);
             Assert.AreEqual(expected.Select(p => Math.Round(p, 4)), averagedScans[0].MassSpectrum.YArray.Select(p => Math.Round(p, 4)));
