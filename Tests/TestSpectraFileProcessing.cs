@@ -320,16 +320,16 @@ namespace Tests
             SpectralAveragingOptions.NumberOfScansToAverage = 2;
             SpectralAveragingOptions.ScanOverlap = 1;
             MsDataScan[] averagedScans = SpectraFileProcessing.ProcessSpectra(DummyDDAScansInOrder, SpectralAveragingOptions);
+            var test = averagedScans.Select(p => (p.OneBasedScanNumber, p.OneBasedPrecursorScanNumber)).ToList();
             double[] expected = new double[] { 0, 5, 0, 0, 0, 0, 0, 10, 0 };
             Assert.That(averagedScans.Count(p => p.MsnOrder == 1) == 4);
-            Assert.That(averagedScans.Count(p => p.MsnOrder == 2) == 24);
+            Assert.That(averagedScans.Count(p => p.MsnOrder == 2) == 15);
             Assert.That(averagedScans[0].MassSpectrum.YArray.SequenceEqual(expected));
             expected = new double[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
             Assert.AreEqual(expected, averagedScans.Last(p => p.MsnOrder == 1).MassSpectrum.YArray);
             int?[] expectedNullable = new int?[]
             {
-                null, 1, 1, 1, 1, 1, 1, null, 8, 8, 8, 8, 8, 8, 
-                null, 15, 15, 15, 15, 15, 15, null, 22, 22, 22, 22, 22, 22
+                null, 1, 1, 1, null, 5, 5, 5, null, 9, 9, 9, null, 13, 13, 13, 13, 13, 13
             };
             Assert.That(averagedScans.Select(p => p.OneBasedPrecursorScanNumber).ToArray().SequenceEqual(expectedNullable));
 
@@ -337,29 +337,28 @@ namespace Tests
             averagedScans = SpectraFileProcessing.ProcessSpectra(DummyDDAScansInOrder, SpectralAveragingOptions);
             expected = new double[] { 0, 5, 0, 0, 0, 0, 0, 10, 0 };
             Assert.That(averagedScans.Count(p => p.MsnOrder == 1) == 2);
-            Assert.That(averagedScans.Count(p => p.MsnOrder == 2) == 18);
+            Assert.That(averagedScans.Count(p => p.MsnOrder == 2) == 15);
             Assert.That(averagedScans[0].MassSpectrum.YArray.SequenceEqual(expected));
             expected = new double[] { 0, 5.0 * (2.0/3.0), 0, 0, 0, 0, 0, 10.0 * (2.0/3.0), 0 };
             Assert.AreEqual(expected.Select(p => Math.Round(p, 4)), averagedScans.Last(p => p.MsnOrder == 1).MassSpectrum.YArray.Select(p => Math.Round(p, 4)));
             expectedNullable = new int?[]
             {
-                null, 1, 1, 1, 1, 1, 1, 1, 1, 1, null, 11, 11, 11, 11, 11, 11, 11, 11, 11
+                null, 1, 1, 1, 1, 1, 1, null, 8, 8, 8, 8, 8, 8, 8, 8, 8
             };
             Assert.That(averagedScans.Select(p => p.OneBasedPrecursorScanNumber).ToArray().SequenceEqual(expectedNullable));
 
             SpectralAveragingOptions.NumberOfScansToAverage = 3;
             SpectralAveragingOptions.ScanOverlap = 2;
             averagedScans = SpectraFileProcessing.ProcessSpectra(DummyDDAScansInOrder, SpectralAveragingOptions);
-            var test = averagedScans.Select(p => (p.OneBasedScanNumber, p.OneBasedPrecursorScanNumber)).ToList();
             expected = new double[] { 0, 5, 0, 0, 0, 0, 0, 10, 0 };
             Assert.That(averagedScans.Count(p => p.MsnOrder == 1) == 3);
-            Assert.That(averagedScans.Count(p => p.MsnOrder == 2) == 27);
+            Assert.That(averagedScans.Count(p => p.MsnOrder == 2) == 15);
             Assert.That(averagedScans[0].MassSpectrum.YArray.SequenceEqual(expected));
             expected = new double[] { 0, 5.0 * (2.0 / 3.0), 0, 0, 0, 0, 0, 10.0 * (2.0 / 3.0), 0 };
             Assert.AreEqual(expected.Select(p => Math.Round(p, 4)), averagedScans.Last(p => p.MsnOrder == 1).MassSpectrum.YArray.Select(p => Math.Round(p, 4)));
             expectedNullable = new int?[]
             {
-                null, 1, 1, 1, 1, 1, 1, 1, 1, 1, null, 11, 11, 11, 11, 11, 11, 11, 11, 11, null, 21, 21, 21, 21, 21, 21, 21, 21, 21
+                null, 1, 1, 1, null, 5, 5, 5, null, 9, 9, 9, 9, 9, 9, 9, 9, 9
             };
             Assert.AreEqual(expectedNullable, averagedScans.Select(p => p.OneBasedPrecursorScanNumber).ToArray());
         }
