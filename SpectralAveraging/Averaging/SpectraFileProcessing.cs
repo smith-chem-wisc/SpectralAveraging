@@ -108,17 +108,22 @@ namespace SpectralAveraging
             {
                 // get the scans to be averaged
                 scansToProcess.Clear();
-                if (i <= options.ScanOverlap) // very start of the file
-                {
-                    scansToProcess = ms1Scans.GetRange(i, options.NumberOfScansToAverage);
-                }
-                else if (i + options.NumberOfScansToAverage > ms1Scans.Count) // very end of the file
+                IEnumerable<MsDataScan> ms2ScansFromAveragedScans;
+                if (i + options.NumberOfScansToAverage > ms1Scans.Count) // very end of the file
                 {
                     break;
                 }
-                else // anywhere in the middle of the file
+                else 
                 {
                     scansToProcess = ms1Scans.GetRange(i, options.NumberOfScansToAverage);
+                    // if next iteration breaks the loop (end of file), then add the rest of the MS2's
+                    if ((i + options.NumberOfScansToAverage - options.ScanOverlap) + options.NumberOfScansToAverage > ms1Scans.Count)
+                        ms2ScansFromAveragedScans = ms2Scans.Where(p =>
+                            scansToProcess.Any(m => m.OneBasedScanNumber == p.OneBasedPrecursorScanNumber));
+                    // if not, add MS2 scans from MS1's that will not be averaged in the next iteration
+                    else
+                        ms2ScansFromAveragedScans = ms2Scans.Where(p =>
+                            scansToProcess.GetRange(0, options.NumberOfScansToAverage - options.ScanOverlap).Any(m => m.OneBasedScanNumber == p.OneBasedPrecursorScanNumber));
                 }
 
                 // average scans and add to averaged list
@@ -139,9 +144,6 @@ namespace SpectralAveraging
                 int precursorScanIndex = scanNumberIndex;
                 scanNumberIndex++;
 
-                // add the respective Ms2 scans
-                IEnumerable<MsDataScan> ms2ScansFromAveragedScans = ms2Scans.Where(p =>
-                    scansToProcess.Any(m => m.OneBasedScanNumber == p.OneBasedPrecursorScanNumber));
                 foreach (var scan in ms2ScansFromAveragedScans)
                 {
                     MsDataScan newScan = new(scan.MassSpectrum, scanNumberIndex, scan.MsnOrder, scan.IsCentroid,
@@ -156,8 +158,7 @@ namespace SpectralAveraging
                     scanNumberIndex++;
                 }
             }
-
-            var test = averagedScans.Select(p => (p.OneBasedScanNumber, p.OneBasedPrecursorScanNumber));
+            
             return averagedScans.ToArray();
         }
     }
