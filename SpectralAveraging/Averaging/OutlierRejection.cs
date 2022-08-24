@@ -119,7 +119,7 @@ namespace SpectralAveraging
         {
             List<double> values = initialValues.ToList();
             int n = 0;
-            double iterationLimitforHuberLoop = 0.0005;
+            double iterationLimitforHuberLoop = 0.00005;
             double medianLeftBound;
             double medianRightBound;
             double windsorizedStandardDeviation;
@@ -139,7 +139,6 @@ namespace SpectralAveraging
                     median = BasicStatistics.CalculateMedian(toProcess);
                     windsorizedStandardDeviation = standardDeviation;
                     standardDeviation = BasicStatistics.CalculateStandardDeviation(toProcess) * 1.134;
-                    var temp = Math.Abs(standardDeviation - windsorizedStandardDeviation) / windsorizedStandardDeviation;
                 } while (Math.Abs(standardDeviation - windsorizedStandardDeviation) / windsorizedStandardDeviation > iterationLimitforHuberLoop);
 
                 n = 0;
@@ -153,7 +152,7 @@ namespace SpectralAveraging
                         i--;
                     }
                 }
-            } while (n > 0);
+            } while (n > 0 && values.Count > 1); // break loop if nothing was rejected, or only one value remains
             return values.ToArray();
         }
 
@@ -252,11 +251,17 @@ namespace SpectralAveraging
             {
                 if (initialValues[i] < medianLeftBound)
                 {
-                    initialValues[i] = medianLeftBound;
+                    if (i < initialValues.Length && initialValues.Any(p => p > medianLeftBound))
+                        initialValues[i] = initialValues.First(p => p > medianLeftBound);
+                    else
+                        initialValues[i] = medianLeftBound;
                 }
                 else if (initialValues[i] > medianRightBound)
                 {
-                    initialValues[i] = medianRightBound;
+                    if (i != 0 && initialValues.Any(p => p < medianRightBound))
+                        initialValues[i] = initialValues.Last(p => p < medianRightBound);
+                    else
+                        initialValues[i] = medianRightBound;
                 }
             }
         }
