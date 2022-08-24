@@ -119,11 +119,11 @@ namespace SpectralAveraging
         {
             List<double> values = initialValues.ToList();
             int n = 0;
-            double iterationLimitforHuberLoop = 0.01;
-            double averageAbsoluteDeviation = Math.Sqrt(2 / Math.PI) * (sValueMax + sValueMin) / 2;
+            double iterationLimitforHuberLoop = 0.0005;
             double medianLeftBound;
             double medianRightBound;
             double windsorizedStandardDeviation;
+            int breakpoint = 0;
             do
             {
                 if (!values.Any())
@@ -133,14 +133,13 @@ namespace SpectralAveraging
                 double[] toProcess = values.ToArray();
                 do // calculates a new median and standard deviation based on the values to do sigma clipping with (Huber loop)
                 {
-                    medianLeftBound = median - sValueMin * standardDeviation;
-                    medianRightBound = median + sValueMax * standardDeviation;
+                    medianLeftBound = median - 1.5 * standardDeviation;
+                    medianRightBound = median + 1.5 * standardDeviation;
                     toProcess.Winsorize(medianLeftBound, medianRightBound);
                     median = BasicStatistics.CalculateMedian(toProcess);
                     windsorizedStandardDeviation = standardDeviation;
-                    // TODO: Annotate magic value.
-                    // Technically, the magic value is some derivation from a normal distribution
-                    standardDeviation = BasicStatistics.CalculateStandardDeviation(toProcess) * 1.05;
+                    standardDeviation = BasicStatistics.CalculateStandardDeviation(toProcess) * 1.134;
+                    var temp = Math.Abs(standardDeviation - windsorizedStandardDeviation) / windsorizedStandardDeviation;
                 } while (Math.Abs(standardDeviation - windsorizedStandardDeviation) / windsorizedStandardDeviation > iterationLimitforHuberLoop);
 
                 n = 0;
