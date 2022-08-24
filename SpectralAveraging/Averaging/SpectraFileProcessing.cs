@@ -117,7 +117,7 @@ namespace SpectralAveraging
                 {
                     scansToProcess = ms1Scans.GetRange(i, options.NumberOfScansToAverage);
                     // if next iteration breaks the loop (end of file), then add the rest of the MS2's
-                    if ((i + options.NumberOfScansToAverage - options.ScanOverlap) + options.NumberOfScansToAverage < ms1Scans.Count)
+                    if ((i + options.NumberOfScansToAverage - options.ScanOverlap) + options.NumberOfScansToAverage > ms1Scans.Count)
                         ms2ScansFromAveragedScans = ms2Scans.Where(p =>
                             scansToProcess.Any(m => m.OneBasedScanNumber == p.OneBasedPrecursorScanNumber));
                     // if not, add MS2 scans from MS1's that will not be averaged in the next iteration
