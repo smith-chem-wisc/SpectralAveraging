@@ -3,13 +3,11 @@
                     xmlns:local="clr-namespace:SpectralAveragingGUI">
 
     <Style TargetType="{x:Type Control}" x:Key="BaseStyle">
-        <Setter Property="FontFamily" Value="{StaticResource LatoThin}" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeRegular}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}" />
     </Style>
 
     <Style TargetType="{x:Type TextBlock}" x:Key="BaseTextBlockStyle">
-        <Setter Property="FontFamily" Value="{StaticResource LatoThin}" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeRegular}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}" />
     </Style>
 
     <Style TargetType="{x:Type Button}" BasedOn="{StaticResource BaseStyle}" />

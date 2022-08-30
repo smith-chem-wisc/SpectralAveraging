@@ -3,9 +3,6 @@
                     xmlns:local="clr-namespace:SpectralAveragingGUI"
                     xmlns:system="clr-namespace:System;assembly=mscorlib">
 
-    <FontFamily x:Key="LatoThin">pack://application;,,,/Fonts/#Lato Thin</FontFamily>
-    <FontFamily x:Key="LatoRegular">pack://application;,,,/Fonts/#Lato Regular</FontFamily>
-    <FontFamily x:Key="LatoBold">pack://application;,,,/Fonts/#Lato Black</FontFamily>
 
     <system:Double x:Key="FontSizeSmaller">10</system:Double>
     <system:Double x:Key="FontSizeSmall">12</system:Double>

@@ -40,7 +40,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- File List -->
-            <Label Grid.Row="0" Grid.Column="0" Content="Specta Files" FontFamily="{StaticResource LatoRegular}" Margin="5 0 0 0"/>
+            <Label Grid.Row="0" Grid.Column="0" Content="Specta Files" Margin="5 0 0 0"/>
             <Border Grid.Column="0" Grid.Row="0"  Margin="10 24 10 10" BorderThickness="2"
                     BorderBrush="{StaticResource ForegroundMainBrush}">
                 <DataGrid   AllowDrop="True"  Background="{StaticResource BackgroundVeryLightBrush}"
@@ -76,7 +76,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <Label Grid.Row="0" Grid.Column="0" Content="Saved Averaging Options" FontFamily="{StaticResource LatoRegular}" Margin="5 0 0 0"/>
+            <Label Grid.Row="0" Grid.Column="0" Content="Saved Averaging Options"  Margin="5 0 0 0"/>
             <Border Grid.Column="0" Grid.Row="0"  Margin="10 24 10 10" BorderThickness="2"
                     BorderBrush="{StaticResource ForegroundMainBrush}">
                 <DataGrid   AllowDrop="True"  Background="{StaticResource BackgroundVeryLightBrush}"
