@@ -13,7 +13,6 @@
     <Style TargetType="{x:Type GroupBox}" x:Key="GroupBoxStyle">
         <Setter Property="BorderBrush" Value="{StaticResource ForegroundMainBrush}"></Setter>
         <Setter Property="BorderThickness" Value="2"></Setter>
-        <Setter Property="FontFamily" Value="{StaticResource LatoRegular}"></Setter>
         <Setter Property="FontSize" Value="{StaticResource FontSizeLarge}"></Setter>
         <Setter Property="Background" Value="{StaticResource BackgroundVeryLightBrush}"></Setter>
         <Setter Property="Margin" Value="5"></Setter>
@@ -26,14 +25,12 @@
         <Setter Property="Width" Value="40"></Setter>
         <Setter Property="Background" Value="{StaticResource BackgroundVeryLightBrush}"></Setter>
         <Setter Property="FontSize" Value="{StaticResource FontSizeRegular}"></Setter>
-        <Setter Property="FontFamily" Value="{StaticResource LatoRegular}"></Setter>
     </Style>
 
     <!-- ProgressTextBlockStyle -->
     <Style TargetType="{x:Type TextBlock}" x:Key="ProgressTextBlockStyle" >
         <Setter Property="Background" Value="Transparent"></Setter>
         <Setter Property="FontSize" Value="{StaticResource FontSizeRegular}"></Setter>
-        <Setter Property="FontFamily" Value="{StaticResource LatoBold}"></Setter>
     </Style>
 
     <!-- ValueEnteringStackPanel -->
