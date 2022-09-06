@@ -39,7 +39,7 @@ namespace Tests
             SingleScanDataObject singleScan = singleScans.First();
             double[] yArray = singleScan.YArray;
             yArray = yArray.Select(p => p / singleScan.TotalIonCurrent).ToArray();
-            SpectrumNormalization.NormalizeSpectrumToTic(singleScan);
+            singleScan.NormalizeSpectrumToTic();
             Assert.That(singleScan.YArray.SequenceEqual(yArray));
 
             // multi scan data object
@@ -49,7 +49,7 @@ namespace Tests
             {
                 yArrays[i] = multiScan.YArrays[i].Select(p => p / multiScan.TotalIonCurrent[i]).ToArray();
             }
-            SpectrumNormalization.NormalizeSpectrumToTic(multiScan, false);
+            multiScan.NormalizeSpectrumToTic(false);
             for (int i = 0; i < multiScan.ScansToProcess; i++)
             {
                 Assert.That(multiScan.YArrays[i].SequenceEqual(yArrays[i]));

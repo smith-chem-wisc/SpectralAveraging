@@ -4,16 +4,22 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <ApplicationIcon>Images\AveragingIcon.ico</ApplicationIcon>
+    <PackageIcon>Images\AveragingIcon.png</PackageIcon>
+    <Version>1.0</Version>
+    <Authors>nbollis, avcarr2</Authors>
+    <Company>smith-chem-wisc</Company>
+    <PackageTags>Data Processing;Mass Spectrometry;Mass Spec;Averaging;Spectra;Spectrum;Spectral Averaging;Spectra Averaging;Spectrum Averaging</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
-    <PackageReference Include="mzLib" Version="1.0.532" />
-    <PackageReference Include="Nett" Version="0.15.0" />
+    <Content Include="Images\AveragingIcon.ico" />
+    <Content Include="Images\AveragingIcon.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AveragingIO\AveragingIO.csproj" />
+    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+    <PackageReference Include="Nett" Version="0.15.0" />
   </ItemGroup>
 
 </Project>

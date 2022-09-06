@@ -1,10 +1,9 @@
-﻿using MassSpectrometry;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MzLibUtil;
 
 namespace SpectralAveraging
 {
@@ -14,35 +13,30 @@ namespace SpectralAveraging
         /// Calls the specific merging function based upon the current static field SpecrumMergingType
         /// </summary>
         /// <param name="scans"></param>
-        public static MzSpectrum CombineSpectra(double[][] xArrays, double[][] yArrays, double[] totalIonCurrents, int numSpectra, SpectralAveragingOptions options)
+        public static double[][] CombineSpectra(double[][] xArrays, double[][] yArrays, double[] totalIonCurrents, int numSpectra, SpectralAveragingOptions options)
         {
-            MzSpectrum compositeSpectrum = null;
+
             switch (options.SpectrumMergingType)
             {
                 case SpectrumMergingType.SpectrumBinning:
-                    compositeSpectrum = SpectrumBinning(xArrays, yArrays, totalIonCurrents, options.BinSize, numSpectra, options);
-                    break;
-
+                    return SpectrumBinning(xArrays, yArrays, totalIonCurrents, options.BinSize, numSpectra, options);
 
                 case SpectrumMergingType.MostSimilarSpectrum:
-                    compositeSpectrum = MostSimilarSpectrum();
-                    break;
+                    return MostSimilarSpectrum();
+
+                default :
+                    Debugger.Break();
+                    return null;
             }
-            return compositeSpectrum;
         }
 
-        public static MzSpectrum CombineSpectra(MultiScanDataObject multiScanDataObject, SpectralAveragingOptions options)
-        {
-            return CombineSpectra(multiScanDataObject.XArrays, multiScanDataObject.YArrays, multiScanDataObject.TotalIonCurrent,
-                multiScanDataObject.ScansToProcess, options);
-        }
-
+        
         /// <summary>
         /// Merges spectra into a two dimensional array of (m/z, int) values based upon their bin 
         /// </summary>
         /// <param name="scans">scans to be combined</param>
         /// <returns>MSDataScan with merged values</returns>
-        public static MzSpectrum SpectrumBinning(double[][] xArrays, double[][] yArrays, double[] totalIonCurrents, double binSize, int numSpectra,
+        public static double[][] SpectrumBinning(double[][] xArrays, double[][] yArrays, double[] totalIonCurrents, double binSize, int numSpectra,
             SpectralAveragingOptions options)
         {
             // normalize if selected
@@ -97,14 +91,10 @@ namespace SpectralAveraging
                 yArray[i] = ProcessSingleMzArray(yValuesBin[i].OrderBy(p => p).ToArray(), options);
             }
 
-            // Create new MsDataScan to return
-            MzRange range = new(min, max);
-            MzSpectrum mergedSpectra = new(xArray, yArray, true);
-
-            return mergedSpectra;
+            return new double[][] {xArray, yArray};
         }
 
-        public static MzSpectrum MostSimilarSpectrum()
+        public static double[][] MostSimilarSpectrum()
         {
             throw new NotImplementedException();
         }

@@ -8,8 +8,9 @@ using IO.MzML;
 using MassSpectrometry;
 using MathNet.Numerics.Statistics;
 using MzLibUtil;
+using SpectralAveraging;
 
-namespace SpectralAveraging
+namespace AveragingIO
 {
     /// <summary>
     /// Manages the spectra files being averaged
@@ -46,7 +47,7 @@ namespace SpectralAveraging
             // average spectrum
             MsDataScan representativeScan = scans.First();
             MultiScanDataObject multiScanDataObject = new(SingleScanDataObject.ConvertMSDataScansInBulk(scans));
-            MzSpectrum averagedSpectrum = SpectralMerging.CombineSpectra(multiScanDataObject, options);
+            MzSpectrum averagedSpectrum = multiScanDataObject.CombineSpectra(options);
 
             // create output
             MsDataScan averagedScan = new(averagedSpectrum, 1, representativeScan.OneBasedScanNumber,
@@ -81,7 +82,7 @@ namespace SpectralAveraging
                 // average scans
                 MsDataScan representativeScan = scansToProcess.First();
                 MultiScanDataObject multiScanDataObject = new(SingleScanDataObject.ConvertMSDataScansInBulk(scansToProcess));
-                MzSpectrum averagedSpectrum = SpectralMerging.CombineSpectra(multiScanDataObject, options);
+                MzSpectrum averagedSpectrum = multiScanDataObject.CombineSpectra(options);
                 MsDataScan averagedScan = new(averagedSpectrum, scanNumberIndex, 1,
                     representativeScan.IsCentroid, representativeScan.Polarity, scansToProcess.Select(p => p.RetentionTime).Minimum(),
                     averagedSpectrum.Range, null, representativeScan.MzAnalyzer, (double)multiScanDataObject.AverageIonCurrent,
@@ -129,7 +130,7 @@ namespace SpectralAveraging
                 // average scans and add to averaged list
                 MsDataScan representativeScan = scansToProcess.First();
                 MultiScanDataObject multiScanDataObject = new(SingleScanDataObject.ConvertMSDataScansInBulk(scansToProcess));
-                MzSpectrum averagedSpectrum = SpectralMerging.CombineSpectra(multiScanDataObject, options);
+                MzSpectrum averagedSpectrum = multiScanDataObject.CombineSpectra(options);
                 MsDataScan averagedScan = new(averagedSpectrum, scanNumberIndex, 1,
                     representativeScan.IsCentroid, representativeScan.Polarity, representativeScan.RetentionTime,
                     averagedSpectrum.Range, null, representativeScan.MzAnalyzer, (double)multiScanDataObject.AverageIonCurrent,

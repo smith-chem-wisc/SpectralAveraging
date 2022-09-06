@@ -1,9 +1,8 @@
 ﻿using System.Text;
-using ThermoFisher.CommonCore.Data.Business;
 
 namespace SpectralAveraging
 {
-    public class SpectralAveragingOptions 
+    public class SpectralAveragingOptions
     {
         #region Averaging Options
         public RejectionType RejectionType { get; set; }
@@ -41,7 +40,7 @@ namespace SpectralAveraging
         public void SetValues(RejectionType rejectionType = RejectionType.NoRejection,
             WeightingType intensityWeighingType = WeightingType.NoWeight, SpectrumMergingType spectrumMergingType = SpectrumMergingType.SpectrumBinning,
             bool performNormalization = true, double percentile = 0.1, double minSigma = 1.5, double maxSigma = 1.5, double binSize = 0.01,
-            SpectraFileProcessingType spectraFileProcessingType = SpectraFileProcessingType.AverageAll, int numberOfScansToAverage = 5, 
+            SpectraFileProcessingType spectraFileProcessingType = SpectraFileProcessingType.AverageAll, int numberOfScansToAverage = 5,
             int scanOverlap = 2, OutputType outputType = OutputType.mzML, bool outputOptions = false)
         {
             RejectionType = rejectionType;

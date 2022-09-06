@@ -7,8 +7,9 @@ using AveragingIO;
 using IO.MzML;
 using MassSpectrometry;
 using Nett;
+using SpectralAveraging;
 
-namespace SpectralAveraging
+namespace AveragingIO
 {
     public static class AveragedSpectraOutputter
     {
