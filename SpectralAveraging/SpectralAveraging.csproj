@@ -1,19 +1,23 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Authors>nbollis, avcarr2</Authors>
+    <Company>smith-chem-wisc</Company>
+    <Version>1.0.1</Version>
+    <PackageIcon>Images\AveragingIcon.png</PackageIcon>
+    <RepositoryUrl>https://github.com/smith-chem-wisc/SpectralAveraging</RepositoryUrl>
+    <PackageTags>Data Processing;Mass Spectrometry;Mass Spec;Averaging;Spectra;Spectrum;Spectral Averaging;Spectra Averaging;Spectrum Averaging</PackageTags>
+    <Description>Spectral averaging package </Description>
+    <IsPublishable>True</IsPublishable>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
-    <PackageReference Include="mzLib" Version="1.0.532" />
     <PackageReference Include="Nett" Version="0.15.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\AveragingIO\AveragingIO.csproj" />
-  </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
 ﻿using MassSpectrometry;
 
-namespace SpectralAveraging
+namespace AveragingIO
 {
     public class MultiScanDataObject 
     {
