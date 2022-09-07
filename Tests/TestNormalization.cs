@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AveragingIO;
+using IO.MzML;
 using MassSpectrometry;
 using SpectralAveraging;
 
@@ -32,15 +32,14 @@ namespace Tests
         {
             // setup
             string filepath = Path.Combine(TestContext.CurrentContext.TestDirectory, @"DataFiles\TDYeastFractionMS1.mzML");
-            List<MsDataScan> scans = SpectraFileHandler.LoadMS1ScansFromFile(filepath);
-            List<SingleScanDataObject> singleScans = SingleScanDataObject.ConvertMSDataScansInBulk(scans);
+            List<MsDataScan> scans = Mzml.LoadAllStaticData(filepath).GetAllScansList();
 
             // single scan data object
-            SingleScanDataObject singleScan = singleScans.First();
-            double[] yArray = singleScan.YArray;
-            yArray = yArray.Select(p => p / singleScan.TotalIonCurrent).ToArray();
-            singleScan.NormalizeSpectrumToTic();
-            Assert.That(singleScan.YArray.SequenceEqual(yArray));
+            MsDataScan firstScan = scans.First();
+            double[] yArray = firstScan.MassSpectrum.YArray;
+            yArray = yArray.Select(p => p / firstScan.TotalIonCurrent).ToArray();
+            SpectrumNormalization.NormalizeSpectrumToTic(firstScan.MassSpectrum.YArray, firstScan.TotalIonCurrent);
+            Assert.That(firstScan.MassSpectrum.YArray.SequenceEqual(yArray));
 
             // multi scan data object
             MultiScanDataObject multiScan = new MultiScanDataObject(singleScans.GetRange(1, 5));
