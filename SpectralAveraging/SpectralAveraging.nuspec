@@ -2,17 +2,17 @@
 <package >
   <metadata>
     <id>SpectralAveraging</id>
-    <version>$version$</version>
-    <title>$title$</title>
-    <authors>$authors$</authors>
+    <version>1.0.6</version>
+    <title>SpectralAveraging</title>
+    <authors>nbollis, avcarr2</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
-    <icon>$packageicon$</icon>
-    <projectUrl>$repositoryurl$</projectUrl>
-    <description>$description$</description>
+    <icon>Images\AveragingIcon.png</icon>
+    <projectUrl>https://github.com/smith-chem-wisc/SpectralAveraging</projectUrl>
+    <description>Spectral averaging package</description>
     <releaseNotes>Trimmed Excess Classes</releaseNotes>
     <copyright>$copyright$</copyright>
-    <tags>$pacakgetags$</tags>
+    <tags>Data Processing;Mass Spectrometry;Mass Spec;Averaging;Spectra;Spectrum;Spectral Averaging;Spectra Averaging;Spectrum Averaging</tags>
     <dependencies>
       <group targetFramework="net6.0">
         <dependency id="MathNet.Numerics" version="5.0.0" />
@@ -26,5 +26,7 @@
   </metadata>
   <files>
     <file src="AveragingIcon.png" target="Images\" />
+	<file src="bin\x64\Release\net6.0\SpectralAveraging.dll" target="lib\net6.0" /> 
+	<file src="bin\x64\Release\net6.0\SpectralAveraging.dll" target="lib\net6.0-windows7.0" /> 
   </files>
 </package>
