@@ -6,12 +6,13 @@
     <Nullable>enable</Nullable>
     <Authors>nbollis, avcarr2</Authors>
     <Company>smith-chem-wisc</Company>
-    <Version>1.0.1</Version>
+    <Version>1.0.6</Version>
     <PackageIcon>Images\AveragingIcon.png</PackageIcon>
     <RepositoryUrl>https://github.com/smith-chem-wisc/SpectralAveraging</RepositoryUrl>
     <PackageTags>Data Processing;Mass Spectrometry;Mass Spec;Averaging;Spectra;Spectrum;Spectral Averaging;Spectra Averaging;Spectrum Averaging</PackageTags>
     <Description>Spectral averaging package </Description>
     <IsPublishable>True</IsPublishable>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>

@@ -26,33 +26,5 @@ namespace Tests
             Assert.That(sampleData.Sum() == 1);
             Assert.That(sampleData.SequenceEqual(expected));
         }
-
-        [Test]
-        public static void TestNormalizationWithDifferentDataTypes()
-        {
-            // setup
-            string filepath = Path.Combine(TestContext.CurrentContext.TestDirectory, @"DataFiles\TDYeastFractionMS1.mzML");
-            List<MsDataScan> scans = Mzml.LoadAllStaticData(filepath).GetAllScansList();
-
-            // single scan data object
-            MsDataScan firstScan = scans.First();
-            double[] yArray = firstScan.MassSpectrum.YArray;
-            yArray = yArray.Select(p => p / firstScan.TotalIonCurrent).ToArray();
-            SpectrumNormalization.NormalizeSpectrumToTic(firstScan.MassSpectrum.YArray, firstScan.TotalIonCurrent);
-            Assert.That(firstScan.MassSpectrum.YArray.SequenceEqual(yArray));
-
-            // multi scan data object
-            MultiScanDataObject multiScan = new MultiScanDataObject(singleScans.GetRange(1, 5));
-            double[][] yArrays = multiScan.YArrays;
-            for (int i = 0; i < multiScan.ScansToProcess; i++)
-            {
-                yArrays[i] = multiScan.YArrays[i].Select(p => p / multiScan.TotalIonCurrent[i]).ToArray();
-            }
-            multiScan.NormalizeSpectrumToTic(false);
-            for (int i = 0; i < multiScan.ScansToProcess; i++)
-            {
-                Assert.That(multiScan.YArrays[i].SequenceEqual(yArrays[i]));
-            }
-        }
     }
 }
