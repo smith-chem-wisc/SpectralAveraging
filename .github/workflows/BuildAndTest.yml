@@ -1,0 +1,34 @@
+name: .NET
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+    
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: cd SpectralAveraging && dotnet restore
+    - name: Build
+      run: cd SpectralAveraging && dotnet build --no-restore
+    - name: Build (Test)
+      run: dotnet build ./Tests/Tests.csproj 
+    - name: Add coverlet collector (Test)
+      run: dotnet add ./Tests/Tests.csproj package coverlet.collector
+    - name: Test
+      run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=cobertura ./Tests/Tests.csproj
+    - name: Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        verbose: true
+        fail_ci_if_error: true
+        files: Tests*/TestResults/*/coverage.cobertura.xml
