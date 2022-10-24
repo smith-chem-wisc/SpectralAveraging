@@ -223,18 +223,15 @@ namespace SpectralAveraging
         /// <returns></returns>
         private static bool SigmaClipping(double value, double median, double standardDeviation, double sValueMin, double sValueMax)
         {
-            if ((median - value) / standardDeviation > sValueMin)
+            double medianMinusvValue = (median - value) / standardDeviation; 
+            double valueMinusMedian = (value - median) / standardDeviation;
+
+            if (medianMinusvValue > sValueMin || valueMinusMedian > sValueMax)
             {
-                return true;
+                return true; 
             }
-            else if ((value - median) / standardDeviation > sValueMax)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+
+            return false; 
         }
 
         /// <summary>

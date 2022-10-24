@@ -56,6 +56,7 @@ namespace Tests
         }
 
         [Test]
+        [Repeat(10)]
         public void TestCombination()
         {
             SpectralAveragingOptions options = new SpectralAveragingOptions();
