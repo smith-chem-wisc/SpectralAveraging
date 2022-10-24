@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace SpectralAveraging
 {
@@ -88,8 +89,17 @@ namespace SpectralAveraging
             {
                 // linq is probably slow 
                 xArray[i] = xValuesBin[i].Where(p => p != 0).Average();
-                yArray[i] = ProcessSingleMzArray(yValuesBin[i].OrderBy(p => p).ToArray(), options);
+
             }
+
+            var rangePartitioner = Partitioner.Create(0, yValuesBin.GetLength(0));
+            Parallel.ForEach(rangePartitioner, (range, loopState) =>
+            {
+                for (int i = range.Item1; i < range.Item2; i++)
+                {
+                    yArray[i] = ProcessSingleMzArray(yValuesBin[i].OrderBy(p => p).ToArray(), options);
+                }
+            });
 
             return new double[][] {xArray, yArray};
         }
