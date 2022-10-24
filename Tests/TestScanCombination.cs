@@ -60,7 +60,7 @@ namespace Tests
         {
             SpectralAveragingOptions options = new SpectralAveragingOptions();
             options.SetDefaultValues();
-            double[][] results = SpectralMerging.CombineSpectra(_xarrays, _yarrays, _tics, 1000, options);
+            double[][] results = SpectralMerging.CombineSpectra(_xarrays, _yarrays, _tics, 10, options);
         }
     }
 }
