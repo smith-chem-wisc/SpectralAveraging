@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,7 +8,8 @@ using SpectralAveraging;
 
 namespace Tests
 {
-    internal class GeneralMiscTests
+    [ExcludeFromCodeCoverage]
+    public static class GeneralMiscTests
     {
         [Test]
         public static void TestOptionToString()
@@ -46,6 +48,13 @@ namespace Tests
             Assert.That(opt5String.Equals("WinsorizedSigmaClipping_NoWeight_Normalized_MinSigma-1_MaxSigma-1_BinSize-0.01"));
             Assert.That(opt6String.Equals("WinsorizedSigmaClipping_NormalDistribution_Normalized_MinSigma-1_MaxSigma-1_BinSize-0.01"));
             Assert.That(opt7String.Equals("WinsorizedSigmaClipping_NormalDistribution_MinSigma-1_MaxSigma-1_BinSize-0.01"));
+        }
+
+        [Test]
+        public static void TestZeroStatistics()
+        {
+            double[] toCalc = new double[] { 0, 0, 0, 0, 0 };
+
         }
     }
 }
