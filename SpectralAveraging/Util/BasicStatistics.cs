@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace SpectralAveraging
 {
-    internal class BasicStatistics
+    public class BasicStatistics
     {
         /// <summary>
         /// Calculates the median of a list of doubles
         /// </summary>
         /// <param name="toCalc">initial list to calculate from</param>
         /// <returns>double representation of the median</returns>
-        internal static double CalculateMedian(IEnumerable<double> toCalc)
+        public static double CalculateMedian(IEnumerable<double> toCalc)
         {
             IEnumerable<double> sortedValues = toCalc.OrderByDescending(p => p).ToList();
             double median;
@@ -25,7 +25,7 @@ namespace SpectralAveraging
             return median;
         }
 
-        internal static double CalculateNonZeroMedian(IEnumerable<double> toCalc)
+        public static double CalculateNonZeroMedian(IEnumerable<double> toCalc)
         {
             toCalc = toCalc.Where(p => p != 0).ToList();
             if (!toCalc.Any())
@@ -40,26 +40,26 @@ namespace SpectralAveraging
         /// <param name="toCalc">initial list to calculate from</param>
         /// <param name="average">passable value for the average</param>
         /// <returns>double representation of the standard deviation</returns>
-        internal static double CalculateStandardDeviation(IEnumerable<double> toCalc, double average = 0)
+        public static double CalculateStandardDeviation(IEnumerable<double> toCalc, double average = 0)
         {
             double deviation = 0;
 
             if (toCalc.Any())
             {
                 List<double> calcList = toCalc.ToList();
-                average = calcList.Average();
+                average = average == 0 ? calcList.Average() : average;
                 double sum = calcList.Sum(x => Math.Pow(x - average, 2));
-                deviation = Math.Sqrt(sum / calcList.Count() - 1);
+                deviation = Math.Sqrt(sum / (calcList.Count() - 1));
             }
             return deviation;
         }
 
-        internal static double CalculateStandardDeviation(double[] toCalc, double average = 0)
+        public static double CalculateStandardDeviation(double[] toCalc, double average = 0)
         {
             return CalculateStandardDeviation((IEnumerable<double>)toCalc, average);
         }
 
-        internal static double CalculateNonZeroStandardDeviation(IEnumerable<double> toCalc, double average = 0)
+        public static double CalculateNonZeroStandardDeviation(IEnumerable<double> toCalc, double average = 0)
         {
             toCalc = toCalc.Where(p => p != 0).ToList();
             if (!toCalc.Any())

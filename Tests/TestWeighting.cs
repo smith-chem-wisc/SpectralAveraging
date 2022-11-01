@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using SpectralAveraging;
 namespace Tests
 {
-    internal class TestWeighting
+    [ExcludeFromCodeCoverage]
+    public static class TestWeighting
     {
         [Test]
         public static void TestWeightedAverage()
@@ -23,28 +27,69 @@ namespace Tests
         }
 
         [Test]
-        public static void TestCalculatingWeights()
+        public static void TestWeightByNormalDistribution()
         {
             double[] test = new double[] { 10, 8, 6, 5, 4, 3, 2, 1 };
             double[] weights = new double[test.Length];
             BinWeighting.WeightByNormalDistribution(test, ref weights);
             double weightedAverage = SpectralMerging.MergePeakValuesToAverage(test, weights);
-            Assert.That(Math.Round(weightedAverage, 4), Is.EqualTo(4.5460));
+            Assert.That(Math.Round(weightedAverage, 4), Is.EqualTo(4.5749));
+        }
 
-            weights = new double[test.Length];
+        [Test]
+        public static void TestWeightByCauchyDistribution()
+        {
+            double[] test = new double[] { 10, 8, 6, 5, 4, 3, 2, 1 };
+            double[] weights = new double[test.Length];
             BinWeighting.WeightByCauchyDistribution(test, ref weights);
-            weightedAverage = SpectralMerging.MergePeakValuesToAverage(test, weights);
-            Assert.That(Math.Round(weightedAverage, 4), Is.EqualTo(4.6411));
+            double weightedAverage = SpectralMerging.MergePeakValuesToAverage(test, weights);
+            Assert.That(Math.Round(weightedAverage, 4), Is.EqualTo(4.6449));
+        }
 
-            weights = new double[test.Length];
+        [Test]
+        public static void TestWeightByPoissonDistribution()
+        {
+            double[] test = new double[] { 10, 8, 6, 5, 4, 3, 2, 1 };
+            double[] weights = new double[test.Length];
             BinWeighting.WeightByPoissonDistribution(test, ref weights);
+            double weightedAverage = SpectralMerging.MergePeakValuesToAverage(test, weights);
+            Assert.That(Math.Round(weightedAverage, 4), Is.EqualTo(5.0244));
+        }
+
+        [Test]
+        public static void TestWeightByGammaDistribution()
+        {
+            double[] test = new double[] { 10, 8, 6, 5, 4, 3, 2, 1 };
+            double[] weights = new double[test.Length];
+            BinWeighting.WeightByGammaDistribution(test, ref weights);
+            double weightedAverage = SpectralMerging.MergePeakValuesToAverage(test, weights);
+            Assert.That(Math.Round(weightedAverage, 4), Is.EqualTo(4.6598));
+        }
+
+        [Test]
+        public static void TestWeightingSwitch()
+        {
+            double[] test = new double[] { 10, 8, 6, 5, 4, 3, 2, 1 };
+            double[] weights = new double[test.Length];
+            weights = BinWeighting.CalculateWeights(test, WeightingType.NormalDistribution);
+            double weightedAverage = SpectralMerging.MergePeakValuesToAverage(test, weights);
+            Assert.That(Math.Round(weightedAverage, 4), Is.EqualTo(4.5749));
+
+            weights = BinWeighting.CalculateWeights(test, WeightingType.CauchyDistribution);
+            weightedAverage = SpectralMerging.MergePeakValuesToAverage(test, weights);
+            Assert.That(Math.Round(weightedAverage, 4), Is.EqualTo(4.6449));
+
+            weights = BinWeighting.CalculateWeights(test, WeightingType.PoissonDistribution);
             weightedAverage = SpectralMerging.MergePeakValuesToAverage(test, weights);
             Assert.That(Math.Round(weightedAverage, 4), Is.EqualTo(5.0244));
 
-            weights = new double[test.Length];
-            BinWeighting.WeightByGammaDistribution(test, ref weights);
+            weights = BinWeighting.CalculateWeights(test, WeightingType.GammaDistribution);
             weightedAverage = SpectralMerging.MergePeakValuesToAverage(test, weights);
-            Assert.That(Math.Round(weightedAverage, 4), Is.EqualTo(4.7196));
+            Assert.That(Math.Round(weightedAverage, 4), Is.EqualTo(4.6598));
+
+            weights = BinWeighting.CalculateWeights(test, WeightingType.NoWeight);
+            weightedAverage = SpectralMerging.MergePeakValuesToAverage(test, weights);
+            Assert.That(Math.Round(weightedAverage, 4), Is.EqualTo(Math.Round(test.Average(), 4)));
         }
 	}
 }

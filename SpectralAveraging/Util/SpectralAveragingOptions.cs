@@ -16,9 +16,6 @@ namespace SpectralAveraging
 
         #endregion
 
-     
-
-
         public SpectralAveragingOptions()
         {
             SetDefaultValues();
@@ -81,7 +78,7 @@ namespace SpectralAveraging
                 stringBuilder.Append("MaxSigma-" + MaxSigmaValue + '_');
             }
 
-            stringBuilder.Append("BinSize-" + BinSize + '_');
+            stringBuilder.Append("BinSize-" + BinSize);
 
             return stringBuilder.ToString();
         }
