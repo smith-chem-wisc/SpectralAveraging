@@ -105,6 +105,32 @@ namespace Tests
         }
 
         [Test]
+        public static void TestCombineSpectraError()
+        {
+            SpectralAveragingOptions options = new SpectralAveragingOptions();
+            options.SpectrumMergingType = (SpectrumMergingType)(-1);
+            MzSpectrum[] mzSpectras = new MzSpectrum[DummyMzSpectra.Count];
+            DummyMzCopy.CopyTo(mzSpectras);
+            try
+            {
+                double[][] compositeSpectraValues = SpectralMerging.CombineSpectra(
+                    mzSpectras.Select(p => p.XArray).ToArray(),
+                    mzSpectras.Select(p => p.YArray).ToArray(),
+                    mzSpectras.Select(p => p.SumOfAllY).ToArray(),
+                    mzSpectras.Count(), options);
+                Assert.That(false);
+            }
+            catch (NotImplementedException)
+            {
+
+            }
+            catch (Exception)
+            {
+                Assert.That(false);
+            }
+        }
+
+        [Test]
         public static void TestProcessSingleMzArray()
         {
             double[] arr = new double[] { 1, 2, 3, 4, 5 };
@@ -117,7 +143,7 @@ namespace Tests
             options.RejectionType = RejectionType.NoRejection;
 
             var normalResult = SpectralMerging.ProcessSingleMzArray(arr, options);
-            Assert.That(Math.Abs(normalResult - 3) < 0.001);
+            Assert.That(normalResult == 3);
 
             var allZerosResult = SpectralMerging.ProcessSingleMzArray(arr2, options);
             Assert.That(allZerosResult == 0);

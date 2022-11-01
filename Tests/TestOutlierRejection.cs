@@ -1,5 +1,6 @@
 ﻿
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.VisualBasic;
 using SpectralAveraging;
 
 namespace Tests
@@ -98,6 +99,25 @@ namespace Tests
             averagedSigmaClipping = OutlierRejection.AveragedSigmaClipping(test, 1.5, 1.5);
             expected = test[1..^2];
             Assert.That(averagedSigmaClipping, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public static void TestBelowThresholdRejection()
+        {
+            var arr = new double[] { 0, 10, 0, 0, 0, 0, 0};
+            var arr2 = new double[] { 0, 10, 0, 0, 0};
+            var arr3 = new double[] { 0, 10, 0, 0};
+            var copy3 = new double[arr3.Length];
+            Array.Copy(arr3, copy3, arr3.Length);
+
+            var result = OutlierRejection.BelowThresholdRejection(arr);
+            Assert.That(result.All(p => p == 0));
+            
+            var result2 = OutlierRejection.BelowThresholdRejection(arr2);
+            Assert.That(result2.All(p => p == 0));
+
+            var result3 = OutlierRejection.BelowThresholdRejection(arr3);
+            Assert.That(result3.SequenceEqual(copy3));
         }
 
 

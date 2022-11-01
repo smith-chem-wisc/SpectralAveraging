@@ -194,16 +194,12 @@ namespace SpectralAveraging
         /// Sets the array of mz values to null if they have 20% or fewer values than the number of scans
         /// </summary>
         /// <param name="initialValues">array of mz values to evaluate</param>
-        /// <param name="scanCount">number of scans used to create initialValues</param>
+        /// <param name="cutoffValue">percent in decimal form of where to cutoff </param>
         /// <returns></returns>
-        internal static double[] BelowThresholdRejection(double[] initialValues, double cutoffValue = 0.2)
+        public static double[] BelowThresholdRejection(double[] initialValues, double cutoffValue = 0.2)
         {
             int scanCount = initialValues.Length;
-            if (initialValues.Count() <= scanCount * cutoffValue)
-            {
-                initialValues = new double[scanCount];
-            }
-            else if (initialValues.Where(p => p != 0).Count() <= scanCount * cutoffValue)
+            if (initialValues.Count(p => p != 0) <= scanCount * cutoffValue)
             {
                 initialValues = new double[scanCount];
             }
