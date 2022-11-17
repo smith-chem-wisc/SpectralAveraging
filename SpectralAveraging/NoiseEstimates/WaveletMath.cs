@@ -26,17 +26,17 @@ namespace SpectralAveraging.NoiseEstimates
             ref double[] waveletCoeff)
         {
             int n = signal.Length;
-            double[] h = waveletFilter;
-            double[] g = scalingFilter;
-            int l = waveletFilter.Length;
 
-            for (int t = 0; t < n; t++)
+            int l = waveletFilter.Length;
+            int d = (int)Math.Pow(2d, (double)(scale));
+            int k = 0; 
+            
+            for (int t = 0; t < n; ++t)
             {
-                double k = t;
-                double wjt = h[0] * signal[(int)k];
-                double vjt = g[0] * signal[(int)k];
-                double d = Math.Pow(2d, (double)(scale - 1)); 
-                for (int v = 1; v < l; v++)
+                scalingCoeff[t] = scalingFilter[0] * signal[t];
+                waveletCoeff[t] = waveletFilter[0] * signal[t];
+
+                for (int v = 1; v < l; ++v)
                 {
                     if (k >= d)
                     {
@@ -46,11 +46,9 @@ namespace SpectralAveraging.NoiseEstimates
                     {
                         k = n + k - d; 
                     }
-                    wjt += h[v] * signal[(int)k];
-                    vjt += g[v] * signal[(int)k]; 
+                    scalingCoeff[t] += scalingFilter[v] * signal[(int)k];
+                    waveletCoeff[t] += waveletFilter[v] * signal[(int)k]; 
                 }
-                waveletCoeff[t] = wjt; 
-                scalingCoeff[t] = vjt;
             }
         }
         /// <summary>
@@ -67,15 +65,14 @@ namespace SpectralAveraging.NoiseEstimates
             int numScales = (int)Math.Floor(Math.Log2(signal.Length)); 
 
             var output = new ModWtOutput(numScales, waveletType); 
-            for (int i = 0; i < numScales; i++)
+            for (int i = 0; i < numScales; ++i)
             {
                 double[] waveletCoeffs = new double[signal.Length];
                 double[] scalingCoeffs = new double[signal.Length];
-                ModwtForward(signal, waveletFilter, scalingFilter, i,
+                ModwtForward(signal, waveletFilter, scalingFilter, i + 1,
                     ref scalingCoeffs, ref waveletCoeffs);
-                output.AddLevel(waveletCoeffs, scalingCoeffs, i+1); 
+                output.AddLevel(waveletCoeffs, scalingCoeffs, i + 1); 
             }
-
             return output; 
         }
 

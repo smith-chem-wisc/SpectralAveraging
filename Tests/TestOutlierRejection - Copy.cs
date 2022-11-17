@@ -37,7 +37,7 @@ namespace Tests
         [Test]
         public void TestModWt()
         {
-            var signal = Enumerable.Range(0, 1024)
+            var signal = Enumerable.Range(1, 1024)
                 .Select(i => Math.Sin(i / 60d)).ToArray();
 
             WaveletFilter wflt = new WaveletFilter();
@@ -54,6 +54,7 @@ namespace Tests
                 0.074927106,
             };
             Assert.That(modwtResult.Levels[0].ScalingCoeff[0..6], Is.EqualTo(expectedScaling).Within(0.1));
+            modwtResult.PrintToTxt(Path.Combine(TestContext.CurrentContext.WorkDirectory, "modwtOutput.txt"));
         }
 
         [Test]
@@ -65,6 +66,19 @@ namespace Tests
             double[] expectedScaling = { 0.5d, -0.5 };
             Assert.That(expectedValWavelets, Is.EqualTo(wflt.WaveletCoefficients).Within(0.01));
             Assert.That(expectedScaling, Is.EqualTo(wflt.ScalingCoefficients).Within(0.01));
+        }
+
+        [Test]
+        public void TestSumWaveletCoefficients()
+        {
+            var signal = Enumerable.Range(0, 1024)
+                .Select(i => Math.Sin(i / 60d)).ToArray();
+
+            WaveletFilter wflt = new WaveletFilter();
+            wflt.CreateFiltersFromCoeffs(WaveletType.Haar);
+            var modwtResult = WaveletMath.ModWt(signal, wflt);
+
+            double[] results = modwtResult.SumWaveletCoefficients(); 
         }
     }
 

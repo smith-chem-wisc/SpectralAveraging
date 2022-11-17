@@ -44,27 +44,84 @@ namespace SpectralAveraging.NoiseEstimates
             return (int)v;
         }
 
-        public static void MSRNoiseEstimation(double[] signal, double epsilon )
+        public static void MSRNoiseEstimation(double[] signal, double epsilon)
         {
             // 1. Estimate the standard deviation of the noise in the original signal. 
+            double stdevInitial = BasicStatistics.CalculateStandardDeviation(signal);
+
             // 2. Compute the modwt of the image
+            WaveletFilter filter = new(); 
+            filter.CreateFiltersFromCoeffs(WaveletType.Haar);
+            ModWtOutput wtOutput = WaveletMath.ModWt(signal, filter); 
             // 3. Set n = 0; 
+            int n = 0;
             // 4. Compute the multiresolution support M that is derived from the wavelet coefficients
             // and the standard deviation of the noise at each level. 
             // 5. Select all points that belong to the noise; they don't have an significant coefficients above noise 
+            List<int> mrsIndices = wtOutput.CreateMultiResolutionSupport(stdevInitial);
+            
             // 6. For the selected pixels, calculate original signal - residual signal and compute the standard deviation 
             // for those values. 
+
+
             // 7. n = n + l. 
             // 8. start again at 4 if sigma_I^n - sigma_I^(n-1) / sigma_I^(n) > epsilon. 
 
 
         }
 
-        public static void DetectLevel(Level level, double[] signal)
+
+
+    }
+    public static class ModWtOuputExtensions
+    {
+        public static List<int> CreateMultiResolutionSupport(this ModWtOutput wtOutput, double noiseEstimate,
+            int noiseThreshold = 3)
+
         {
-
+            List<int> indexList = new(); 
+            foreach (Level level in wtOutput.Levels)
+            {
+                ValueFailsToExceedStd(level, noiseThreshold, ref indexList);
+            }
+            // get all distinct values 
+            return indexList.Distinct().ToList();
         }
-        
 
+
+        /// <summary>
+        /// Returns the indexes of the array that contain noise. 
+        /// </summary>
+        /// <param name="level"></param>
+        /// <param name="noiseThreshold"></param>
+        /// <returns></returns>
+        private static void ValueFailsToExceedStd(this Level level, int noiseThreshold, ref List<int> indexList)
+        {
+            List<int> valuesThatFailed = new();
+            double stdevNoiseAtLevel = BasicStatistics.CalculateStandardDeviation(level.WaveletCoeff); 
+            
+            for (int i = 0; i < level.WaveletCoeff.Length; i++)
+            {
+                if (level.WaveletCoeff[i] < stdevNoiseAtLevel * noiseThreshold)
+                {
+                    indexList.Add(i);
+                }
+            }
+        }
+
+        public static double[] SumWaveletCoefficients(this ModWtOutput output)
+        {
+            var waveletCoeffs = output.Levels.Select(i => i.WaveletCoeff);
+
+            double[] summedResults = new double[waveletCoeffs.First().Length];
+            for (int h = 0; h < waveletCoeffs.Count(); h++)
+            {
+                for (int i = 0; i < summedResults.Length; i++)
+                {
+                    summedResults[i] += waveletCoeffs.ElementAt(h).ElementAt(i); 
+                }
+            }
+            return summedResults;
+        }
     }
 }
