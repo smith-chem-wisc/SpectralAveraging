@@ -31,7 +31,7 @@ namespace SpectralAveraging.NoiseEstimates
             int d = (int)Math.Pow(2d, (double)(scale));
             int k = 0; 
             
-            for (int t = 0; t < n; ++t)
+            for (int t = 0; t < n; k = (++t))
             {
                 scalingCoeff[t] = scalingFilter[0] * signal[t];
                 waveletCoeff[t] = waveletFilter[0] * signal[t];
@@ -69,9 +69,9 @@ namespace SpectralAveraging.NoiseEstimates
             {
                 double[] waveletCoeffs = new double[signal.Length];
                 double[] scalingCoeffs = new double[signal.Length];
-                ModwtForward(signal, waveletFilter, scalingFilter, i + 1,
+                ModwtForward(signal, waveletFilter, scalingFilter, i,
                     ref scalingCoeffs, ref waveletCoeffs);
-                output.AddLevel(waveletCoeffs, scalingCoeffs, i + 1); 
+                output.AddLevel(waveletCoeffs, scalingCoeffs, i); 
             }
             return output; 
         }
