@@ -116,10 +116,11 @@ namespace Tests
 
             double stdev = BasicStatistics.CalculateStandardDeviation(signal);
             
-            List<int> noiseIndices = modwtResult.CreateMultiResolutionSupport(stdev, 3);
-            Dictionary<int, double> waveletCoeffs = modwtResult.GetSumOfWaveletCoeffsFromNoise(noiseIndices); 
+            List<int> noiseIndices = modwtResult.CreateMultiResolutionSupport(stdev);
+            double stdevIterated = modwtResult.ComputeStdevOfNoisePixels(signal, noiseIndices); 
 
         }
+        
     }
 
 }

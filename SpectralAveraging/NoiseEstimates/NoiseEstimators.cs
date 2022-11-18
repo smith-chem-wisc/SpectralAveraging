@@ -92,22 +92,39 @@ namespace SpectralAveraging.NoiseEstimates
     {
         public static Dictionary<int, double> GetSumOfWaveletCoeffsFromNoise(this ModWtOutput output, List<int> noiseIndices)
         {
-            var waveletCoeffs = output.Levels.Select(i => i.WaveletCoeff);
+            var waveletCoeffs = output.Levels.Select(i => i.WaveletCoeff).ToList();
 
             List<List<double>> listOfNoiseValsAtEachScale = new(); 
             for (int h = 0; h < waveletCoeffs.Count(); h++)
             {
-                
+                List<double> tempArrayOfNoiseVals = new();
+                for (int k = 0; k < noiseIndices.Count(); k++)
+                {
+                    double tempVal = waveletCoeffs[h].ElementAt(noiseIndices.ElementAt(k)); 
+                    tempArrayOfNoiseVals.Add(tempVal);
+                }
+                listOfNoiseValsAtEachScale.Add(tempArrayOfNoiseVals.ToList());
             }
             // calculate the stdev at each scale
             Dictionary<int, double> scaleStdevDictionary = new();
             int i = 1; 
             foreach (List<double> waveletVals in listOfNoiseValsAtEachScale)
             {
-                scaleStdevDictionary.Add(i, BasicStatistics.CalculateStandardDeviation());
+                scaleStdevDictionary.Add(i, BasicStatistics.CalculateStandardDeviation(waveletVals));
                 i++; 
             }
             return scaleStdevDictionary;
+        }
+
+        public static double ComputeStdevOfNoisePixels(this ModWtOutput wtOutput, double[] signal, List<int> noiseIndices)
+        {
+            List<double> noiseValues = new();
+            for (int k = 0; k < noiseIndices.Count; k++)
+            {
+                noiseValues.Add(signal.ElementAt(noiseIndices.ElementAt(k)));
+            }
+
+            return BasicStatistics.CalculateStandardDeviation(noiseValues); 
         }
 
         public static List<int> CreateMultiResolutionSupport(this ModWtOutput wtOutput, double noiseEstimate,
@@ -119,7 +136,9 @@ namespace SpectralAveraging.NoiseEstimates
                 ValueFailsToExceedStd(level, noiseThreshold, ref indexList);
             }
             // get all distinct values 
-            return indexList.Distinct().ToList();
+            return indexList.GroupBy(n => n)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key).ToList();
         }
 
 
