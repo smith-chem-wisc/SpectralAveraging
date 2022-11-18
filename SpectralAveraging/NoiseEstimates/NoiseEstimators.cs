@@ -44,8 +44,9 @@ namespace SpectralAveraging.NoiseEstimates
             return (int)v;
         }
 
-        public static void MSRNoiseEstimation(double[] signal, double epsilon)
+        public static double MRSNoiseEstimation(double[] signal, double epsilon, int maxIterations = 10)
         {
+            int iterations = 0; 
             // 1. Estimate the standard deviation of the noise in the original signal. 
             double stdevInitial = BasicStatistics.CalculateStandardDeviation(signal);
 
@@ -54,22 +55,36 @@ namespace SpectralAveraging.NoiseEstimates
             filter.CreateFiltersFromCoeffs(WaveletType.Haar);
             ModWtOutput wtOutput = WaveletMath.ModWt(signal, filter);
 
-            double[] lowFreqComponent = CalculateLowFrequencyComponent(signal, wtOutput); 
             // 3. Set n = 0; 
             int n = 0;
-            // 4. Compute the multiresolution support M that is derived from the wavelet coefficients
-            // and the standard deviation of the noise at each level. 
-            // 5. Select all points that belong to the noise; they don't have an significant coefficients above noise 
-            List<int> mrsIndices = wtOutput.CreateMultiResolutionSupport(stdevInitial);
-            
-            // 6. For the selected pixels, calculate original signal - residual signal and compute the standard deviation 
-            // for those values. 
 
 
-            // 7. n = n + l. 
-            // 8. start again at 4 if sigma_I^n - sigma_I^(n-1) / sigma_I^(n) > epsilon. 
 
+            double criticalVal = 0d;
+            double stdevIterated = 0d; 
+            do
+            {
+                // 4. Compute the multiresolution support M that is derived from the wavelet coefficients
+                // and the standard deviation of the noise at each level. 
+                // 5. Select all points that belong to the noise; they don't have an significant coefficients above noise 
+                List<int> mrsIndices = wtOutput.CreateMultiResolutionSupport(stdevInitial);
 
+                // 6. For the selected pixels, calculate original array - smoothed array and compute the standard deviation 
+                // for those values. 
+
+                // I am instead only taking the sum of the wavelet values.
+                stdevIterated = wtOutput.ComputeStdevOfNoisePixels(signal, mrsIndices);
+
+                // 7. n = n + l. 
+                // 8. start again at 4 if sigma_I^n - sigma_I^(n-1) / sigma_I^(n) > epsilon. 
+                criticalVal = Math.Abs(stdevIterated - stdevInitial) / stdevIterated;
+
+                // setup for next iteration 
+                stdevInitial = stdevIterated; 
+                iterations++; 
+            } while (criticalVal > epsilon || iterations <= maxIterations);
+
+            return stdevInitial; 
         }
 
         public static double[] CalculateLowFrequencyComponent(double[] originalSignal, ModWtOutput output)
@@ -133,7 +148,7 @@ namespace SpectralAveraging.NoiseEstimates
             List<int> indexList = new(); 
             foreach (Level level in wtOutput.Levels)
             {
-                ValueFailsToExceedStd(level, noiseThreshold, ref indexList);
+                ValueFailsToExceedStd(level, noiseThreshold, noiseEstimate, ref indexList);
             }
             // get all distinct values 
             return indexList.GroupBy(n => n)
@@ -148,14 +163,14 @@ namespace SpectralAveraging.NoiseEstimates
         /// <param name="level"></param>
         /// <param name="noiseThreshold"></param>
         /// <returns></returns>
-        private static void ValueFailsToExceedStd(this Level level, int noiseThreshold, ref List<int> indexList)
+        private static void ValueFailsToExceedStd(this Level level, int noiseThreshold, double noiseEstimate, ref List<int> indexList)
         {
             List<int> valuesThatFailed = new();
-            double stdevNoiseAtLevel = BasicStatistics.CalculateStandardDeviation(level.WaveletCoeff); 
-            
+
+            double threshold = noiseEstimate * noiseThreshold;
             for (int i = 0; i < level.WaveletCoeff.Length; i++)
             {
-                double threshold = stdevNoiseAtLevel * noiseThreshold; 
+                 
                 if (level.WaveletCoeff[i] < threshold)
                 {
                     indexList.Add(i);

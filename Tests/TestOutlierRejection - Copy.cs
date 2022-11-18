@@ -120,6 +120,31 @@ namespace Tests
             double stdevIterated = modwtResult.ComputeStdevOfNoisePixels(signal, noiseIndices); 
 
         }
+
+        [Test]
+        [TestCase(@"C:\Users\Austin\Desktop\ubiquitin_noise20.csv")]
+        public void TestNoiseStdEstimated(string path)
+        {
+            List<double> mzVals = new();
+            List<double> intensityVals = new();
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+                while (!csvParser.EndOfData)
+                {
+                    string[] fields = csvParser.ReadFields();
+                    mzVals.Add(Convert.ToDouble(fields[0]));
+                    intensityVals.Add(Convert.ToDouble(fields[1]));
+                }
+            }
+
+            WaveletFilter wflt = new WaveletFilter();
+            wflt.CreateFiltersFromCoeffs(WaveletType.Haar);
+            double[] signal = intensityVals.ToArray();
+            NoiseEstimators.MRSNoiseEstimation(signal, 0.10);
+        }
         
     }
 
