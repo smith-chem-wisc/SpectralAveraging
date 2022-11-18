@@ -99,8 +99,6 @@ namespace SpectralAveraging.NoiseEstimates
 
             return results; 
         }
-
-        
     }
 
     public static class ModWtOuputExtensions
