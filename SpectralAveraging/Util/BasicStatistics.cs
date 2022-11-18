@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SpectralAveraging
 {
-    internal class BasicStatistics
+    public class BasicStatistics
     {
         /// <summary>
         /// Calculates the median of a list of doubles
@@ -40,7 +40,7 @@ namespace SpectralAveraging
         /// <param name="toCalc">initial list to calculate from</param>
         /// <param name="average">passable value for the average</param>
         /// <returns>double representation of the standard deviation</returns>
-        internal static double CalculateStandardDeviation(IEnumerable<double> toCalc, double average = 0)
+        public static double CalculateStandardDeviation(IEnumerable<double> toCalc, double average = 0)
         {
             double deviation = 0;
 

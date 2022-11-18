@@ -52,7 +52,9 @@ namespace SpectralAveraging.NoiseEstimates
             // 2. Compute the modwt of the image
             WaveletFilter filter = new(); 
             filter.CreateFiltersFromCoeffs(WaveletType.Haar);
-            ModWtOutput wtOutput = WaveletMath.ModWt(signal, filter); 
+            ModWtOutput wtOutput = WaveletMath.ModWt(signal, filter);
+
+            double[] lowFreqComponent = CalculateLowFrequencyComponent(signal, wtOutput); 
             // 3. Set n = 0; 
             int n = 0;
             // 4. Compute the multiresolution support M that is derived from the wavelet coefficients
@@ -70,14 +72,46 @@ namespace SpectralAveraging.NoiseEstimates
 
         }
 
+        public static double[] CalculateLowFrequencyComponent(double[] originalSignal, ModWtOutput output)
+        {
+            double[] results = new double[originalSignal.Length];
+            double[] summedWt = output.SumWaveletCoefficients();
 
+            for (int i = 0; i < results.Length; i++)
+            {
+                results[i] = originalSignal[i] + summedWt[i]; 
+            }
 
+            return results; 
+        }
+
+        
     }
+
     public static class ModWtOuputExtensions
     {
+        public static Dictionary<int, double> GetSumOfWaveletCoeffsFromNoise(this ModWtOutput output, List<int> noiseIndices)
+        {
+            var waveletCoeffs = output.Levels.Select(i => i.WaveletCoeff);
+
+            List<List<double>> listOfNoiseValsAtEachScale = new(); 
+            for (int h = 0; h < waveletCoeffs.Count(); h++)
+            {
+                
+            }
+            // calculate the stdev at each scale
+            Dictionary<int, double> scaleStdevDictionary = new();
+            int i = 1; 
+            foreach (List<double> waveletVals in listOfNoiseValsAtEachScale)
+            {
+                scaleStdevDictionary.Add(i, BasicStatistics.CalculateStandardDeviation());
+                i++; 
+            }
+            return scaleStdevDictionary;
+        }
+
         public static List<int> CreateMultiResolutionSupport(this ModWtOutput wtOutput, double noiseEstimate,
             int noiseThreshold = 3)
-
         {
             List<int> indexList = new(); 
             foreach (Level level in wtOutput.Levels)
@@ -102,7 +136,8 @@ namespace SpectralAveraging.NoiseEstimates
             
             for (int i = 0; i < level.WaveletCoeff.Length; i++)
             {
-                if (level.WaveletCoeff[i] < stdevNoiseAtLevel * noiseThreshold)
+                double threshold = stdevNoiseAtLevel * noiseThreshold; 
+                if (level.WaveletCoeff[i] < threshold)
                 {
                     indexList.Add(i);
                 }

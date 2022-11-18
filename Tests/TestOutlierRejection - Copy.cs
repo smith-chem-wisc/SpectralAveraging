@@ -1,7 +1,9 @@
 ﻿
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.VisualBasic.FileIO;
 using SpectralAveraging;
 using SpectralAveraging.NoiseEstimates;
+
 
 
 namespace Tests
@@ -43,17 +45,6 @@ namespace Tests
             WaveletFilter wflt = new WaveletFilter();
             wflt.CreateFiltersFromCoeffs(WaveletType.Haar);
             var modwtResult = WaveletMath.ModWt(signal, wflt);
-
-            double[] expectedScaling =
-            {
-                -0.488796241,
-                0.008332948,
-                0.024996528,
-                0.041653165,
-                0.058298232,
-                0.074927106,
-            };
-            Assert.That(modwtResult.Levels[0].ScalingCoeff[0..6], Is.EqualTo(expectedScaling).Within(0.1));
             modwtResult.PrintToTxt(Path.Combine(TestContext.CurrentContext.WorkDirectory, "modwtOutput.txt"));
         }
 
@@ -78,7 +69,56 @@ namespace Tests
             wflt.CreateFiltersFromCoeffs(WaveletType.Haar);
             var modwtResult = WaveletMath.ModWt(signal, wflt);
 
-            double[] results = modwtResult.SumWaveletCoefficients(); 
+            double[] results = modwtResult.SumWaveletCoefficients();
+
+            double[] c_p = new double[results.Length];
+            for (int i = 0; i < results.Length; i++)
+            {
+                c_p[i] = signal[i] + results[i]; 
+            }
+
+            int k = 0; 
+        }
+
+        [Test]
+        public void TestCreateReflectedArray()
+        {
+            double[] testArray = { 0, 1, 2, 3, 4, 5 };
+            double[] result = WaveletMath.CreateReflectedArray(testArray);
+            double[] expected = { 0, 1, 2, 3, 4, 5, 5, 4, 3, 2, 1, 0 };
+            Assert.That(result.Length, Is.EqualTo(6*2));
+            Assert.That(result, Is.EqualTo(expected));
+        }
+
+        [Test]
+        [TestCase(@"C:\Users\Austin\Desktop\ubiquitin_noise20.csv")]
+        public void TestCreateMultiResolutionSupport(string path)
+        {
+            List<double> mzVals = new();
+            List<double> intensityVals = new(); 
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+                while (!csvParser.EndOfData)
+                {
+                    string[] fields = csvParser.ReadFields();
+                    mzVals.Add(Convert.ToDouble(fields[0]));
+                    intensityVals.Add(Convert.ToDouble(fields[1]));
+                }
+            }
+            
+            WaveletFilter wflt = new WaveletFilter();
+            wflt.CreateFiltersFromCoeffs(WaveletType.Haar);
+            double[] signal = intensityVals.ToArray(); 
+            var modwtResult = WaveletMath.ModWt(signal, wflt);
+
+            double stdev = BasicStatistics.CalculateStandardDeviation(signal);
+            
+            List<int> noiseIndices = modwtResult.CreateMultiResolutionSupport(stdev, 3);
+            Dictionary<int, double> waveletCoeffs = modwtResult.GetSumOfWaveletCoeffsFromNoise(noiseIndices); 
+
         }
     }
 

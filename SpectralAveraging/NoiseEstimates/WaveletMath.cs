@@ -6,6 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using MathNet.Numerics.Distributions;
+using MathNet.Numerics.Integration;
 using Nett;
 
 namespace SpectralAveraging.NoiseEstimates
@@ -15,39 +16,32 @@ namespace SpectralAveraging.NoiseEstimates
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="signal">Must be power of 2 length.</param>
-        /// <param name="waveletFilter"></param>
-        /// <param name="scalingFilter"></param>
-        /// <param name="scales"></param>
-        /// <param name="scalingCoeff"></param>
-        /// <param name="waveletCoeff"></param>
-        public static void ModwtForward(double[] signal, double[] waveletFilter,
-            double[] scalingFilter, int scale, ref double[] scalingCoeff, 
-            ref double[] waveletCoeff)
+        /// <param name="V">Original signal</param>
+        /// <param name="N">Length of original signal</param>
+        /// <param name="j">Current scale</param>
+        /// <param name="h">Wavelet filter</param>
+        /// <param name="g">Scaling filter</param>
+        /// <param name="L">Length of filter</param>
+        /// <param name="Wj">Wavelet coefficients out</param>
+        /// <param name="Vj">Scaling coefficients out</param>
+        public static void ModwtForward(double[] V, int N, int j,
+            double[] h, double[] g, int L, ref double[] Wj, ref double[] Vj)
         {
-            int n = signal.Length;
+            int t, k, n;
+            double k_div;
 
-            int l = waveletFilter.Length;
-            int d = (int)Math.Pow(2d, (double)(scale));
-            int k = 0; 
-            
-            for (int t = 0; t < n; k = (++t))
+            for (t = 0; t < N; t++)
             {
-                scalingCoeff[t] = scalingFilter[0] * signal[t];
-                waveletCoeff[t] = waveletFilter[0] * signal[t];
-
-                for (int v = 1; v < l; ++v)
+                k = t;
+                Wj[t] = h[0] * V[k];
+                Vj[t] = g[0] * V[k];
+                for (n = 1; n < L; n++)
                 {
-                    if (k >= d)
-                    {
-                        k -= d;
-                    }
-                    else
-                    {
-                        k = n + k - d; 
-                    }
-                    scalingCoeff[t] += scalingFilter[v] * signal[(int)k];
-                    waveletCoeff[t] += waveletFilter[v] * signal[(int)k]; 
+                    k -= (int)Math.Pow(2, (j-1));
+                    k_div = -k / (double)N;
+                    if (k < 0) k += (int)Math.Ceiling(k_div) * N;
+                    Wj[t] += h[n] * V[k];
+                    Vj[t] += g[n] * V[k]; 
                 }
             }
         }
@@ -62,27 +56,49 @@ namespace SpectralAveraging.NoiseEstimates
             WaveletType waveletType)
         {
             // calculate the number of scales to iterate over
-            int numScales = (int)Math.Floor(Math.Log2(signal.Length)); 
+            int numScales = (int)Math.Floor(Math.Log2(signal.Length));
 
-            var output = new ModWtOutput(numScales, waveletType); 
-            for (int i = 0; i < numScales; ++i)
+            // use reflected boundary
+            double[] reflectedSignal = CreateReflectedArray(signal); 
+
+            var output = new ModWtOutput(numScales, waveletType, BoundaryType.Reflection); 
+            for (int i = 0; i < numScales; i++)
             {
-                double[] waveletCoeffs = new double[signal.Length];
-                double[] scalingCoeffs = new double[signal.Length];
-                ModwtForward(signal, waveletFilter, scalingFilter, i,
-                    ref scalingCoeffs, ref waveletCoeffs);
-                output.AddLevel(waveletCoeffs, scalingCoeffs, i); 
+                double[] waveletCoeffs = new double[reflectedSignal.Length];
+                double[] scalingCoeffs = new double[reflectedSignal.Length];
+                ModwtForward(reflectedSignal, reflectedSignal.Length, i + 1, waveletFilter,
+                    scalingFilter, waveletFilter.Length, ref waveletCoeffs, 
+                    ref scalingCoeffs); 
+                output.AddLevel(waveletCoeffs, scalingCoeffs, i + 1, BoundaryType.Reflection, signal.Length, waveletFilter.Length); 
             }
             return output; 
         }
 
+        public static double[] CreateReflectedArray(double[] original)
+        {
+            double[] reflectedArray = new double[original.Length*2];
+            double[] copyOfOriginal = new double[original.Length];
+
+            // copy original into new
+            Buffer.BlockCopy(original, 0, copyOfOriginal, 0, sizeof(double)*copyOfOriginal.Length);
+            // reverse copy of the original array
+            Array.Reverse(copyOfOriginal);
+            // Combine the original and the reverse arrays 
+            Buffer.BlockCopy(original, 0, reflectedArray, 0, original.Length*sizeof(double));
+
+            int reverseArrayOffset = sizeof(double) * (copyOfOriginal.Length); 
+            // original array is copied starting at element zero
+            Buffer.BlockCopy(copyOfOriginal, 0, 
+                // dst array contains the original signal, so need to offset the copying 
+                // of the reflected signal. 
+                reflectedArray, reverseArrayOffset, 
+                copyOfOriginal.Length * sizeof(double));
+            return reflectedArray; 
+
+        }
+
         public static ModWtOutput ModWt(double[] signal, WaveletFilter filters)
         {
-            if (signal.Length != NoiseEstimators.ClosestPow2(signal.Length))
-            {
-                NoiseEstimators.PadZeroes(signal, out double[] paddedSignal);
-                return ModWt(paddedSignal, filters.WaveletCoefficients, filters.ScalingCoefficients, filters.WaveletType);
-            }
             return ModWt(signal, filters.WaveletCoefficients, filters.ScalingCoefficients, filters.WaveletType);
         }
     }
@@ -92,27 +108,40 @@ namespace SpectralAveraging.NoiseEstimates
         Haar = 1
     }
 
+    public enum BoundaryType
+    {
+        Reflection = 1
+    }
+
     public class ModWtOutput
     {
-        public ModWtOutput(int maxScale, WaveletType waveletType)
+        public ModWtOutput(int maxScale, WaveletType waveletType, BoundaryType boundaryType)
         {
             Levels = new List<Level>(); 
             MaxScale = maxScale;
             WaveletType = waveletType;
+            BoundaryType = boundaryType; 
         }
 
         public List<Level> Levels { get; private set; }
         public int MaxScale { get; private set; }
         public WaveletType WaveletType { get; }
-
+        public BoundaryType BoundaryType { get; }
         public void AddLevel(Level level)
         {
             Levels.Add(level);
         }
 
-        public void AddLevel(double[] waveletCoeff, double[] scalingCoeff, int scale)
+        public void AddLevel(double[] waveletCoeff, double[] scalingCoeff, int scale, 
+            BoundaryType boundaryType, int originalSignalLength, int filterLength)
         {
-            Levels.Add(new Level(scale, waveletCoeff, scalingCoeff));
+            if (boundaryType == BoundaryType.Reflection)
+            {
+                int startIndex = ((int)Math.Pow(2, scale)-1)*(filterLength - 1);
+                int stopIndex = startIndex + originalSignalLength; 
+                Levels.Add(new Level(scale, waveletCoeff[startIndex .. stopIndex], 
+                    scalingCoeff[startIndex .. stopIndex]));
+            }
         }
 
         public void PrintToTxt(string path)
