@@ -142,7 +142,7 @@ namespace Tests
             WaveletFilter wflt = new WaveletFilter();
             wflt.CreateFiltersFromCoeffs(WaveletType.Haar);
             double[] signal = intensityVals.ToArray();
-            double noiseVarianceEstimate = NoiseEstimators.MRSNoiseEstimation(signal, 0.10);
+            double noiseVarianceEstimate = NoiseEstimators.MRSNoiseEstimation(signal, 0.1);
         }
 
         [Test]
@@ -177,7 +177,7 @@ namespace Tests
             {
                 foreach (double[] array in waveletCoeffs)
                 {
-                    wr.WriteLine(string.Join(",", array)); 
+                    wr.WriteLine(string.Join(",", array));
                 }
                 
             }

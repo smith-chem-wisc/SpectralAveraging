@@ -62,18 +62,19 @@ namespace SpectralAveraging.NoiseEstimates
             signal.CopyTo(signalIterable, 0);
 
             double criticalVal = 0d;
-            double stdevIterated = 0d; 
+            double stdevIterated = stdevInitial;
             do
             {
+                
                 // 4. Compute the multiresolution support M that is derived from the wavelet coefficients
                 // and the standard deviation of the noise at each level. 
                 // 5. Select all points that belong to the noise; they don't have an significant coefficients above noise 
-                List<int> mrsIndices = wtOutput.CreateMultiResolutionSupport(stdevInitial, noiseThreshold:2);
+                List<int> mrsIndices = wtOutput.CreateMultiResolutionSupport(stdevIterated, noiseThreshold:3);
 
                 // 6. For the selected pixels, calculate original array - smoothed array and compute the standard deviation 
                 // for those values. 
                 // don't modify the original signal, use a deep copy instead: 
-                signalIterable = CreateSmoothedSignal(signalIterable, wtOutput); 
+                signalIterable = CreateSmoothedSignal(signalIterable,wtOutput); 
 
                 stdevIterated = wtOutput.ComputeStdevOfNoisePixels(signalIterable, mrsIndices);
 
@@ -82,7 +83,6 @@ namespace SpectralAveraging.NoiseEstimates
                 criticalVal = Math.Abs(stdevIterated - stdevInitial) / stdevIterated;
 
                 // setup for next iteration 
-                stdevInitial = stdevIterated; 
                 iterations++; 
             } while (criticalVal > epsilon && iterations <= maxIterations);
 
