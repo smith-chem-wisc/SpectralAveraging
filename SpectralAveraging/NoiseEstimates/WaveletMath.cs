@@ -38,7 +38,7 @@ namespace SpectralAveraging.NoiseEstimates
                 for (n = 1; n < L; n++)
                 {
                     k -= (int)Math.Pow(2, (j-1));
-                    k_div = -k / (double)N;
+                    k_div = -(double)k / (double)N;
                     if (k < 0) k += (int)Math.Ceiling(k_div) * N;
                     Wj[t] += h[n] * V[k];
                     Vj[t] += g[n] * V[k]; 
@@ -52,8 +52,8 @@ namespace SpectralAveraging.NoiseEstimates
         /// <param name="waveletFilter"></param>
         /// <param name="scalingFilter"></param>
         /// <param name="numScales"></param>
-        public static ModWtOutput ModWt(double[] signal, double[] waveletFilter, double[] scalingFilter, 
-            WaveletType waveletType)
+        public static ModWtOutput ModWt(double[] signal, double[] waveletFilter, 
+            double[] scalingFilter, WaveletType waveletType)
         {
             // calculate the number of scales to iterate over
             int numScales = (int)Math.Floor(Math.Log2(signal.Length));
@@ -61,15 +61,15 @@ namespace SpectralAveraging.NoiseEstimates
             // use reflected boundary
             double[] reflectedSignal = CreateReflectedArray(signal); 
 
-            var output = new ModWtOutput(numScales, waveletType, BoundaryType.Reflection); 
+            var output = new ModWtOutput(numScales, waveletType, BoundaryType.Reflection);
+            double[] waveletCoeffs = new double[reflectedSignal.Length];
+            double[] scalingCoeffs = new double[reflectedSignal.Length];
             for (int i = 0; i < numScales; i++)
             {
-                double[] waveletCoeffs = new double[reflectedSignal.Length];
-                double[] scalingCoeffs = new double[reflectedSignal.Length];
                 ModwtForward(reflectedSignal, reflectedSignal.Length, i + 1, waveletFilter,
                     scalingFilter, waveletFilter.Length, ref waveletCoeffs, 
                     ref scalingCoeffs); 
-                output.AddLevel(waveletCoeffs, scalingCoeffs, i + 1, BoundaryType.Reflection, signal.Length, waveletFilter.Length); 
+                output.AddLevel(waveletCoeffs, scalingCoeffs, i, BoundaryType.Reflection, signal.Length, waveletFilter.Length); 
             }
             return output; 
         }
@@ -137,9 +137,10 @@ namespace SpectralAveraging.NoiseEstimates
         {
             if (boundaryType == BoundaryType.Reflection)
             {
-                int startIndex = ((int)Math.Pow(2, scale)-1)*(filterLength - 1);
+                int startIndex = ((int)Math.Pow(2, scale-1))*(filterLength - 1);
                 int stopIndex = startIndex + originalSignalLength; 
-                Levels.Add(new Level(scale, waveletCoeff[startIndex .. stopIndex], 
+                Levels.Add(new Level(scale, 
+                    waveletCoeff[startIndex .. stopIndex], 
                     scalingCoeff[startIndex .. stopIndex]));
             }
         }

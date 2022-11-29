@@ -44,7 +44,7 @@ namespace SpectralAveraging.NoiseEstimates
             return (int)v;
         }
 
-        public static double MRSNoiseEstimation(double[] signal, double epsilon, int maxIterations = 10)
+        public static double MRSNoiseEstimation(double[] signal, double epsilon, int maxIterations = 25)
         {
             int iterations = 0; 
             // 1. Estimate the standard deviation of the noise in the original signal. 
@@ -58,7 +58,8 @@ namespace SpectralAveraging.NoiseEstimates
             // 3. Set n = 0; 
             int n = 0;
 
-
+            double[] signalIterable = new double[signal.Length]; 
+            signal.CopyTo(signalIterable, 0);
 
             double criticalVal = 0d;
             double stdevIterated = 0d; 
@@ -67,13 +68,14 @@ namespace SpectralAveraging.NoiseEstimates
                 // 4. Compute the multiresolution support M that is derived from the wavelet coefficients
                 // and the standard deviation of the noise at each level. 
                 // 5. Select all points that belong to the noise; they don't have an significant coefficients above noise 
-                List<int> mrsIndices = wtOutput.CreateMultiResolutionSupport(stdevInitial);
+                List<int> mrsIndices = wtOutput.CreateMultiResolutionSupport(stdevInitial, noiseThreshold:2);
 
                 // 6. For the selected pixels, calculate original array - smoothed array and compute the standard deviation 
                 // for those values. 
+                // don't modify the original signal, use a deep copy instead: 
+                signalIterable = CreateSmoothedSignal(signalIterable, wtOutput); 
 
-                // I am instead only taking the sum of the wavelet values.
-                stdevIterated = wtOutput.ComputeStdevOfNoisePixels(signal, mrsIndices);
+                stdevIterated = wtOutput.ComputeStdevOfNoisePixels(signalIterable, mrsIndices);
 
                 // 7. n = n + l. 
                 // 8. start again at 4 if sigma_I^n - sigma_I^(n-1) / sigma_I^(n) > epsilon. 
@@ -82,12 +84,12 @@ namespace SpectralAveraging.NoiseEstimates
                 // setup for next iteration 
                 stdevInitial = stdevIterated; 
                 iterations++; 
-            } while (criticalVal > epsilon || iterations <= maxIterations);
+            } while (criticalVal > epsilon && iterations <= maxIterations);
 
             return stdevInitial; 
         }
 
-        public static double[] CalculateLowFrequencyComponent(double[] originalSignal, ModWtOutput output)
+        public static double[] CreateSmoothedSignal(double[] originalSignal, ModWtOutput output)
         {
             double[] results = new double[originalSignal.Length];
             double[] summedWt = output.SumWaveletCoefficients();
@@ -99,6 +101,7 @@ namespace SpectralAveraging.NoiseEstimates
 
             return results; 
         }
+
     }
 
     public static class ModWtOuputExtensions
@@ -190,5 +193,6 @@ namespace SpectralAveraging.NoiseEstimates
             }
             return summedResults;
         }
+
     }
 }

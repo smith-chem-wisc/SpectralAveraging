@@ -59,26 +59,25 @@ namespace Tests
             Assert.That(expectedScaling, Is.EqualTo(wflt.ScalingCoefficients).Within(0.01));
         }
 
-        [Test]
-        public void TestSumWaveletCoefficients()
-        {
-            var signal = Enumerable.Range(0, 1024)
-                .Select(i => Math.Sin(i / 60d)).ToArray();
+        //[Test]
+        //public void TestSumWaveletCoefficients()
+        //{
+        //    var signal = Enumerable.Range(0, 1024)
+        //        .Select(i => Math.Sin(i / 60d)).ToArray();
 
-            WaveletFilter wflt = new WaveletFilter();
-            wflt.CreateFiltersFromCoeffs(WaveletType.Haar);
-            var modwtResult = WaveletMath.ModWt(signal, wflt);
+        //    WaveletFilter wflt = new WaveletFilter();
+        //    wflt.CreateFiltersFromCoeffs(WaveletType.Haar);
+        //    var modwtResult = WaveletMath.ModWt(signal, wflt);
 
-            double[] results = modwtResult.SumWaveletCoefficients();
+        //    double[] results = modwtResult.SumWaveletCoefficients();
 
-            double[] c_p = new double[results.Length];
-            for (int i = 0; i < results.Length; i++)
-            {
-                c_p[i] = signal[i] + results[i]; 
-            }
+        //    double[] c_p = new double[results.Length];
+        //    for (int i = 0; i < results.Length; i++)
+        //    {
+        //        c_p[i] = signal[i] + results[i]; 
+        //    }
 
-            int k = 0; 
-        }
+        //}
 
         [Test]
         public void TestCreateReflectedArray()
@@ -143,7 +142,48 @@ namespace Tests
             WaveletFilter wflt = new WaveletFilter();
             wflt.CreateFiltersFromCoeffs(WaveletType.Haar);
             double[] signal = intensityVals.ToArray();
-            NoiseEstimators.MRSNoiseEstimation(signal, 0.10);
+            double noiseVarianceEstimate = NoiseEstimators.MRSNoiseEstimation(signal, 0.10);
+        }
+
+        [Test]
+        [TestCase(@"C:\Users\Austin\Desktop\ubiquitin_noise20.csv")]
+        public void TestSumWavelet(string path)
+        {
+            List<double> mzVals = new();
+            List<double> intensityVals = new();
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+                while (!csvParser.EndOfData)
+                {
+                    string[] fields = csvParser.ReadFields();
+                    mzVals.Add(Convert.ToDouble(fields[0]));
+                    intensityVals.Add(Convert.ToDouble(fields[1]));
+                }
+            }
+            double[] signal = intensityVals.ToArray();
+
+
+            WaveletFilter wflt = new WaveletFilter();
+            wflt.CreateFiltersFromCoeffs(WaveletType.Haar);
+            var modwtResult = WaveletMath.ModWt(signal, wflt);
+
+            var summedWaveletCoeff = modwtResult.SumWaveletCoefficients();
+            var waveletCoeffs = modwtResult.Levels.Select(i => i.WaveletCoeff).ToList();
+            using (StreamWriter wr =
+                   new(Path.Combine(TestContext.CurrentContext.WorkDirectory, "testSummedOutput.csv")))
+            {
+                foreach (double[] array in waveletCoeffs)
+                {
+                    wr.WriteLine(string.Join(",", array)); 
+                }
+                
+            }
+            
+            // add actual test data
+
         }
         
     }
