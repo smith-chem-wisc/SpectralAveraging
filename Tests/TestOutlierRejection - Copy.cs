@@ -115,8 +115,6 @@ namespace Tests
 
             double stdev = BasicStatistics.CalculateStandardDeviation(signal);
             
-            List<int> noiseIndices = modwtResult.CreateMultiResolutionSupport(stdev);
-            double stdevIterated = modwtResult.ComputeStdevOfNoisePixels(signal, noiseIndices); 
 
         }
 
@@ -143,6 +141,7 @@ namespace Tests
             wflt.CreateFiltersFromCoeffs(WaveletType.Haar);
             double[] signal = intensityVals.ToArray();
             double noiseVarianceEstimate = NoiseEstimators.MRSNoiseEstimation(signal, 0.1);
+            Assert.That(noiseVarianceEstimate, Is.EqualTo(29.2).Within(0.1));
         }
 
         [Test]

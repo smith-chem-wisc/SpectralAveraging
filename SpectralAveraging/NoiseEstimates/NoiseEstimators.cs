@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -48,7 +49,7 @@ namespace SpectralAveraging.NoiseEstimates
         {
             int iterations = 0; 
             // 1. Estimate the standard deviation of the noise in the original signal. 
-            double stdevInitial = BasicStatistics.CalculateStandardDeviation(signal);
+            double stdevPrevious = BasicStatistics.CalculateStandardDeviation(signal);
 
             // 2. Compute the modwt of the image
             WaveletFilter filter = new(); 
@@ -62,31 +63,33 @@ namespace SpectralAveraging.NoiseEstimates
             signal.CopyTo(signalIterable, 0);
 
             double criticalVal = 0d;
-            double stdevIterated = stdevInitial;
+           
+            signalIterable = CreateSmoothedSignal(signalIterable, wtOutput);
+            double stdevNext = stdevPrevious;
             do
             {
-                
                 // 4. Compute the multiresolution support M that is derived from the wavelet coefficients
                 // and the standard deviation of the noise at each level. 
                 // 5. Select all points that belong to the noise; they don't have an significant coefficients above noise 
-                List<int> mrsIndices = wtOutput.CreateMultiResolutionSupport(stdevIterated, noiseThreshold:3);
+                var booleanizedLevels = ModWtOuputExtensions.BooleanizeLevels(wtOutput,
+                    stdevPrevious, 1.97); 
+                int[] mrsIndices = CreateMultiResolutionSupport(booleanizedLevels);
 
                 // 6. For the selected pixels, calculate original array - smoothed array and compute the standard deviation 
                 // for those values. 
                 // don't modify the original signal, use a deep copy instead: 
-                signalIterable = CreateSmoothedSignal(signalIterable,wtOutput); 
-
-                stdevIterated = wtOutput.ComputeStdevOfNoisePixels(signalIterable, mrsIndices);
+                stdevNext = wtOutput.ComputeStdevOfNoisePixels(signalIterable, mrsIndices);
 
                 // 7. n = n + l. 
                 // 8. start again at 4 if sigma_I^n - sigma_I^(n-1) / sigma_I^(n) > epsilon. 
-                criticalVal = Math.Abs(stdevIterated - stdevInitial) / stdevIterated;
+                criticalVal = Math.Abs(stdevNext - stdevPrevious) / stdevPrevious;
 
                 // setup for next iteration 
                 iterations++; 
+                stdevPrevious = stdevNext;
             } while (criticalVal > epsilon && iterations <= maxIterations);
 
-            return stdevInitial; 
+            return stdevNext; 
         }
 
         public static double[] CreateSmoothedSignal(double[] originalSignal, ModWtOutput output)
@@ -96,12 +99,21 @@ namespace SpectralAveraging.NoiseEstimates
 
             for (int i = 0; i < results.Length; i++)
             {
-                results[i] = originalSignal[i] + summedWt[i]; 
+                results[i] = originalSignal[i] - summedWt[i]; 
             }
 
             return results; 
         }
 
+        public static int[] CreateMultiResolutionSupport(List<int[]> booleanizedLevels)
+        {
+            int[] outputArray = new int[booleanizedLevels[0].Length];
+            for (int i = 0; i < outputArray.Length; i++)
+            {
+                outputArray[i] = booleanizedLevels.Select(k => k.ElementAt(i)).Sum();
+            }
+            return outputArray;
+        }
     }
 
     public static class ModWtOuputExtensions
@@ -132,31 +144,72 @@ namespace SpectralAveraging.NoiseEstimates
             return scaleStdevDictionary;
         }
 
-        public static double ComputeStdevOfNoisePixels(this ModWtOutput wtOutput, double[] signal, List<int> noiseIndices)
+        public static double ComputeStdevOfNoisePixels(this ModWtOutput wtOutput, double[] signal, int[] noiseIndices)
         {
             List<double> noiseValues = new();
-            for (int k = 0; k < noiseIndices.Count; k++)
+            for (int k = 0; k < noiseIndices.Length; k++)
             {
-                noiseValues.Add(signal.ElementAt(noiseIndices.ElementAt(k)));
+                if (noiseIndices[k] == 0)
+                {
+                    noiseValues.Add(signal.ElementAt(k));
+                }
+                 
             }
 
             return BasicStatistics.CalculateStandardDeviation(noiseValues); 
         }
 
-        public static List<int> CreateMultiResolutionSupport(this ModWtOutput wtOutput, double noiseEstimate,
-            int noiseThreshold = 3)
+        //public static void CreateMultiResolutionSupport(this ModWtOutput wtOutput, double noiseEstimate,
+        //    double noiseThreshold = 1.97)
+        //{
+
+        //    //List<int> indexList = new(); 
+        //    //foreach (Level level in wtOutput.Levels)
+        //    //{
+        //    //    ValueFailsToExceedStd(level, noiseThreshold, noiseEstimate, ref indexList);
+        //    //}
+        //    //// get all distinct values 
+        //    //return indexList.GroupBy(n => n)
+        //    //    .Where(g => g.Count() > 1)
+        //    //    .Select(g => g.Key).ToList();
+        //}
+
+        
+
+        public static List<int[]> BooleanizeLevels(ModWtOutput wtOutput, double noiseEstimate, double noiseThreshold)
         {
-            List<int> indexList = new(); 
+            List<int[]> booleanizedLevels = new();
             foreach (Level level in wtOutput.Levels)
             {
-                ValueFailsToExceedStd(level, noiseThreshold, noiseEstimate, ref indexList);
+                booleanizedLevels.Add(level.BooleanizeLevel(noiseEstimate, noiseThreshold));
             }
-            // get all distinct values 
-            return indexList.GroupBy(n => n)
-                .Where(g => g.Count() > 1)
-                .Select(g => g.Key).ToList();
+            return booleanizedLevels;
         }
 
+        // need some sort of static data structure 
+        private static void ModOutputToDataTable(ModWtOutput wtOutput)
+        {
+
+        }
+
+        private static int[] BooleanizeLevel(this Level level, double noiseEstimate, double threshold)
+        {
+            int[] results = new int[level.WaveletCoeff.Length]; 
+            double valToExceed = threshold * noiseEstimate;
+
+            for (int i = 0; i < results.Length; i++)
+            {
+                if (Math.Abs(level.WaveletCoeff[i]) >= valToExceed)
+                {
+                    results[i] = 1;
+                }
+                else
+                {
+                    results[i] = 0; 
+                }
+            }
+            return results; 
+        }
 
         /// <summary>
         /// Returns the indexes of the array that contain noise. 
@@ -164,7 +217,7 @@ namespace SpectralAveraging.NoiseEstimates
         /// <param name="level"></param>
         /// <param name="noiseThreshold"></param>
         /// <returns></returns>
-        private static void ValueFailsToExceedStd(this Level level, int noiseThreshold, double noiseEstimate, ref List<int> indexList)
+        private static void ValueFailsToExceedStd(this Level level, double noiseThreshold, double noiseEstimate, ref List<int> indexList)
         {
             List<int> valuesThatFailed = new();
 
@@ -193,6 +246,5 @@ namespace SpectralAveraging.NoiseEstimates
             }
             return summedResults;
         }
-
     }
 }
