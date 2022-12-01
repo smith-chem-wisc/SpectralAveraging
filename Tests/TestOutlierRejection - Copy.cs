@@ -11,30 +11,6 @@ namespace Tests
 
     public class NoiseEstimatorTests
     {
-        [Test]
-        public void TestClosestPow2()
-        {
-            int val1 = 17;
-            int val2 = 3;
-            int val3 = 64;
-
-            int res1 = NoiseEstimators.ClosestPow2(val1); 
-            int res2 = NoiseEstimators.ClosestPow2(val2); 
-            int res3 = NoiseEstimators.ClosestPow2(val3);
-
-            Assert.That(res1, Is.EqualTo(32)); 
-            Assert.That(res2, Is.EqualTo(4));
-            Assert.That(res3, Is.EqualTo(64));
-        }
-
-        [Test]
-        public void TestPadZeroes()
-        {
-            double[] testArray = { 1d, 2d, 3d };
-            double[] expected = { 1d, 2d, 3d, 0d }; 
-            NoiseEstimators.PadZeroes(testArray, out double[] paddedSignal);
-            Assert.That(paddedSignal, Is.EqualTo(expected));
-        }
 
         [Test]
         public void TestModWt()
@@ -58,26 +34,6 @@ namespace Tests
             Assert.That(expectedValWavelets, Is.EqualTo(wflt.WaveletCoefficients).Within(0.01));
             Assert.That(expectedScaling, Is.EqualTo(wflt.ScalingCoefficients).Within(0.01));
         }
-
-        //[Test]
-        //public void TestSumWaveletCoefficients()
-        //{
-        //    var signal = Enumerable.Range(0, 1024)
-        //        .Select(i => Math.Sin(i / 60d)).ToArray();
-
-        //    WaveletFilter wflt = new WaveletFilter();
-        //    wflt.CreateFiltersFromCoeffs(WaveletType.Haar);
-        //    var modwtResult = WaveletMath.ModWt(signal, wflt);
-
-        //    double[] results = modwtResult.SumWaveletCoefficients();
-
-        //    double[] c_p = new double[results.Length];
-        //    for (int i = 0; i < results.Length; i++)
-        //    {
-        //        c_p[i] = signal[i] + results[i]; 
-        //    }
-
-        //}
 
         [Test]
         public void TestCreateReflectedArray()
@@ -140,8 +96,9 @@ namespace Tests
             WaveletFilter wflt = new WaveletFilter();
             wflt.CreateFiltersFromCoeffs(WaveletType.Haar);
             double[] signal = intensityVals.ToArray();
-            double noiseVarianceEstimate = NoiseEstimators.MRSNoiseEstimation(signal, 0.1);
-            Assert.That(noiseVarianceEstimate, Is.EqualTo(29.2).Within(0.1));
+            bool noiseEstimationSuccess = MRSNoiseEstimator.MRSNoiseEstimation(signal, 0.1, out double noiseEstimate);
+            Assert.That(noiseEstimate, Is.EqualTo(29.2).Within(0.1));
+            Assert.True(noiseEstimationSuccess);
         }
 
         [Test]
