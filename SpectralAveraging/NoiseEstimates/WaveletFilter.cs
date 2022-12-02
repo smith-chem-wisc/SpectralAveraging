@@ -29,6 +29,12 @@ public class WaveletFilter
                 CreateFiltersFromCoeffs(_haarCoefficients);
                 return;
             }
+            case WaveletType.Db4:
+            {
+                WaveletType = WaveletType.Db4; 
+                CreateFiltersFromCoeffs(_db4Coefficients);
+                return; 
+            }
         }
     }
     private readonly double[] _haarCoefficients =
@@ -36,4 +42,16 @@ public class WaveletFilter
         0.7071067811865475,
         0.7071067811865475
     };
+
+    private readonly double[] _db4Coefficients =
+    {
+        0.2304, 
+        0.7148, 
+        0.6309, 
+        -0.0280, 
+        -0.1870, 
+        0.0308, 
+        0.0329, 
+        -0.0106
+    }; 
 }

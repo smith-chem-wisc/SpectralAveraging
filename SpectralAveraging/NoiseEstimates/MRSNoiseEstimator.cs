@@ -20,7 +20,8 @@ namespace SpectralAveraging.NoiseEstimates
         /// <param name="maxIterations">Maximum number of iterations to perform.</param>
         /// <returns></returns>
         public static bool MRSNoiseEstimation(double[] signal, double epsilon,
-            out double noiseEstimate, int maxIterations = 25)
+            out double noiseEstimate, int maxIterations = 25, 
+            WaveletType waveletType = WaveletType.Haar)
         {
             int iterations = 0; 
             // 1. Estimate the standard deviation of the noise in the original signal. 
@@ -28,7 +29,7 @@ namespace SpectralAveraging.NoiseEstimates
 
             // 2. Compute the modwt of the image
             WaveletFilter filter = new(); 
-            filter.CreateFiltersFromCoeffs(WaveletType.Haar);
+            filter.CreateFiltersFromCoeffs(waveletType);
             ModWtOutput wtOutput = WaveletMath.ModWt(signal, filter);
 
             // 3. Set n = 0; (this is done implicitly while in the do while loop.)
@@ -116,7 +117,8 @@ namespace SpectralAveraging.NoiseEstimates
         private static double[] CreateSmoothedSignal(double[] originalSignal, ModWtOutput output)
         {
             double[] results = new double[originalSignal.Length];
-            double[] summedWt = output.SumWaveletCoefficients();
+            int lastLevel = output.MaxScale; 
+            double[] summedWt = output.Levels[lastLevel-1].ScalingCoeff;
 
             for (int i = 0; i < results.Length; i++)
             {

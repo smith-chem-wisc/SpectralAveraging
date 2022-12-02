@@ -26,8 +26,8 @@ public class ModWtOutput
     {
         if (boundaryType == BoundaryType.Reflection)
         {
-            int startIndex = ((int)Math.Pow(2, scale)) * (filterLength - 1);
-            int stopIndex = startIndex + originalSignalLength;
+            int startIndex = ((int)Math.Pow(2, scale) - 1) * (filterLength - 1);
+            int stopIndex = Math.Min(startIndex + originalSignalLength, waveletCoeff.Length - 1);
             Levels.Add(new Level(scale,
                 waveletCoeff[startIndex..stopIndex],
                 scalingCoeff[startIndex..stopIndex]));

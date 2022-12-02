@@ -2,7 +2,8 @@
 
 public enum WaveletType
 {
-    Haar = 1
+    Haar = 1, 
+    Db4 = 2
 }
 
 public enum BoundaryType

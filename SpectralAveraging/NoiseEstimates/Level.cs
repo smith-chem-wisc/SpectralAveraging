@@ -17,5 +17,4 @@ public class Level
     public int Scale { get; private set; }
     public double[] WaveletCoeff { get; private set; }
     public double[] ScalingCoeff { get; private set; }
-
 }

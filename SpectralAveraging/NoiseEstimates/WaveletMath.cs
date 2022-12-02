@@ -45,6 +45,12 @@ namespace SpectralAveraging.NoiseEstimates
                 }
             }
         }
+
+        private static int CalculateNumberScales(int signalLength, int filterLength)
+        {
+            double val = Math.Log(((signalLength - 1) / (filterLength - 1)) + 1) / Math.Log(2); 
+            return (int)Math.Floor(val); 
+        }
         /// <summary>
         /// 
         /// </summary>
@@ -56,7 +62,7 @@ namespace SpectralAveraging.NoiseEstimates
             double[] scalingFilter, WaveletType waveletType)
         {
             // calculate the number of scales to iterate over
-            int numScales = (int)Math.Floor(Math.Log2(signal.Length));
+            int numScales = CalculateNumberScales(signal.Length, waveletFilter.Length); 
 
             // use reflected boundary
             double[] reflectedSignal = CreateReflectedArray(signal); 
