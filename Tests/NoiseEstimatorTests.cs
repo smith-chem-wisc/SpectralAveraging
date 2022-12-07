@@ -165,5 +165,4 @@ namespace Tests
             Assert.That(noiseEstimate, Is.LessThan(noiseStddev));
         }
     }
-
 }

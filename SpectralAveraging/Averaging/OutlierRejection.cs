@@ -58,6 +58,8 @@ namespace SpectralAveraging
             double max = initialValues.Max();
             double min = initialValues.Min();
 
+
+
             return initialValues.Where(p => p < max && p > min).ToArray();
         }
 

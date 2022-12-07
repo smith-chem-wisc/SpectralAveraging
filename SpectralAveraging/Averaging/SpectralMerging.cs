@@ -15,7 +15,6 @@ namespace SpectralAveraging
         /// <param name="scans"></param>
         public static double[][] CombineSpectra(double[][] xArrays, double[][] yArrays, double[] totalIonCurrents, int numSpectra, SpectralAveragingOptions options)
         {
-
             switch (options.SpectrumMergingType)
             {
                 case SpectrumMergingType.SpectrumBinning:
@@ -23,11 +22,13 @@ namespace SpectralAveraging
 
                 case SpectrumMergingType.MostSimilarSpectrum:
                     return MostSimilarSpectrum();
+                case SpectrumMergingType.MrsNoiseEstimate:
 
                 default :
                     throw new NotImplementedException("Spectrum Merging Type Not Yet Implemented");
             }
         }
+
 
         
         /// <summary>
