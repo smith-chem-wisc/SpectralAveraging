@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MathNet.Numerics;
 
 namespace SpectralAveraging
 {
-    public static class OutlierRejection
+    public static partial class OutlierRejection
     {
         /// <summary>
         /// Calls the specific rejection function based upon the current static field RejectionType
@@ -48,6 +49,7 @@ namespace SpectralAveraging
             return trimmedMzValues;
         }
 
+        
         /// <summary>
         /// Reject the max and min of the set
         /// </summary>
@@ -58,10 +60,9 @@ namespace SpectralAveraging
             double max = initialValues.Max();
             double min = initialValues.Min();
 
-
-
             return initialValues.Where(p => p < max && p > min).ToArray();
         }
+
 
         /// <summary>
         /// Removes values that fall outside of the central value by the defined percentile exclusively
