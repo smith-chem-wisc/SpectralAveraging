@@ -8,12 +8,6 @@ public class Level
         WaveletCoeff = waveletCoeff;
         ScalingCoeff = scalingCoeff;
     }
-
-    public Level(int scale)
-    {
-        Scale = scale;
-    }
-
     public int Scale { get; private set; }
     public double[] WaveletCoeff { get; private set; }
     public double[] ScalingCoeff { get; private set; }

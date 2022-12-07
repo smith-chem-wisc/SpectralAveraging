@@ -6,7 +6,7 @@ public class WaveletFilter
     public double[] ScalingCoefficients { get; private set; }
     public WaveletType WaveletType { get; private set; }
 
-    public void CreateFiltersFromCoeffs(double[] filterCoeffs)
+    private void CreateFiltersFromCoeffs(double[] filterCoeffs)
     {
         WaveletCoefficients = new double[filterCoeffs.Length];
         ScalingCoefficients = new double[filterCoeffs.Length];
@@ -37,6 +37,7 @@ public class WaveletFilter
             }
         }
     }
+    #region Wavelet Coefficients
     private readonly double[] _haarCoefficients =
     {
         0.7071067811865475,
@@ -53,5 +54,6 @@ public class WaveletFilter
         0.0308, 
         0.0329, 
         -0.0106
-    }; 
+    };
+#endregion
 }

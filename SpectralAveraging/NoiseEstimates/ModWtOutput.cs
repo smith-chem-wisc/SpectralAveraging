@@ -16,10 +16,6 @@ public class ModWtOutput
     public int MaxScale { get; private set; }
     public WaveletType WaveletType { get; }
     public BoundaryType BoundaryType { get; }
-    public void AddLevel(Level level)
-    {
-        Levels.Add(level);
-    }
 
     public void AddLevel(double[] waveletCoeff, double[] scalingCoeff, int scale,
         BoundaryType boundaryType, int originalSignalLength, int filterLength)
@@ -32,16 +28,5 @@ public class ModWtOutput
                 waveletCoeff[startIndex..stopIndex],
                 scalingCoeff[startIndex..stopIndex]));
         }
-    }
-
-    public void PrintToTxt(string path)
-    {
-        StringBuilder sb = new();
-        foreach (var level in Levels)
-        {
-            sb.AppendLine(string.Join("\t", level.WaveletCoeff));
-            sb.AppendLine(string.Join("\t", level.ScalingCoeff));
-        }
-        File.WriteAllText(path, sb.ToString());
     }
 }

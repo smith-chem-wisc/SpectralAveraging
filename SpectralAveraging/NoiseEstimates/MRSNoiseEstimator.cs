@@ -134,7 +134,7 @@ namespace SpectralAveraging.NoiseEstimates
         /// <param name="booleanizedLevels"></param>
         /// <returns>An integer array where 0 indicates a noise pixel and a positive integer >0 equals a
         /// signal pixel.</returns>
-        public static int[] CreateMultiResolutionSupport(List<int[]> booleanizedLevels)
+        private static int[] CreateMultiResolutionSupport(List<int[]> booleanizedLevels)
         {
             int[] outputArray = new int[booleanizedLevels[0].Length];
             for (int i = 0; i < outputArray.Length; i++)
@@ -153,7 +153,7 @@ namespace SpectralAveraging.NoiseEstimates
         /// <param name="noiseIndices">An array of noise indices with either a zero or a positive integer value.
         /// Zero represents a noise pixel; positive integer represents a non-noise pixel.</param>
         /// <returns>The standard deviation of the noise pixels.</returns>
-        public static double ComputeStdevOfNoisePixels(double[] signal, int[] noiseIndices)
+        private static double ComputeStdevOfNoisePixels(double[] signal, int[] noiseIndices)
         {
             List<double> noiseValues = new();
             // for each index in noiseIndices, get the values of the noise index, which will be either zero or one. 

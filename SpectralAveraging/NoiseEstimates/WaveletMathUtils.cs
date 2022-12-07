@@ -1,6 +1,5 @@
 ﻿namespace SpectralAveraging.NoiseEstimates;
-
-public static class WaveletMathUtils
+internal static class WaveletMathUtils
 {
     /// <summary>
     /// Calcualte the quadruture mirror filter for x, an array of filter coefficients
@@ -8,7 +7,7 @@ public static class WaveletMathUtils
     /// <param name="x"></param>
     /// <param name="inverse"></param>
     /// <returns></returns>
-    public static double[] QMF(double[] x, bool inverse = false)
+    internal static double[] QMF(double[] x, bool inverse = false)
     {
         double[] y = new double[x.Length];
         Buffer.BlockCopy(x, 0, y, 0, x.Length * sizeof(double));

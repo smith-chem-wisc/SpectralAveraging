@@ -24,7 +24,7 @@ namespace SpectralAveraging.NoiseEstimates
         /// <param name="L">Length of filter</param>
         /// <param name="Wj">Wavelet coefficients out</param>
         /// <param name="Vj">Scaling coefficients out</param>
-        public static void ModwtForward(double[] V, int N, int j,
+        internal static void ModwtForward(double[] V, int N, int j,
             double[] h, double[] g, int L, ref double[] Wj, ref double[] Vj)
         {
             int t, k, n;
@@ -46,7 +46,7 @@ namespace SpectralAveraging.NoiseEstimates
             }
         }
 
-        private static int CalculateNumberScales(int signalLength, int filterLength)
+        internal static int CalculateNumberScales(int signalLength, int filterLength)
         {
             double val = Math.Log(((signalLength - 1) / (filterLength - 1)) + 1) / Math.Log(2); 
             return (int)Math.Floor(val); 
@@ -58,7 +58,7 @@ namespace SpectralAveraging.NoiseEstimates
         /// <param name="waveletFilter"></param>
         /// <param name="scalingFilter"></param>
         /// <param name="numScales"></param>
-        public static ModWtOutput ModWt(double[] signal, double[] waveletFilter, 
+        internal static ModWtOutput ModWt(double[] signal, double[] waveletFilter, 
             double[] scalingFilter, WaveletType waveletType)
         {
             // calculate the number of scales to iterate over
@@ -89,7 +89,7 @@ namespace SpectralAveraging.NoiseEstimates
             return output; 
         }
 
-        public static double[] CreateReflectedArray(double[] original)
+        internal static double[] CreateReflectedArray(double[] original)
         {
             double[] reflectedArray = new double[original.Length*2];
             double[] copyOfOriginal = new double[original.Length];
@@ -112,7 +112,7 @@ namespace SpectralAveraging.NoiseEstimates
 
         }
 
-        public static ModWtOutput ModWt(double[] signal, WaveletFilter filters)
+        internal static ModWtOutput ModWt(double[] signal, WaveletFilter filters)
         {
             return ModWt(signal, filters.WaveletCoefficients, filters.ScalingCoefficients, filters.WaveletType);
         }
