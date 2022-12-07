@@ -25,8 +25,7 @@ namespace SpectralAveraging
                     return MostSimilarSpectrum();
 
                 default :
-                    Debugger.Break();
-                    return null;
+                    throw new NotImplementedException("Spectrum Merging Type Not Yet Implemented");
             }
         }
 
