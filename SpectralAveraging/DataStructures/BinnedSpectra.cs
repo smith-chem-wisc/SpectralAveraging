@@ -62,19 +62,21 @@ namespace SpectralAveraging.DataStructures
                 var binIndices = xArrays[i]
                     .Select(i => (int)Math.Floor((i - min) / binSize))
                     .ToArray();
-                for (int j = 0; j < xArrays[i].Length; j++)
-                {
-                     
-                    int binIndex = (int)Math.Floor((xArrays[i][j] - min) / binSize);
-                    if (xValuesBin[binIndex] == null)
-                    {
-                        xValuesBin[binIndex] = new double[numSpectra];
-                        yValuesBin[binIndex] = new double[numSpectra];
-                    }
+                //for (int j = 0; j < xValuesBin.Length; j++)
+                //{
+                //    // check to see there is only one bin index in the x array
+                    
 
-                    xValuesBin[binIndex][i] = xArrays[i][j];
-                    yValuesBin[binIndex][i] = yArrays[i][j];
-                }
+
+                //    if (xValuesBin[binIndex] == null)
+                //    {
+                //        xValuesBin[binIndex] = new double[numSpectra];
+                //        yValuesBin[binIndex] = new double[numSpectra];
+                //    }
+
+                //    xValuesBin[binIndex][i] = xArrays[i][j];
+                //    yValuesBin[binIndex][i] = yArrays[i][j];
+                //}
             }
 
             xValuesBin = xValuesBin.Where(p => p != null).ToArray();
