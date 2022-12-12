@@ -15,6 +15,7 @@ namespace SpectralAveraging.DataStructures
         public Dictionary<int, double> NoiseEstimates { get; private set; }
         public Dictionary<int, double> ScaleEstimates { get; private set; }
         public Dictionary<int, double> Weights { get; private set; }
+        public int NumSpectra => PixelStacks[0].Intensity.Count;
 
         public BinnedSpectra()
         {
@@ -44,78 +45,71 @@ namespace SpectralAveraging.DataStructures
             }
 
             int numberOfBins = (int)Math.Ceiling((max - min) * (1 / binSize));
-
-            double[][] xValuesBin = new double[numberOfBins][];
-            double[][] yValuesBin = new double[numberOfBins][];
             // go through each scan and place each (m/z, int) from the spectra into a jagged array
 
             // 1) find all values of x that fall within a bin.
-            
-            // 2) perform a cubic spline interpolation to find the value of the 
-            // central point (aka the bin center). 
+
+            List<List<BinValue>> listBinValues = new();
 
             for (int i = 0; i < numSpectra; i++)
             {
                 // currently this updates the y value with the most recent value from the array. 
                 // what it really needs to do is a linear interpolation. 
 
-                var binIndices = xArrays[i]
-                    .Select(i => (int)Math.Floor((i - min) / binSize))
-                    .ToArray();
-                //for (int j = 0; j < xValuesBin.Length; j++)
-                //{
-                //    // check to see there is only one bin index in the x array
-                    
-
-
-                //    if (xValuesBin[binIndex] == null)
-                //    {
-                //        xValuesBin[binIndex] = new double[numSpectra];
-                //        yValuesBin[binIndex] = new double[numSpectra];
-                //    }
-
-                //    xValuesBin[binIndex][i] = xArrays[i][j];
-                //    yValuesBin[binIndex][i] = yArrays[i][j];
-                //}
+                listBinValues.Add(CreateBinValueList(xArrays[i], yArrays[i], min, binSize));
             }
 
-            xValuesBin = xValuesBin.Where(p => p != null).ToArray();
-            yValuesBin = yValuesBin.Where(p => p != null).ToArray();
+            int[] spectraId = Enumerable.Range(0, numSpectra).ToArray(); 
 
-            double[] xArray = new double[xValuesBin.Length];
-
-
-            for (var i = 0; i < xArray.Length; i++)
+            for (int i = 0; i < numberOfBins; i++)
             {
-                xArray[i] = xValuesBin[i].Where(p => p != 0).Average();
-                double x = xArray[i];
-                var pixelStack = new PixelStack(x);
-                pixelStack.AddIntensityVals(yValuesBin[i]);
-                PixelStacks.Add(pixelStack);
-            }
-        }
-
-        public void PerformNormalization(double[][] yArrays, double[] tics)
-        {
-            for (int i = 0; i < yArrays.Length; i++)
-            {
-                SpectrumNormalization.NormalizeSpectrumToTic(yArrays[i],
-                    tics[i], tics.Average());
-            }
-        }
-
-        public void CalculateNoiseEstimates(double[][] yArrays)
-        {
-            for (var i = 0; i < yArrays.Length; i++)
-            {
-                double[] yArray = yArrays[i];
-                bool success = MRSNoiseEstimator.MRSNoiseEstimation(yArray, 0.01, out double noiseEstimate);
-                // if the MRS noise estimate fails to converge, go by regular standard deviation
-                if (!success)
+                List<double> xVals = new();
+                List<double> yVals = new();
+                foreach (List<BinValue> binValList in listBinValues)
                 {
-                    noiseEstimate = BasicStatistics.CalculateStandardDeviation(yArray);
+                    var valsInBin = binValList
+                        .Where(m => m.Bin == i);
+                    if (valsInBin.Count() > 1)
+                    {
+                        xVals.Add(valsInBin.Average(m => m.Mz));
+                        yVals.Add(valsInBin.Average(m => m.Intensity));
+                    }
+                    else
+                    {
+                        xVals.Add(valsInBin.First().Mz);
+                        yVals.Add(valsInBin.First().Intensity);
+                    }
                 }
+                PixelStacks.Add(new PixelStack(xVals, yVals, spectraId));
+            }
+        }
 
+        public void PerformNormalization(double[] tics)
+        {
+            Parallel.For(0, PixelStacks.Count, i =>
+            {
+                // pixelStacks[i].Length will be the number of spectra to be averaged, 
+                // which is equal to tics. 
+                for (int j = 0; j < PixelStacks[i].Length; j++)
+                {
+                    PixelStacks[i].Intensity[j] /= tics[j];
+                }
+            }); 
+        }
+
+        public void CalculateNoiseEstimates(WaveletType waveletType = WaveletType.Haar, 
+            double epsilon = 0.01, int maxIterations = 25)
+        {
+            // note that noise estimate needs to be run on the pixel stacks. 
+            for (int i = 0; i < NumSpectra; i++)
+            {
+                double[] tempValArray = PopIntensityValuesFromPixelStackList(i);
+                bool success = MRSNoiseEstimator.MRSNoiseEstimation(tempValArray, epsilon, out double noiseEstimate,
+                    waveletType: waveletType, maxIterations: maxIterations);
+                if (!success || double.IsNaN(noiseEstimate))
+                {
+                    noiseEstimate = BasicStatistics.CalculateStandardDeviation(tempValArray); 
+                }
                 NoiseEstimates.Add(i, noiseEstimate);
             }
         }
@@ -123,6 +117,44 @@ namespace SpectralAveraging.DataStructures
         public void CalculateScaleEstimates()
         {
             // insert avgdev method code here
+        }
+
+        private double MedianAbsoluteDeviationFromMedian(double[] array)
+        {
+            double arrayMedian = BasicStatistics.CalculateMedian(array);
+            double[] results = new double[array.Length];
+            for (int j = 0; j < array.Length; j++)
+            {
+                results[j] = Math.Abs(array[j] - arrayMedian);
+            }
+
+            return BasicStatistics.CalculateMedian(results); 
+        }
+
+        private double BiweightMidvariance(double[] array)
+        {
+            double[] y_i = new double[array.Length];
+            double[] a_i = new double[array.Length]; 
+            double MAD_X = MedianAbsoluteDeviationFromMedian(array);
+            double median = BasicStatistics.CalculateMedian(array); 
+            for (int i = 0; i < y_i.Length; i++)
+            {
+                y_i[i] = (array[i] - median) / (9d * MAD_X);
+                if (y_i[i] < 1d)
+                {
+                    a_i[i] = 1d; 
+                }
+                else
+                {
+                    a_i[i] = 0; 
+                }
+            }
+
+            // biweight midvariance calculation
+
+
+
+
         }
 
         public void CalculateWeights()
@@ -160,5 +192,37 @@ namespace SpectralAveraging.DataStructures
             double[] yArray = PixelStacks.Select(i => i.MergedValue).ToArray();
             return new[] { xArray, yArray };
         }
+        private static List<BinValue> CreateBinValueList(double[] xArray, double[] yArray,
+            double min, double binSize)
+        {
+            var binIndices = xArray
+                .Select(i => (int)Math.Floor((i - min) / binSize))
+                .ToArray();
+            List<BinValue> binValues = new List<BinValue>();
+
+            for (int i = 0; i < binIndices.Length; i++)
+            {
+                binValues.Add(new BinValue(binIndices[i], xArray[i], yArray[i]));
+            }
+            return binValues;
+        }
+
+        private double[] PopIntensityValuesFromPixelStackList(int index)
+        {
+            double[] results = new double[PixelStacks.Count];
+            for (int i = 0; i < PixelStacks.Count; i++)
+            {
+                results[i] = PixelStacks[i].Intensity[index]; 
+            }
+
+            return results; 
+        }
     }
+    /// <summary>
+    /// Record type used to facilitate bin, mz, and intensity matching. 
+    /// </summary>
+    /// <param name="Bin"></param>
+    /// <param name="Mz"></param>
+    /// <param name="Intensity"></param>
+    internal readonly record struct BinValue(int Bin, double Mz, double Intensity);
 }
