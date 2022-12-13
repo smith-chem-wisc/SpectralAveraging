@@ -30,7 +30,7 @@ namespace Tests
             double[] xarray = new double[(int)numberSteps];
             for (int i = 0; i < numberSteps; i++)
             {
-                xarray[i] = 500 + i * 0.001;
+                xarray[i] = 500 + i * 0.01;
             }
 
             // create random values with seed starting at 1551. 

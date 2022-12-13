@@ -97,12 +97,12 @@ namespace SpectralAveraging.DataStructures
                     {
                         xVals.Add(binValRecord.Average(m => m.Mz));
                         yVals.Add(binValRecord.Average(m => m.Intensity));
-                    }
-                    else
+                    }else if (binValRecord.Count == 0)
                     {
-                        xVals.Add(binValRecord.First().Mz);
-                        yVals.Add(binValRecord.First().Intensity);
+                        continue; 
                     }
+                    xVals.Add(binValRecord.First().Mz);
+                    yVals.Add(binValRecord.First().Intensity);
                 }
 
                 PixelStacks.Add(new PixelStack(xVals, yVals, spectraId));
@@ -286,7 +286,7 @@ namespace SpectralAveraging.DataStructures
         {
             var binIndices = xArray
                 .Select((w, i) => 
-                    new { Index = i, Bin = (int)Math.Floor((w - min) / binSize) }); 
+                    new { Index = i, Bin = (int)Math.Round((w - min) / binSize) }); 
             List<BinValue> binValues = new List<BinValue>();
             foreach (var bin in binIndices)
             {
