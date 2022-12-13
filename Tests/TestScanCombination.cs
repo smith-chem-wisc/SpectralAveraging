@@ -62,11 +62,11 @@ namespace Tests
             Stopwatch sw = Stopwatch.StartNew();
             SpectralAveragingOptions options = new SpectralAveragingOptions();
             options.SetDefaultValues();
-            options.SpectrumMergingType = SpectrumMergingType.MrsNoiseEstimate; 
-            double[][] results = SpectralMerging.CombineSpectra(_xarrays, _yarrays, 
+            options.SpectrumMergingType = SpectrumMergingType.MrsNoiseEstimate;
+            double[][] results = SpectralMerging.CombineSpectra(_xarrays, _yarrays,
                 _tics, 3, options);
-            sw.Stop(); 
-            Console.WriteLine(sw.ElapsedMilliseconds / 1000 / 60);
+            sw.Stop();
+            Console.WriteLine(sw.ElapsedMilliseconds);
         }
     }
 }

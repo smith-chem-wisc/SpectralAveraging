@@ -93,6 +93,8 @@ public class TestBinnedSpectra
         // The values produces by the NoiseEstimation are tested elsewhere. 
         BinnedSpectra bs = new();
         bs.ConsumeSpectra(xArrays, yArrays, numSpectra, binSize);
+        bs.RecalculateTics();
+        bs.PerformNormalization();
         bs.CalculateNoiseEstimates();
         foreach (var estimate in bs.NoiseEstimates)
         {
@@ -111,9 +113,9 @@ public class TestBinnedSpectra
         bs.CalculateScaleEstimates();
         double[] expected = new[]
         {
-            0.0005797, 
-            0.00054368, 
-            0.002552
+            1.0d, 
+            1.119241, 
+            27.981022
         };
         Assert.That(bs.ScaleEstimates.Values.ToArray(), 
             Is.EqualTo(expected).Within(0.00001));
@@ -141,9 +143,9 @@ public class TestBinnedSpectra
         bs.CalculateWeights();
         double[] expectedWeights = new[]
         {
-            4580099255.639d, 
-            5717338995.563, 
-            55263874.7829, 
+            0.4347826, 
+            0.31931026, 
+            2.0435857E-05d
         }; 
         Assert.That(bs.Weights.Values.ToArray(), 
             Is.EqualTo(expectedWeights).Within(0.01));

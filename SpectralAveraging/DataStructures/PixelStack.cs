@@ -21,12 +21,6 @@ public class PixelStack
         Intensity = new List<double>();
     }
 
-    public PixelStack(int[] spectraID)
-    {
-        Intensity = new List<double>();
-        SpectraIDs = spectraID;
-    }
-
     public PixelStack(IEnumerable<double> xArray, IEnumerable<double> yArray, int[] spectraId)
     {
         Mz = xArray.Average();
@@ -66,5 +60,12 @@ public class PixelStack
             denominator += weights[i];
         }
         MergedValue = numerator / denominator; 
+    }
+    internal class PixelStackComparer: IComparer<PixelStack>
+    {
+        public int Compare(PixelStack x, PixelStack y)
+        {
+            return x.Mz.CompareTo(y.Mz);
+        }
     }
 }
