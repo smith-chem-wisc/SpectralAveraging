@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MathNet.Numerics.Integration;
+using SpectralAveraging.DataStructures;
 
 namespace SpectralAveraging
 {
@@ -22,15 +24,30 @@ namespace SpectralAveraging
 
                 case SpectrumMergingType.MostSimilarSpectrum:
                     return MostSimilarSpectrum();
+
                 case SpectrumMergingType.MrsNoiseEstimate:
+                    return MrsNoiseEstimation(xArrays, yArrays, numSpectra, options); 
 
                 default :
                     throw new NotImplementedException("Spectrum Merging Type Not Yet Implemented");
             }
         }
 
+        public static double[][] MrsNoiseEstimation(double[][] xArrays, double[][] yArrays,
+            int numSpectra, SpectralAveragingOptions options)
+        {
+            BinnedSpectra binnedSpectra = new(); 
+            binnedSpectra.ConsumeSpectra(xArrays, yArrays, numSpectra, options.BinSize);
+            binnedSpectra.RecalculateTics();
+            if(options.PerformNormalization) binnedSpectra.PerformNormalization();
+            binnedSpectra.CalculateNoiseEstimates();
+            binnedSpectra.CalculateScaleEstimates();
+            binnedSpectra.CalculateWeights();
+            binnedSpectra.ProcessPixelStacks(options);
+            binnedSpectra.MergeSpectra(); 
+            return binnedSpectra.GetMergedSpectrum(); 
+        }
 
-        
         /// <summary>
         /// Merges spectra into a two dimensional array of (m/z, int) values based upon their bin 
         /// </summary>

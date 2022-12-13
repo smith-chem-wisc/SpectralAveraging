@@ -15,7 +15,9 @@ namespace SpectralAveraging.DataStructures
         public Dictionary<int, double> NoiseEstimates { get; private set; }
         public Dictionary<int, double> ScaleEstimates { get; private set; }
         public Dictionary<int, double> Weights { get; private set; }
+        public double[] Tics { get; private set; }
         public int NumSpectra => PixelStacks[0].Intensity.Count;
+        private List<double[]> RecalculatedSpectra { get; set; }
 
         public BinnedSpectra()
         {
@@ -27,14 +29,14 @@ namespace SpectralAveraging.DataStructures
 
         public void ProcessPixelStacks(SpectralAveragingOptions options)
         {
-            foreach (var pixelStack in PixelStacks)
+            Parallel.ForEach(PixelStacks, pixelStack =>
             {
                 pixelStack.PerformRejection(options);
-            }
+            }); 
         }
 
-        public void ConsumeSpectra(double[][] xArrays, double[][] yArrays, 
-            double[] totalIonCurrents, int numSpectra, double binSize)
+        public void ConsumeSpectra(double[][] xArrays, double[][] yArrays,
+            int numSpectra, double binSize)
         {
             double min = 100000;
             double max = 0;
@@ -84,7 +86,7 @@ namespace SpectralAveraging.DataStructures
             }
         }
 
-        public void PerformNormalization(double[] tics)
+        public void PerformNormalization()
         {
             Parallel.For(0, PixelStacks.Count, i =>
             {
@@ -92,7 +94,7 @@ namespace SpectralAveraging.DataStructures
                 // which is equal to tics. 
                 for (int j = 0; j < PixelStacks[i].Length; j++)
                 {
-                    PixelStacks[i].Intensity[j] /= tics[j];
+                    PixelStacks[i].Intensity[j] /= Tics[j];
                 }
             }); 
         }
@@ -116,7 +118,18 @@ namespace SpectralAveraging.DataStructures
 
         public void CalculateScaleEstimates()
         {
-            // insert avgdev method code here
+            double reference = 0;
+            for (int i = 0; i < NumSpectra; i++)
+            {
+                double[] tempValArray = PopIntensityValuesFromPixelStackList(i);
+                double scale = BiweightMidvariance(tempValArray);
+                if (i == 0)
+                {
+                    reference = scale;
+                }
+                ScaleEstimates.Add(i, reference / scale);
+            }
+            
         }
 
         private double MedianAbsoluteDeviationFromMedian(double[] array)
@@ -152,9 +165,15 @@ namespace SpectralAveraging.DataStructures
 
             // biweight midvariance calculation
 
+            double denomSum = 0;
+            double numeratorSum = 0; 
+            for (int i = 0; i < y_i.Length; i++)
+            {
+                numeratorSum += a_i[i] * Math.Pow(array[i] - median, 2) * Math.Pow(1 - y_i[i] * y_i[i], 4); 
+                denomSum += a_i[i] * (1 - 5 * y_i[i] * y_i[i]) * (1 - y_i[i] * y_i[i]);
+            }
 
-
-
+            return (double)y_i.Length * numeratorSum / Math.Pow(Math.Abs(denomSum), 2); 
         }
 
         public void CalculateWeights()
@@ -175,15 +194,24 @@ namespace SpectralAveraging.DataStructures
             }
         }
 
+        public void RecalculateTics()
+        {
+            Tics = new double[NumSpectra];
+            RecalculatedSpectra = new List<double[]>(); 
+            for (int i = 0; i < NumSpectra; i++)
+            {
+                RecalculatedSpectra.Add(PopIntensityValuesFromPixelStackList(i));
+                Tics[i] = RecalculatedSpectra[i].Sum();
+            }
+        }
+
         public void MergeSpectra()
         {
-            double[] weights = Weights.OrderBy(i => i.Key)
-                .Select(i => i.Value)
-                .ToArray();
-            foreach (var pixelStack in PixelStacks)
+            var weights = Weights.Values.ToArray(); 
+            Parallel.ForEach(PixelStacks, pixelStack =>
             {
                 pixelStack.Average(weights);
-            }
+            });
         }
 
         public double[][] GetMergedSpectrum()
