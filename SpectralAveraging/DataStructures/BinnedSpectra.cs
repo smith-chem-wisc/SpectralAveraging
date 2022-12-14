@@ -113,7 +113,7 @@ namespace SpectralAveraging.DataStructures
 
                 }
 
-                PixelStacks.Add(new PixelStack(xVals, yVals, spectraId));
+                PixelStacks.Add(new PixelStack(xVals, yVals));
             }
         }
 
@@ -273,10 +273,9 @@ namespace SpectralAveraging.DataStructures
 
         public void MergeSpectra()
         {
-            var weights = Weights.Values.ToArray(); 
             Parallel.ForEach(PixelStacks, pixelStack =>
             {
-                pixelStack.Average(weights);
+                pixelStack.Average(Weights);
             });
         }
 

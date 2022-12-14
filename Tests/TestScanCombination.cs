@@ -94,10 +94,6 @@ namespace Tests
         [Test]
         public void TestCombination()
         {
-            // edge case: first value of x axis is negative. 
-            // TODO: FIX THE EDGE CASES THAT ARE FLOATING AROUND. 
-            // TODO: Replace all double.NaN with zeroes. 
-            
             using (StreamWriter sr = new("noisyOutput.txt"))
             {
                 for (int i = 0; i < xArrays[0].Length; i++)

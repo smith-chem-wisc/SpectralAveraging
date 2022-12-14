@@ -114,7 +114,7 @@ public static partial class OutlierRejection
     /// <returns></returns>
     public static void AveragedSigmaClipping(PixelStack pixelStack, double sValueMin, double sValueMax)
     {
-        double median = BasicStatistics.CalculateStandardDeviation(pixelStack.UnrejectedValues);
+        double median = BasicStatistics.CalculateMedian(pixelStack.UnrejectedValues);
         // calculate s
 
         double numerator = 0;

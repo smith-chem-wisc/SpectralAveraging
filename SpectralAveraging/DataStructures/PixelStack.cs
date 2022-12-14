@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
 using SpectralAveraging.NoiseEstimates;
 
@@ -16,7 +17,9 @@ public class PixelStack
     public IEnumerable<double> UnrejectedValues => _pixels
         .Where(i => i.Rejected == false)
         .Select(i => i.Intensity);
-    
+
+    private event EventHandler<IntensityChangedEventArgs> _IntensityChangedEvent; 
+
     public PixelStack(double mzVal)
     {
         Mz = mzVal;
@@ -30,6 +33,15 @@ public class PixelStack
         _pixels = Intensity
             .Select((w, i) => new Pixel(i, w, false))
             .ToList(); 
+    }
+
+    private void OnIntensityChangedEvent(IntensityChangedEventArgs e)
+    {
+        EventHandler<IntensityChangedEventArgs> raiseEvent = _IntensityChangedEvent;
+        if (_IntensityChangedEvent != null)
+        {
+            raiseEvent(this, e); 
+        }
     }
 
     public void Reject(int index)
@@ -107,5 +119,14 @@ public class Pixel
         {
             return x.SpectraId.CompareTo(y.SpectraId); 
         }
+    }
+}
+
+public class IntensityChangedEventArgs : EventArgs
+{
+    public double Value { get; set; }
+    public IntensityChangedEventArgs(double value)
+    {
+        Value = value; 
     }
 }
