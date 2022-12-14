@@ -49,7 +49,7 @@ public class TestBinnedSpectra
     [Test]
     public void TestConsumeSpectra()
     {
-        BinnedSpectra binnedSpectra = new();
+        BinnedSpectra binnedSpectra = new(this.numSpectra);
 
         int numSpectra = 3;
         double binSize = 1.0;
@@ -64,7 +64,7 @@ public class TestBinnedSpectra
     [Test]
     public void TestConsumeSpectraUnequalArrayLength()
     {
-        BinnedSpectra binnedSpectra = new();
+        BinnedSpectra binnedSpectra = new(this.numSpectra);
         int numSpectra = 3;
         double binSize = 1.0;
         binnedSpectra.ConsumeSpectra(xArrays, yArrays, numSpectra, binSize);
@@ -78,7 +78,7 @@ public class TestBinnedSpectra
     [Test]
     public void TestPerformNormalization()
     {
-        BinnedSpectra bs = new();
+        BinnedSpectra bs = new(this.numSpectra);
         bs.ConsumeSpectra(xArrays, yArrays, numSpectra, binSize);
         bs.RecalculateTics();
         bs.PerformNormalization();
@@ -91,7 +91,7 @@ public class TestBinnedSpectra
     {
         // This is just testing to see if the noise estimates work.
         // The values produces by the NoiseEstimation are tested elsewhere. 
-        BinnedSpectra bs = new();
+        BinnedSpectra bs = new(this.numSpectra);
         bs.ConsumeSpectra(xArrays, yArrays, numSpectra, binSize);
         bs.RecalculateTics();
         bs.PerformNormalization();
@@ -106,7 +106,7 @@ public class TestBinnedSpectra
     [Test]
     public void TestScaleEstimate()
     {
-        BinnedSpectra bs = new();
+        BinnedSpectra bs = new(this.numSpectra);
         bs.ConsumeSpectra(xArrays, yArrays, numSpectra, binSize);
         bs.RecalculateTics();
         bs.PerformNormalization();
@@ -124,7 +124,7 @@ public class TestBinnedSpectra
     [Test]
     public void TestRecalculateTics()
     {
-        BinnedSpectra bs = new();
+        BinnedSpectra bs = new(this.numSpectra);
         bs.ConsumeSpectra(xArrays, yArrays, numSpectra, binSize);
         bs.RecalculateTics();
         double[] expected = new double[] { 59.5, 65d, 150d };
@@ -134,7 +134,7 @@ public class TestBinnedSpectra
     [Test]
     public void TestCalculateWeights()
     {
-        BinnedSpectra bs = new();
+        BinnedSpectra bs = new(this.numSpectra);
         bs.ConsumeSpectra(xArrays, yArrays, numSpectra, binSize);
         bs.RecalculateTics();
         bs.PerformNormalization();
@@ -156,7 +156,7 @@ public class TestBinnedSpectra
     {
         SpectralAveragingOptions options = new(); 
         options.SetDefaultValues();
-        BinnedSpectra bs = new();
+        BinnedSpectra bs = new(this.numSpectra);
         bs.ConsumeSpectra(xArrays, yArrays, numSpectra, binSize);
         bs.RecalculateTics();
         bs.PerformNormalization();

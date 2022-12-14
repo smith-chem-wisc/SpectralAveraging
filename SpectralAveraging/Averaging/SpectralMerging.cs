@@ -36,7 +36,7 @@ namespace SpectralAveraging
         public static double[][] MrsNoiseEstimation(double[][] xArrays, double[][] yArrays,
             int numSpectra, SpectralAveragingOptions options)
         {
-            BinnedSpectra binnedSpectra = new(); 
+            BinnedSpectra binnedSpectra = new(numSpectra); 
             binnedSpectra.ConsumeSpectra(xArrays, yArrays, numSpectra, options.BinSize);
             binnedSpectra.RecalculateTics();
             if(options.PerformNormalization) binnedSpectra.PerformNormalization();

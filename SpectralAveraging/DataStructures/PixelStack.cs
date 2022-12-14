@@ -14,6 +14,9 @@ public class PixelStack
     public int Length => Intensity.Count;
     public int NonNaNLength => Intensity.Count(i => !double.IsNaN(i)); 
     public double MergedValue { get; private set; }
+    private List<int> RejectedIndices { get; set; }
+    private List<double> ValuesAfterRejection { get; set; }
+
 
     public PixelStack(double mzVal)
     {
@@ -23,9 +26,11 @@ public class PixelStack
 
     public PixelStack(IEnumerable<double> xArray, IEnumerable<double> yArray, int[] spectraId)
     {
-        Mz = xArray.Average();
+        Mz = xArray.Where(i => !double.IsNaN(i)).Average();
         Intensity = yArray.ToList();
-        SpectraIDs = spectraId; 
+        SpectraIDs = spectraId;
+        RejectedIndices = new(); 
+        ValuesAfterRejection = new List<double>();
     }
     public IEnumerable<double> GetNonNaNValues()
     {
@@ -61,6 +66,15 @@ public class PixelStack
         }
         MergedValue = numerator / denominator; 
     }
+    public void RejectValue(int spectraId)
+    {
+        RejectedValueIndices.Add(spectraId);
+    }
+    // People using the code should only ever see the list of doubles that represent 
+    // the intensity values, and the merged spectra. 
+    // But the actual backing probably needs to be more complicated than that. 
+    // Use a sorted dictionary as the store
+
     internal class PixelStackComparer: IComparer<PixelStack>
     {
         public int Compare(PixelStack x, PixelStack y)

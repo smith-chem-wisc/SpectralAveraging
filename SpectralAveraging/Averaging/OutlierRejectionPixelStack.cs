@@ -176,28 +176,46 @@ public static partial class OutlierRejection
     /// <returns></returns>
     public static void  AveragedSigmaClipping(PixelStack pixelStack, double sValueMin, double sValueMax)
     {
-        double median = BasicStatistics.CalculateNonZeroMedian(pixelStack.GetNonNaNValues());
-        double deviation = BasicStatistics.CalculateNonZeroStandardDeviation(pixelStack.GetNonNaNValues(), median);
-        int n = 0;
-        double standardDeviation;
+        //double median = BasicStatistics.CalculateNonZeroMedian(pixelStack.GetNonNaNValues());
+        //double deviation = BasicStatistics.CalculateNonZeroStandardDeviation(pixelStack.GetNonNaNValues(), median);
+        //int n = 0;
+        //double standardDeviation;
+        //do
+        //{
+        //    median = BasicStatistics.CalculateNonZeroMedian(pixelStack.Intensity);
+        //    standardDeviation = deviation * Math.Sqrt(median) / 10;
+
+        //    n = 0;
+        //    for (int i = 0; i < pixelStack.Intensity.Count; i++)
+        //    {
+        //        double temp = (pixelStack.Intensity[i] - median) / standardDeviation;
+        //        if (SigmaClipping(pixelStack.Intensity[i], median, standardDeviation, sValueMin, sValueMax))
+        //        {
+        //            pixelStack.Intensity[i] = double.NaN;
+        //            n++;
+        //            i--;
+        //        }
+        //    }
+        //} while (n > 0);
+
+        double median = BasicStatistics.CalculateStandardDeviation(pixelStack.GetNonNaNValues()); 
+        // calculate s
+
+        double numerator = 0;
+        double denominator = pixelStack.Length - 1; 
+
+        for (int i = 0; i < pixelStack.Length; i++)
+        {
+            numerator += (Math.Pow((pixelStack.Intensity[i] - median), 2) / median);
+        }
+
+        double s = Math.Sqrt(numerator / denominator);
+
         do
         {
-            median = BasicStatistics.CalculateNonZeroMedian(pixelStack.Intensity);
-            standardDeviation = deviation * Math.Sqrt(median) / 10;
+            
+        } while ();
 
-            n = 0;
-            for (int i = 0; i < pixelStack.Intensity.Count; i++)
-            {
-                double temp = (pixelStack.Intensity[i] - median) / standardDeviation;
-                if (SigmaClipping(pixelStack.Intensity[i], median, standardDeviation, sValueMin, sValueMax))
-                {
-
-                    pixelStack.Intensity[i] = double.NaN;
-                    n++;
-                    i--;
-                }
-            }
-        } while (n > 0);
     }
 
     /// <summary>
