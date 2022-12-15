@@ -40,9 +40,11 @@ namespace SpectralAveraging
             binnedSpectra.ConsumeSpectra(xArrays, yArrays, numSpectra, options.BinSize);
             binnedSpectra.RecalculateTics();
             if(options.PerformNormalization) binnedSpectra.PerformNormalization();
+            // could be async
             binnedSpectra.CalculateNoiseEstimates();
             binnedSpectra.CalculateScaleEstimates();
             binnedSpectra.CalculateWeights();
+            // end 
             binnedSpectra.ProcessPixelStacks(options);
             binnedSpectra.MergeSpectra(); 
             return binnedSpectra.GetMergedSpectrum(); 

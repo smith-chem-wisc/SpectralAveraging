@@ -26,7 +26,7 @@ public class TestBinnedSpectra
     {
         xArrays = new[]
         {
-            new double[] { 0, 1, 2, 3, 3.5, 4 },
+            new double[] { 0, 1, 2, 3, 3.49, 4 },
             new double[] { 0, 1, 2, 3, 4 },
             new double[] { 0.1, 1.1, 2.1, 3.1, 4.1}
         };
@@ -56,7 +56,7 @@ public class TestBinnedSpectra
 
         binnedSpectra.ConsumeSpectra(xArrays, yArrays, numSpectra, binSize); 
         Assert.True(binnedSpectra.PixelStacks.Count == 5);
-        Assert.That(binnedSpectra.PixelStacks[0].Mz, Is.EqualTo(0.033333d).Within(0.01));
+        Assert.That(binnedSpectra.PixelStacks[0].MzAverage, Is.EqualTo(0.033333d).Within(0.01));
         Assert.That(binnedSpectra.PixelStacks[2].Intensity, 
             Is.EqualTo(new double[] {12, 13, 30}));
     }
@@ -69,6 +69,7 @@ public class TestBinnedSpectra
         double binSize = 1.0;
         binnedSpectra.ConsumeSpectra(xArrays, yArrays, numSpectra, binSize);
         Assert.True(binnedSpectra.PixelStacks.Count == 5);
+        Assert.True(binnedSpectra.PixelStacks.All(i => i.Length == 3));
         // 12.5 is the correct answer if the binning and averaging is correct. 
         // Value will be exactly 12.5, so okay to use 12.5 explicitly.  
         // ReSharper disable once CompareOfFloatsByEqualityOperator
@@ -114,8 +115,8 @@ public class TestBinnedSpectra
         double[] expected = new[]
         {
             1.0d, 
-            1.119241, 
-            27.981022
+            0.937844, 
+            4.402658
         };
         Assert.That(bs.ScaleEstimates.Values.ToArray(), 
             Is.EqualTo(expected).Within(0.00001));
@@ -143,9 +144,9 @@ public class TestBinnedSpectra
         bs.CalculateWeights();
         double[] expectedWeights = new[]
         {
-            0.4347826, 
-            0.31931026, 
-            2.0435857E-05d
+            1539.23913, 
+            1921.432574,
+            18.5725928
         }; 
         Assert.That(bs.Weights.Values.ToArray(), 
             Is.EqualTo(expectedWeights).Within(0.01));

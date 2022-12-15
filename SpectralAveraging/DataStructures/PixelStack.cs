@@ -8,40 +8,51 @@ namespace SpectralAveraging;
 public class PixelStack
 {
     // binned spectrum -> pixel stack -> average combination
-    public double Mz { get; set; }
-    public List<double> Intensity { get; private set; }
-    public int Length => Intensity.Count;
+    // TODO: Mz should not be a single value unless you're printing to console or getting the result. 
+    // TODO: Store only values in _pixels and create GetIntensities method so you're only storing in 
+    // one place. 
+    public int Length => _pixels.Count;
     public int NonRejectedLength => _pixels.Count(i => i.Rejected == false); 
-    public double MergedValue { get; private set; }
-    private List<Pixel> _pixels = new List<Pixel>();
-    public IEnumerable<double> UnrejectedValues => _pixels
-        .Where(i => i.Rejected == false)
+    public double MergedIntensityValue { get; private set; }
+    public double MergedMzValue { get; private set; }
+    public List<double> Intensity => _pixels.Select(i => i.Intensity).ToList();
+    public double MzAverage => _pixels.Where(i => i.Rejected == false).Average(i => i.Mz);
+    public IEnumerable<double> UnrejectedIntensities => _pixels.Where(i => i.Rejected == false)
         .Select(i => i.Intensity);
-
-    private event EventHandler<IntensityChangedEventArgs> _IntensityChangedEvent; 
-
-    public PixelStack(double mzVal)
-    {
-        Mz = mzVal;
-        Intensity = new List<double>();
-    }
-
+    public IEnumerable<double> UnrejectedMzs => _pixels.Where(i => i.Rejected == false)
+        .Select(i => i.Mz); 
+    private List<Pixel> _pixels { get; set; }
+    
+    // Implement INotifyPropertyChanged -> listen for Intensity changing -> Call method to 
+    // update _pixels. 
+    
     public PixelStack(IEnumerable<double> xArray, IEnumerable<double> yArray)
     {
-        Mz = xArray.Where(i => !double.IsNaN(i)).Average();
-        Intensity = yArray.ToList();
-        _pixels = Intensity
-            .Select((w, i) => new Pixel(i, w, false))
-            .ToList(); 
+        _pixels = xArray.Zip(yArray, (mz, its) => (mz,its))
+            .Select((m,n) => new Pixel(n, m.mz, m.its, rejected:false))
+            .ToList();
+        _pixels.Sort(new Pixel.PixelComparer());
     }
 
-    private void OnIntensityChangedEvent(IntensityChangedEventArgs e)
+    public IEnumerable<double> GetIntensities()
     {
-        EventHandler<IntensityChangedEventArgs> raiseEvent = _IntensityChangedEvent;
-        if (_IntensityChangedEvent != null)
-        {
-            raiseEvent(this, e); 
-        }
+        return _pixels.Select(i => i.Intensity);
+    }
+
+    public IEnumerable<double> GetMzValues()
+    {
+        return _pixels.Select(i => i.Mz); 
+    }
+
+    public IEnumerable<double> GetUnrejectedIntValues()
+    {
+        return _pixels.Where(i => i.Rejected == false)
+            .Select(i => i.Intensity); 
+    }
+    public IEnumerable<double> GetUnrejectedMzValues()
+    {
+        return _pixels.Where(i => i.Rejected == false)
+            .Select(i => i.Mz);
     }
 
     public void Reject(int index)
@@ -54,9 +65,30 @@ public class PixelStack
         return _pixels[index].Rejected;
     }
 
-    public void ModifyPixelValues(int index, double value)
+    public void ModifyPixelIntensity(int index, double value)
     {
         _pixels[index].Intensity = value; 
+    }
+
+    public void ModifyPixelMz(int index, double value)
+    {
+        _pixels[index].Intensity = value; 
+    }
+
+    public double GetIntensityAtIndex(int index)
+    {
+        return _pixels[index].Intensity; 
+    }
+
+    public double GetMzAtIndex(int index)
+    {
+        return _pixels[index].Mz; 
+    }
+
+    public double CalculateMzAverage()
+    {
+        return _pixels.Where(j => j.Rejected == false)
+            .Average(j => j.Mz); 
     }
     public void PerformRejection(SpectralAveragingOptions options)
     {
@@ -72,14 +104,14 @@ public class PixelStack
 
         foreach (var weight in weightsDictionary)
         {
-            int index = _pixels.BinarySearch(new Pixel() { SpectraId = weight.Key });
-            if (index < 0) continue;
+            int index = _pixels.IndexOf(_pixels.Where(i => i.SpectraId == weight.Key).First()); 
             if (_pixels[index].Rejected == true) continue;
 
             numerator += weight.Value * _pixels[index].Intensity;
             denominator += weight.Value; 
         }
-        MergedValue = numerator / denominator; 
+        MergedIntensityValue = numerator / denominator;
+        MergedMzValue = _pixels.Select(i => i.Mz).Average(); 
     }
     
     // People using the code should only ever see the list of doubles that represent 
@@ -91,7 +123,7 @@ public class PixelStack
     {
         public int Compare(PixelStack x, PixelStack y)
         {
-            return x.Mz.CompareTo(y.Mz);
+            return x.CalculateMzAverage().CompareTo(y.CalculateMzAverage());
         }
     }
 }
@@ -100,12 +132,14 @@ public class Pixel
 {
     public int SpectraId;
     public double Intensity;
+    public double Mz; 
     public bool Rejected; 
-    public Pixel(int spectraId, double intensity, bool rejected)
+    public Pixel(int spectraId, double mz, double intensity, bool rejected)
     {
         SpectraId = spectraId; 
         Intensity = intensity;
         Rejected = rejected;
+        Mz = mz; 
     }
 
     public Pixel()
@@ -119,14 +153,5 @@ public class Pixel
         {
             return x.SpectraId.CompareTo(y.SpectraId); 
         }
-    }
-}
-
-public class IntensityChangedEventArgs : EventArgs
-{
-    public double Value { get; set; }
-    public IntensityChangedEventArgs(double value)
-    {
-        Value = value; 
     }
 }

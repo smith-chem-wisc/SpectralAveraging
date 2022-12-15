@@ -88,8 +88,8 @@ public static partial class OutlierRejection
         int iterationN = pixelStack.Length; 
         do
         {
-            double median = BasicStatistics.CalculateMedian(pixelStack.UnrejectedValues);
-            double standardDeviation = BasicStatistics.CalculateStandardDeviation(pixelStack.UnrejectedValues);
+            double median = BasicStatistics.CalculateMedian(pixelStack.UnrejectedIntensities);
+            double standardDeviation = BasicStatistics.CalculateStandardDeviation(pixelStack.UnrejectedIntensities);
             n = 0; 
             for (int i = 0; i < iterationN; i++)
             {
@@ -114,9 +114,9 @@ public static partial class OutlierRejection
     /// <returns></returns>
     public static void AveragedSigmaClipping(PixelStack pixelStack, double sValueMin, double sValueMax)
     {
-        double median = BasicStatistics.CalculateMedian(pixelStack.UnrejectedValues);
+        double median = BasicStatistics.CalculateMedian(pixelStack.UnrejectedIntensities);
+        
         // calculate s
-
         double numerator = 0;
         double denominator = pixelStack.Length - 1;
         int n = 0;
@@ -131,7 +131,7 @@ public static partial class OutlierRejection
         int iterationUnrejectedLength = pixelStack.NonRejectedLength;
         do
         {
-            median = BasicStatistics.CalculateMedian(pixelStack.UnrejectedValues);
+            median = BasicStatistics.CalculateMedian(pixelStack.UnrejectedIntensities);
             double sigma = s * Math.Sqrt(median);
             n = 0;
 
@@ -170,9 +170,9 @@ public static partial class OutlierRejection
             if (!pixelStack.Intensity.Any())
                 break;
 
-            double median = BasicStatistics.CalculateNonZeroMedian(pixelStack.UnrejectedValues);
-            stddev_current = BasicStatistics.CalculateNonZeroStandardDeviation(pixelStack.UnrejectedValues);
-            List<double> tempIntensityValues = pixelStack.UnrejectedValues.ToList();
+            double median = BasicStatistics.CalculateNonZeroMedian(pixelStack.UnrejectedIntensities);
+            stddev_current = BasicStatistics.CalculateNonZeroStandardDeviation(pixelStack.UnrejectedIntensities);
+            List<double> tempIntensityValues = pixelStack.UnrejectedIntensities.ToList();
 
             do // calculates a new median and standard deviation based on the values to do sigma clipping with (Huber loop)
             {
