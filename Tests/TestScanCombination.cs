@@ -12,6 +12,7 @@ using SpectralAveraging;
 using SpectralAveraging.NoiseEstimates;
 
 
+
 namespace Tests
 {
     public class TestScanCombination
