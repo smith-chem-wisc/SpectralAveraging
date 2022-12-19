@@ -3,6 +3,7 @@
     public enum SpectrumMergingType
     {
         SpectrumBinning,
-        MostSimilarSpectrum
+        MostSimilarSpectrum, 
+        MrsNoiseEstimate
     }
 }
