@@ -64,10 +64,11 @@ public class PixelStack
         _pixels[index].Intensity = value; 
     }
 
-    internal void ModifyPixelMz(int index, double value)
-    {
-        _pixels[index].Intensity = value; 
-    }
+    // not currently used. 
+    //internal void ModifyPixelMz(int index, double value)
+    //{
+    //    _pixels[index].Intensity = value; 
+    //}
 
     public double GetIntensityAtIndex(int index)
     {
@@ -105,13 +106,5 @@ public class PixelStack
             denominator += weight.Value; 
         }
         MergedIntensityValue = numerator / denominator;
-    }
-
-    internal class PixelStackComparer: IComparer<PixelStack>
-    {
-        public int Compare(PixelStack x, PixelStack y)
-        {
-            return x.CalculateMzAverage().CompareTo(y.CalculateMzAverage());
-        }
     }
 }

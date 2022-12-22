@@ -45,10 +45,14 @@ public static partial class OutlierRejection
     /// <returns>list of mz values with outliers rejected</returns>
     public static void MinMaxClipping(PixelStack stack)
     {
-        int max = stack.Intensity.IndexOf(stack.Intensity.Max());
-        int min = stack.Intensity.IndexOf(stack.Intensity.Min());
-        stack.Reject(max);
-        stack.Reject(min); 
+        if (stack.Intensity.Any())
+        {
+            int max = stack.Intensity.IndexOf(stack.Intensity.Max());
+            int min = stack.Intensity.IndexOf(stack.Intensity.Min());
+            stack.Reject(max);
+            stack.Reject(min);
+        }
+
     }
 
     /// <summary>
@@ -59,6 +63,11 @@ public static partial class OutlierRejection
     /// <returns>list of mz values with outliers rejected</returns>
     public static void PercentileClipping(PixelStack pixelStack, double percentile)
     {
+        if (!pixelStack.Intensity.Any())
+        {
+            return; 
+        }
+
         double trim = (1 - percentile) / 2;
         double highPercentile = 1 - trim;
         double median = BasicStatistics.CalculateMedian(pixelStack.Intensity);
@@ -84,6 +93,11 @@ public static partial class OutlierRejection
     /// <returns></returns>
     public static void SigmaClipping(PixelStack pixelStack, double sValueMin, double sValueMax)
     {
+        if (!pixelStack.Intensity.Any())
+        {
+            return;
+        }
+
         int n;
         int iterationN = pixelStack.Length; 
         do
@@ -114,6 +128,10 @@ public static partial class OutlierRejection
     /// <returns></returns>
     public static void AveragedSigmaClipping(PixelStack pixelStack, double sValueMin, double sValueMax)
     {
+        if (!pixelStack.Intensity.Any())
+        {
+            return;
+        }
         double median = BasicStatistics.CalculateMedian(pixelStack.UnrejectedIntensities);
         
         // calculate s
@@ -158,7 +176,12 @@ public static partial class OutlierRejection
     /// <returns></returns>
     public static void WinsorizedSigmaClipping(PixelStack pixelStack, double sValueMin, double sValueMax)
     {
-        int n = 0;
+        if (!pixelStack.Intensity.Any())
+        {
+            return;
+        }
+
+        int n = 0; 
         double iterationLimitforHuberLoop = 0.00005;
         double medianLeftBound;
         double medianRightBound;
@@ -167,9 +190,6 @@ public static partial class OutlierRejection
         int iterationN = pixelStack.Length;
         do
         {
-            if (!pixelStack.Intensity.Any())
-                break;
-
             double median = BasicStatistics.CalculateNonZeroMedian(pixelStack.UnrejectedIntensities);
             stddev_current = BasicStatistics.CalculateNonZeroStandardDeviation(pixelStack.UnrejectedIntensities);
             List<double> tempIntensityValues = pixelStack.UnrejectedIntensities.ToList();
@@ -230,6 +250,10 @@ public static partial class OutlierRejection
     /// <returns></returns>
     public static void BelowThresholdRejection(PixelStack pixelStack, double cutoffValue = 0.2)
     {
+        if (!pixelStack.Intensity.Any())
+        {
+            return;
+        }
         var cutoffVal = pixelStack.Intensity.Max() * cutoffValue;
         for (int i = 0; i < pixelStack.Length; i++)
         {

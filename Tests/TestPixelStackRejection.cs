@@ -21,6 +21,9 @@ public class TestPixelStackRejection
     static double[] testAveragedSigma = { 120, 65, 64, 63, 62, 61, 60, 59, 59, 58, 57, 56, 30, 15 };
     static double[] expectedAveragedSigma = testAveragedSigma[1..^1];
 
+    private static double[] testThreshold = { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
+    private static double[] expectedThreshold = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
+
     private static readonly object[] arguments =
     {
         new object[] { new TestCase(RejectionType.PercentileClipping, percentileTest, percentileExpected) },
@@ -28,7 +31,8 @@ public class TestPixelStackRejection
         new object[] { new TestCase(RejectionType.AveragedSigmaClipping, testAveragedSigma, expectedAveragedSigma) },
         new object[] { new TestCase(RejectionType.MinMaxClipping, minMaxTest, minMaxExpected) },
         new object[] { new TestCase(RejectionType.SigmaClipping, sigmaTest, sigmaExpected) },
-        new object[] { new TestCase(RejectionType.NoRejection, minMaxTest, minMaxTest) }
+        new object[] { new TestCase(RejectionType.NoRejection, minMaxTest, minMaxTest) }, 
+        new object[] { new TestCase(RejectionType.BelowThresholdRejection, testThreshold, expectedThreshold)}
     };
 
     public class TestCase

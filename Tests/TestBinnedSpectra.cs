@@ -60,6 +60,30 @@ public class TestBinnedSpectra
         Assert.That(binnedSpectra.PixelStacks[2].Intensity, 
             Is.EqualTo(new double[] {12, 13, 30}));
     }
+
+    [Test]
+    public void TestConsumeSpectraBinSizes()
+    {
+        double[][] multipleXvals = new double[3][];
+        double[][] xValsInBin = new double[3][];
+        double[][] yVals = new double[3][];
+        
+        double[] yAxis = new double[] { 10, 10, 20, 30, 20, 10, 10 };
+        double[] xAxisSkip = new double[] { 1, 1.1, 1.2, 3.0, 4.0, 5.0, 6.0 };
+
+        multipleXvals[0] = xAxisSkip; 
+        multipleXvals[1] = xAxisSkip; 
+        multipleXvals[2] = xAxisSkip;
+        yVals[0] = yAxis;
+        yVals[1] = yAxis;
+        yVals[2] = yAxis;
+
+        BinnedSpectra bs = new(3); 
+
+        bs.ConsumeSpectra(multipleXvals, yVals, 3, 1.0);
+        Assert.That(bs.PixelStacks[1].Intensity[0], Is.EqualTo(0d));
+        Assert.That(bs.PixelStacks[0].MergedMzValue, Is.EqualTo(1.15));
+    }
     
     [Test]
     public void TestConsumeSpectraUnequalArrayLength()

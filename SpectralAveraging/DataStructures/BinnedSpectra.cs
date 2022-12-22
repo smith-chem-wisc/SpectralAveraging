@@ -104,7 +104,11 @@ namespace SpectralAveraging.DataStructures
                         if (index + k < binValList.Count && binValList[index + k].Bin == i)
                         {
                             binValRecord.Add(binValList[index + k]);
-                            if (k == 0) k++; continue; 
+                            if (k == 0)
+                            {
+                                k++; 
+                                continue;
+                            } 
                         }
 
                         if (index - k > 0 && binValList[index - k].Bin == i )
@@ -131,10 +135,10 @@ namespace SpectralAveraging.DataStructures
                     yVals.Add(binValRecord.First().Intensity);
                 }
 
-                if (xVals.Count > NumSpectra || yVals.Count > NumSpectra)
-                {
+                //if (xVals.Count > NumSpectra || yVals.Count > NumSpectra)
+                //{
 
-                }
+                //}
 
                 PixelStacks.Add(new PixelStack(xVals, yVals));
             }
@@ -155,23 +159,6 @@ namespace SpectralAveraging.DataStructures
         public void CalculateNoiseEstimates(WaveletType waveletType = WaveletType.Haar, 
             double epsilon = 0.01, int maxIterations = 25)
         {
-            if (!RecalculatedSpectra.Any())
-            {
-                for (int i = 0; i < NumSpectra; i++)
-                {
-                    double[] tempValArray = PopIntensityValuesFromPixelStackList(i);
-                    bool success = MRSNoiseEstimator.MRSNoiseEstimation(tempValArray, epsilon, out double noiseEstimate,
-                        waveletType: waveletType, maxIterations: maxIterations);
-                    if (!success || double.IsNaN(noiseEstimate))
-                    {
-                        noiseEstimate = BasicStatistics.CalculateStandardDeviation(tempValArray);
-                    }
-                    NoiseEstimates.TryAdd(i, noiseEstimate);
-                }
-
-                return; 
-            }
-
             ConcurrentDictionary<int, double> tempConcurrentDictionary = new(); 
             RecalculatedSpectra
                 .Select((w, i) => new { Index = i, Array = w })
@@ -191,17 +178,6 @@ namespace SpectralAveraging.DataStructures
 
         public void CalculateScaleEstimates()
         {
-            if (!RecalculatedSpectra.Any())
-            {
-                for (int i = 0; i < NumSpectra; i++)
-                {
-                    double[] tempValArray = PopIntensityValuesFromPixelStackList(i);
-                    double scale = Math.Sqrt(BiweightMidvariance(tempValArray));
-                    ScaleEstimates.TryAdd(i, scale);
-                }
-
-                return; 
-            }
             ConcurrentDictionary<int, double> tempScaleEstimates = new();
             RecalculatedSpectra
                 .Select((w,i) => new {Index = i, Array = w})

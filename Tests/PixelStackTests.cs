@@ -78,4 +78,25 @@ public class PixelStackTests
             Is.EqualTo(15.9999).Within(0.01));
     }
 
+    [Test]
+    [TestCase(RejectionType.WinsorizedSigmaClipping)]
+    [TestCase(RejectionType.SigmaClipping)]
+    [TestCase(RejectionType.AveragedSigmaClipping)]
+    [TestCase(RejectionType.MinMaxClipping)]
+    [TestCase(RejectionType.PercentileClipping)]
+    [TestCase(RejectionType.BelowThresholdRejection)]
+    [TestCase(RejectionType.NoRejection)]
+    public void TestEmptyPixelStack(RejectionType rejection)
+    {
+        SpectralAveragingOptions options = new(); 
+        options.SetDefaultValues();
+        options.RejectionType = rejection; 
+        List<double> emptyXarray = new();
+        List<double> emptyYarray = new(); 
+        PixelStack emptyStack = new(emptyXarray, emptyYarray); 
+        emptyStack.PerformRejection(options);
+
+
+    }
+
 }
