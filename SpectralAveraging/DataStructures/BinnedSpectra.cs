@@ -26,8 +26,9 @@ namespace SpectralAveraging.DataStructures
         public double[] Tics { get; private set; }
         public int NumSpectra { get; set; }
         private List<double[]> RecalculatedSpectra => PixelStackListToSpectra(); 
+        public int ReferenceSpectra { get; }
 
-        public BinnedSpectra(int numSpectra)
+        public BinnedSpectra(int numSpectra, int referenceSpectra = 0)
         {
             PixelStacks = new List<PixelStack>();
             NoiseEstimates = new SortedDictionary<int, double>();
@@ -35,6 +36,7 @@ namespace SpectralAveraging.DataStructures
             Weights = new SortedDictionary<int, double>();
             NumSpectra = numSpectra; 
             Tics = new double[numSpectra];
+            ReferenceSpectra = referenceSpectra; 
         }
 
         private List<double[]> PixelStackListToSpectra()
@@ -189,18 +191,13 @@ namespace SpectralAveraging.DataStructures
 
         public void CalculateScaleEstimates()
         {
-            double reference = 0;
             if (!RecalculatedSpectra.Any())
             {
                 for (int i = 0; i < NumSpectra; i++)
                 {
                     double[] tempValArray = PopIntensityValuesFromPixelStackList(i);
-                    double scale = BiweightMidvariance(tempValArray);
-                    if (i == 0)
-                    {
-                        reference = scale;
-                    }
-                    ScaleEstimates.TryAdd(i, reference / scale);
+                    double scale = Math.Sqrt(BiweightMidvariance(tempValArray));
+                    ScaleEstimates.TryAdd(i, scale);
                 }
 
                 return; 
@@ -262,6 +259,7 @@ namespace SpectralAveraging.DataStructures
 
         public void CalculateWeights()
         {
+            double referenceScale = ScaleEstimates[ReferenceSpectra]; 
             foreach (var entry in NoiseEstimates)
             {
                 var successScale = ScaleEstimates.TryGetValue(entry.Key,
@@ -271,8 +269,10 @@ namespace SpectralAveraging.DataStructures
                 var successNoise = NoiseEstimates.TryGetValue(entry.Key,
                     out double noise);
                 if (!successNoise) continue;
+                
+                double k = referenceScale / scale; 
 
-                double weight = 1d / Math.Pow((scale * noise), 2);
+                double weight = 1d / Math.Pow((k * noise), 2);
 
                 Weights.TryAdd(entry.Key, weight);
             }
