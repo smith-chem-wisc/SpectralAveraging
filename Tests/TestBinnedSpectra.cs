@@ -56,7 +56,7 @@ public class TestBinnedSpectra
 
         binnedSpectra.ConsumeSpectra(xArrays, yArrays, numSpectra, binSize); 
         Assert.True(binnedSpectra.PixelStacks.Count == 5);
-        Assert.That(binnedSpectra.PixelStacks[0].MzAverage, Is.EqualTo(0.033333d).Within(0.01));
+        Assert.That(binnedSpectra.PixelStacks[0].MergedMzValue, Is.EqualTo(0.033333d).Within(0.01));
         Assert.That(binnedSpectra.PixelStacks[2].Intensity, 
             Is.EqualTo(new double[] {12, 13, 30}));
     }

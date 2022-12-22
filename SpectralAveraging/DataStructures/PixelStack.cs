@@ -14,17 +14,12 @@ public class PixelStack
     public int Length => _pixels.Count;
     public int NonRejectedLength => _pixels.Count(i => i.Rejected == false); 
     public double MergedIntensityValue { get; private set; }
-    public double MergedMzValue { get; private set; }
-    public List<double> Intensity => _pixels.Select(i => i.Intensity).ToList();
-    public double MzAverage => _pixels.Where(i => i.Rejected == false).Average(i => i.Mz);
-    public IEnumerable<double> UnrejectedIntensities => _pixels.Where(i => i.Rejected == false)
-        .Select(i => i.Intensity);
-    public IEnumerable<double> UnrejectedMzs => _pixels.Where(i => i.Rejected == false)
-        .Select(i => i.Mz); 
+    public double MergedMzValue => CalculateMzAverage(); 
+    public List<double> Intensity => GetIntensities().ToList();
+    public List<double> Mzs => GetMzValues().ToList(); 
+    public IEnumerable<double> UnrejectedIntensities => GetUnrejectedIntValues();
+    public IEnumerable<double> UnrejectedMzs => GetUnrejectedMzValues();  
     private List<Pixel> _pixels { get; set; }
-    
-    // Implement INotifyPropertyChanged -> listen for Intensity changing -> Call method to 
-    // update _pixels. 
     
     public PixelStack(IEnumerable<double> xArray, IEnumerable<double> yArray)
     {
@@ -34,22 +29,21 @@ public class PixelStack
         _pixels.Sort(new Pixel.PixelComparer());
     }
 
-    public IEnumerable<double> GetIntensities()
+    private IEnumerable<double> GetIntensities()
     {
         return _pixels.Select(i => i.Intensity);
     }
 
-    public IEnumerable<double> GetMzValues()
+    private IEnumerable<double> GetMzValues()
     {
         return _pixels.Select(i => i.Mz); 
     }
-
-    public IEnumerable<double> GetUnrejectedIntValues()
+    private IEnumerable<double> GetUnrejectedIntValues()
     {
         return _pixels.Where(i => i.Rejected == false)
             .Select(i => i.Intensity); 
     }
-    public IEnumerable<double> GetUnrejectedMzValues()
+    private IEnumerable<double> GetUnrejectedMzValues()
     {
         return _pixels.Where(i => i.Rejected == false)
             .Select(i => i.Mz);
@@ -65,12 +59,12 @@ public class PixelStack
         return _pixels[index].Rejected;
     }
 
-    public void ModifyPixelIntensity(int index, double value)
+    internal void ModifyPixelIntensity(int index, double value)
     {
         _pixels[index].Intensity = value; 
     }
 
-    public void ModifyPixelMz(int index, double value)
+    internal void ModifyPixelMz(int index, double value)
     {
         _pixels[index].Intensity = value; 
     }
@@ -85,7 +79,7 @@ public class PixelStack
         return _pixels[index].Mz; 
     }
 
-    public double CalculateMzAverage()
+    private double CalculateMzAverage()
     {
         return _pixels.Where(j => j.Rejected == false)
             .Average(j => j.Mz); 
@@ -111,47 +105,13 @@ public class PixelStack
             denominator += weight.Value; 
         }
         MergedIntensityValue = numerator / denominator;
-        MergedMzValue = _pixels.Select(i => i.Mz).Average(); 
     }
-    
-    // People using the code should only ever see the list of doubles that represent 
-    // the intensity values, and the merged spectra. 
-    // But the actual backing probably needs to be more complicated than that. 
-    // Use a sorted dictionary as the store
 
     internal class PixelStackComparer: IComparer<PixelStack>
     {
         public int Compare(PixelStack x, PixelStack y)
         {
             return x.CalculateMzAverage().CompareTo(y.CalculateMzAverage());
-        }
-    }
-}
-
-public class Pixel
-{
-    public int SpectraId;
-    public double Intensity;
-    public double Mz; 
-    public bool Rejected; 
-    public Pixel(int spectraId, double mz, double intensity, bool rejected)
-    {
-        SpectraId = spectraId; 
-        Intensity = intensity;
-        Rejected = rejected;
-        Mz = mz; 
-    }
-
-    public Pixel()
-    {
-
-    }
-
-    internal class PixelComparer : IComparer<Pixel>
-    {
-        public int Compare(Pixel? x, Pixel? y)
-        {
-            return x.SpectraId.CompareTo(y.SpectraId); 
         }
     }
 }
