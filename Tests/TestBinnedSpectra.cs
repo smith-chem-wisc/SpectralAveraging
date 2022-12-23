@@ -13,6 +13,7 @@ using SpectralAveraging.DataStructures;
 
 namespace Tests;
 
+[ExcludeFromCodeCoverage]
 public class TestBinnedSpectra
 {
     private double[][] xArrays;

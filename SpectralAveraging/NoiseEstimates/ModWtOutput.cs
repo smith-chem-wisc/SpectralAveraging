@@ -4,18 +4,14 @@ namespace SpectralAveraging.NoiseEstimates;
 
 internal class ModWtOutput
 {
-    internal ModWtOutput(int maxScale, WaveletType waveletType, BoundaryType boundaryType)
+    internal ModWtOutput(int maxScale)
     {
         Levels = new List<Level>();
         MaxScale = maxScale;
-        WaveletType = waveletType;
-        BoundaryType = boundaryType;
     }
 
     internal List<Level> Levels { get; private set; }
     internal int MaxScale { get; private set; }
-    internal WaveletType WaveletType { get; }
-    internal BoundaryType BoundaryType { get; }
 
     internal void AddLevel(double[] waveletCoeff, double[] scalingCoeff, int scale,
         BoundaryType boundaryType, int originalSignalLength, int filterLength)

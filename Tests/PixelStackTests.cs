@@ -1,7 +1,8 @@
-﻿using SpectralAveraging;
+﻿using System.Diagnostics.CodeAnalysis;
+using SpectralAveraging;
 
 namespace Tests;
-
+[ExcludeFromCodeCoverage]
 public class PixelStackTests
 {
     private double[] xArray;

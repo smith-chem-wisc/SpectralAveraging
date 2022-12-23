@@ -11,6 +11,9 @@ using Nett;
 
 namespace SpectralAveraging.NoiseEstimates
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class WaveletMath
     {
         /// <summary>
@@ -67,7 +70,7 @@ namespace SpectralAveraging.NoiseEstimates
             // use reflected boundary
             double[] reflectedSignal = CreateReflectedArray(signal); 
 
-            var output = new ModWtOutput(numScales, waveletType, BoundaryType.Reflection);
+            var output = new ModWtOutput(numScales);
 
             double[] scalingCoeffs = new double[reflectedSignal.Length];
             reflectedSignal.CopyTo(scalingCoeffs, 0);

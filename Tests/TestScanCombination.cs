@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Text;
@@ -15,6 +16,7 @@ using SpectralAveraging.NoiseEstimates;
 
 namespace Tests
 {
+    [ExcludeFromCodeCoverage]
     public class TestScanCombination
     {
         private double[][] xArrays; 

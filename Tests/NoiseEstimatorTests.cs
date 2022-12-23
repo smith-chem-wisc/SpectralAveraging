@@ -1,4 +1,5 @@
 ﻿
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography.X509Certificates;
 using MathNet.Numerics.Distributions;
 using Microsoft.VisualBasic.FileIO;
@@ -9,7 +10,7 @@ using SpectralAveraging.NoiseEstimates;
 
 namespace Tests
 {
-
+    [ExcludeFromCodeCoverage]
     public class NoiseEstimatorTests
     {
         [Test]
