@@ -49,7 +49,7 @@ namespace SpectralAveraging
                 List<double> calcList = toCalc.ToList();
                 average = average == 0 ? calcList.Average() : average;
                 double sum = calcList.Sum(x => Math.Pow(x - average, 2));
-                deviation = Math.Sqrt(sum / (calcList.Count() - 1));
+                deviation = Math.Sqrt(sum / (double)(calcList.Count() - 1));
             }
             return deviation;
         }

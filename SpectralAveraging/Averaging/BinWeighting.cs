@@ -46,7 +46,7 @@ namespace SpectralAveraging
         }
 
         /// <summary>
-        /// Weights the mzValues based upon a normal distribution
+        /// NoiseEstimates the mzValues based upon a normal distribution
         /// </summary>
         /// <param name="mzValues">intensities for a single mz value</param>
         /// <param name="weights">calculated weights for each intensity</param>
@@ -62,7 +62,7 @@ namespace SpectralAveraging
         }
 
         /// <summary>
-        /// Weights the mzValues based upon a cauchy distribution
+        /// NoiseEstimates the mzValues based upon a cauchy distribution
         /// </summary>
         /// <param name="mzValues">intensities for a single mz value</param>
         /// <param name="weights">calculated weights for each intensity</param>
@@ -78,7 +78,7 @@ namespace SpectralAveraging
         }
 
         /// <summary>
-        /// Weights the mzValues based upon a gamma distribution
+        /// NoiseEstimates the mzValues based upon a gamma distribution
         /// </summary>
         /// <param name="mzValues">intensities for a single mz value</param>
         /// <param name="weights">calculated weights for each intensity</param>
@@ -100,7 +100,7 @@ namespace SpectralAveraging
         }
 
         /// <summary>
-        /// Weights the mzValues based upon a poisson distribution
+        /// NoiseEstimates the mzValues based upon a poisson distribution
         /// </summary>
         /// <param name="mzValues">intensities for a single mz value</param>
         /// <param name="weights">calculated weights for each intensity</param>
