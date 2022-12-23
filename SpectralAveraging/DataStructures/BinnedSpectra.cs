@@ -15,7 +15,9 @@ using SpectralAveraging.NoiseEstimates;
 
 namespace SpectralAveraging.DataStructures
 {
-
+    /// <summary>
+    /// Object to organize and unify operations performed on a set of spectra to be averaged.
+    /// </summary>
     public class BinnedSpectra
     {
         public List<PixelStack> PixelStacks { get; set; }
@@ -27,7 +29,19 @@ namespace SpectralAveraging.DataStructures
         public int NumSpectra { get; set; }
         private List<double[]> RecalculatedSpectra => PixelStackListToSpectra(); 
         public int ReferenceSpectra { get; }
-
+        /// <summary>
+        /// Creates a binned spectra object given the number of spectra to be averaged
+        /// and the reference spectra. 
+        /// </summary>
+        /// <param name="numSpectra">The number of spectra to be averaged.</param>
+        /// <param name="referenceSpectra">The reference spectra, i.e. the spectra that will be used
+        /// to calculate the scales and, subsequently, the weights. Generally, this is the first spectra in the
+        /// set to be averaged.</param>
+        /// <remarks>Attempting to create a method that will select the "best" reference spectra should require a lot of thought.
+        /// If you choose to go by noise values, just know that you cannot differentiate a "good" spectrum vs a "bad" spectrum based on
+        /// noise estimates alone. A bad spectrum will have a high noise estimate relative to other spectra in the set. But so will a "good" high
+        /// SNR spectra: As signal increases, so too does noise. So pick a criteria that doesn't solely use noise if you want to "intelligently" select
+        /// the reference spectra. -AVC </remarks>
         public BinnedSpectra(int numSpectra, int referenceSpectra = 0)
         {
             PixelStacks = new List<PixelStack>();
@@ -38,7 +52,10 @@ namespace SpectralAveraging.DataStructures
             Tics = new double[numSpectra];
             ReferenceSpectra = referenceSpectra; 
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         private List<double[]> PixelStackListToSpectra()
         {
             List<double[]> results = new(); 
@@ -49,7 +66,12 @@ namespace SpectralAveraging.DataStructures
 
             return results; 
         }
-
+        /// <summary>
+        /// Perform rejection based on the SpectralAveragingOptions based as an argument.
+        /// </summary>
+        /// <remarks>This method is optimized by using Parallel.ForEach. This is the correct choice because we are iterating over many
+        /// pixel stacks in the spectra, exceeding my general criteria for surpassing the additional overhead (roughly 1000 operations) that parallelization requires. </remarks>
+        /// <param name="options"></param>
         public void ProcessPixelStacks(SpectralAveragingOptions options)
         {
             Parallel.ForEach(PixelStacks, pixelStack =>
@@ -57,7 +79,19 @@ namespace SpectralAveraging.DataStructures
                 pixelStack.PerformRejection(options);
             }); 
         }
-
+        /// <summary>
+        /// Takes jagged arrays of x axis and y axis values and converts them into PixelStack objects. Further ensures that bins
+        /// with multiple values in a given spectra are managed appropriately and that empty bins are zero filled in the y array and have the correct
+        /// value in the x array. 
+        /// </summary>
+        /// <remarks>Heavily optimized for speed. Original method took 1.8 minutes in a test case, and this
+        /// current iteration takes ~250 ms for the same test. Uses a custom record to store mz value, intensity value,
+        /// and bin number so that I could use a BinarySearch override that uses a custom comparer to increase search speed.
+        /// Previous version used a .Where() which was the bottleneck of the method.</remarks>
+        /// <param name="xArrays">Jagged array of spectra x axes.</param>
+        /// <param name="yArrays">Jagged array of intensity values for each spectra.</param>
+        /// <param name="numSpectra">Number of spectra to be averaged.</param>
+        /// <param name="binSize">Size of the bins, e.g. 1.0, 0.5, 0.0001, etc.</param>
         public void ConsumeSpectra(double[][] xArrays, double[][] yArrays,
             int numSpectra, double binSize)
         {
@@ -127,6 +161,7 @@ namespace SpectralAveraging.DataStructures
                     }
                     if (binValRecord.Count == 0)
                     {
+                        // TODO: x array values aren't handled correctly. Should be the value of the m/z axis at the particular bin, not a zero. 
                         xVals.Add(0); 
                         yVals.Add(0);
                         continue; 
@@ -143,7 +178,10 @@ namespace SpectralAveraging.DataStructures
                 PixelStacks.Add(new PixelStack(xVals, yVals));
             }
         }
-
+        /// <summary>
+        /// Performs normalization based on the total ion current value for each pixel stack.
+        /// </summary>
+        /// <remarks>Will require refactoring if this C# library is to be expanded to other applications beyond mass spectrometry.</remarks>
         public void PerformNormalization()
         {
             for (int i = 0; i < PixelStacks.Count; i++)
@@ -155,7 +193,12 @@ namespace SpectralAveraging.DataStructures
                 }
             }
         }
-
+        /// <summary>
+        /// Calculates noise estimates for each spectra using multi-resolution support noise estimation.
+        /// </summary>
+        /// <param name="waveletType">wavelet to be used in MRS noise estimation.</param>
+        /// <param name="epsilon">Noise estimate convergence to be reached before returning the noise estimate.</param>
+        /// <param name="maxIterations">Maximum number of iterations to be performed in the MRS noise estimation before returning.</param>
         public void CalculateNoiseEstimates(WaveletType waveletType = WaveletType.Haar, 
             double epsilon = 0.01, int maxIterations = 25)
         {
@@ -175,7 +218,10 @@ namespace SpectralAveraging.DataStructures
                 });
             NoiseEstimates = new SortedDictionary<int, double>(tempConcurrentDictionary); 
         }
-
+        /// <summary>
+        /// Calculates the estimates of scale for each spectra in this object. Scale is determined by
+        /// taking the square root of the biweight midvariance. 
+        /// </summary>
         public void CalculateScaleEstimates()
         {
             ConcurrentDictionary<int, double> tempScaleEstimates = new();
@@ -183,12 +229,18 @@ namespace SpectralAveraging.DataStructures
                 .Select((w,i) => new {Index = i, Array = w})
                 .AsParallel().ForAll(x =>
                 {
-                    double scale = BiweightMidvariance(x.Array);
+                    double scale = Math.Sqrt(BiweightMidvariance(x.Array));
                     tempScaleEstimates.TryAdd(x.Index, Math.Sqrt(scale));
                 });
             ScaleEstimates = new SortedDictionary<int, double>(tempScaleEstimates); 
         }
-
+        /// <summary>
+        /// Calculates the median absolute deviation from the median, which is then used in
+        /// calculating the biweight midvariance. Original algorithm found here:
+        /// https://pixinsight.com/doc/tools/ImageIntegration/ImageIntegration.html#__equation_26__
+        /// </summary>
+        /// <param name="array">Array of values to be calculated.</param>
+        /// <returns>The median absolute deviation from median.</returns>
         private double MedianAbsoluteDeviationFromMedian(double[] array)
         {
             double arrayMedian = BasicStatistics.CalculateMedian(array);
@@ -200,7 +252,12 @@ namespace SpectralAveraging.DataStructures
 
             return BasicStatistics.CalculateMedian(results); 
         }
-
+        /// <summary>
+        /// Calcultes the biweight midvariance for an array. Algorithm orignally found here:
+        /// https://pixinsight.com/doc/tools/ImageIntegration/ImageIntegration.html#__equation_27__
+        /// </summary>
+        /// <param name="array">Array of doubles.</param>
+        /// <returns>The biweight midvariance.</returns>
         private double BiweightMidvariance(double[] array)
         {
             double[] y_i = new double[array.Length];
@@ -232,7 +289,11 @@ namespace SpectralAveraging.DataStructures
 
             return (double)y_i.Length * numeratorSum / Math.Pow(Math.Abs(denomSum), 2); 
         }
-
+        /// <summary>
+        /// Given the noise estimates and the scale estimates, calculates the weight given to
+        /// each spectra when averaging using w_i = 1 / (k * noise_estimate)^2,
+        /// where k = scaleEstimate_reference / scaleEstimate_i
+        /// </summary>
         public void CalculateWeights()
         {
             double referenceScale = ScaleEstimates[ReferenceSpectra]; 
@@ -253,7 +314,10 @@ namespace SpectralAveraging.DataStructures
                 Weights.TryAdd(entry.Key, weight);
             }
         }
-
+        /// <summary>
+        /// After spectra are consumed, spectra that had more than one value in a bin have had that value averaged.
+        /// Therefore, the original tic value is incorrect and the tic need to be recalculated.
+        /// </summary>
         public void RecalculateTics()
         {
             
@@ -265,7 +329,10 @@ namespace SpectralAveraging.DataStructures
                 }
             }
         }
-
+        /// <summary>
+        /// Collapses the pixel stack into a single m/z and intensity value. 
+        /// </summary>
+        /// <remarks>Speed optimized by using a Parallel.Foreach loop.</remarks>
         public void MergeSpectra()
         {
             Parallel.ForEach(PixelStacks, pixelStack =>
@@ -273,13 +340,26 @@ namespace SpectralAveraging.DataStructures
                 pixelStack.Average(Weights);
             });
         }
-
+        /// <summary>
+        /// Utility method to expose the merged x and y array. 
+        /// </summary>
+        /// <returns>Jagged array where double[0] contains the averaged x array
+        /// and double[1] contains the averaged y array. </returns>
         public double[][] GetMergedSpectrum()
         {
             double[] xArray = PixelStacks.Select(i => i.MergedMzValue).ToArray();
             double[] yArray = PixelStacks.Select(i => i.MergedIntensityValue).ToArray();
             return new[] { xArray, yArray };
         }
+        /// <summary>
+        /// Creates a List of BinValue records given the x and y axis of a spectra. The BinValue record maintains
+        /// the x and y values while also recording the bin that each set of values belongs to.  
+        /// </summary>
+        /// <param name="xArray">m/z values of a spectra.</param>
+        /// <param name="yArray">Intensity value of a spectra.</param>
+        /// <param name="min">The lowest value in the xArray.</param>
+        /// <param name="binSize">The size of each bin.</param>
+        /// <returns></returns>
         private static List<BinValue> CreateBinValueList(double[] xArray, double[] yArray,
             double min, double binSize)
         {
@@ -293,7 +373,13 @@ namespace SpectralAveraging.DataStructures
             }
             return binValues;
         }
-
+        /// <summary>
+        /// Pixel stack objects make rejection and averaging calculation easy, but makes linear calculations like
+        /// noise estimation, scale estimation, and weight calculation difficult. This method transforms the PixelStacks into
+        /// linear spectra. 
+        /// </summary>
+        /// <param name="index">The index of the spectra. Bounded from 0 to less than number of spectra to be averaged.</param>
+        /// <returns>A linear spectra from PixelStacks property.</returns>
         private double[] PopIntensityValuesFromPixelStackList(int index)
         {
             double[] results = new double[PixelStacks.Count];
@@ -309,11 +395,14 @@ namespace SpectralAveraging.DataStructures
     /// <summary>
     /// Record type used to facilitate bin, mz, and intensity matching. 
     /// </summary>
-    /// <param name="Bin"></param>
-    /// <param name="Mz"></param>
-    /// <param name="Intensity"></param>
+    /// <param name="Bin">Integer bin number.</param>
+    /// <param name="Mz">Mz value.</param>
+    /// <param name="Intensity">Intensity value.</param>
     internal readonly record struct BinValue(int Bin, double Mz, double Intensity);
 
+    /// <summary>
+    /// Custom comparer to use in override for List.BinarySearch() that accepts a custom comparer as an argument. 
+    /// </summary>
     internal class BinValueComparer : IComparer<BinValue>
     {
         public int Compare(BinValue x, BinValue y)

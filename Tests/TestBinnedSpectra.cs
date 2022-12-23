@@ -139,9 +139,9 @@ public class TestBinnedSpectra
         bs.CalculateScaleEstimates();
         double[] expected = new[]
         {
-            0.024077, 
-            0.023317, 
-            0.050520
+            Math.Sqrt(0.024077), 
+            Math.Sqrt(0.023317), 
+            Math.Sqrt(0.050520)
         };
         Assert.That(bs.ScaleEstimates.Values.ToArray(), 
             Is.EqualTo(expected).Within(0.0001));
@@ -170,8 +170,8 @@ public class TestBinnedSpectra
         double[] expectedWeights = new[]
         {
             1539.23913, 
-            1584.957,
-            1584.957
+            1636.63560,
+            755.37045
         }; 
         Assert.That(bs.Weights.Values.ToArray(), 
             Is.EqualTo(expectedWeights).Within(0.01));

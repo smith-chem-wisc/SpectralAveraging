@@ -7,7 +7,7 @@ internal static class WaveletMathUtils
     /// <param name="x">An array of filter coefficients, either generated via a program like MATLAB or found in a reference.</param>
     /// <param name="inverse">Determines whether the inverse filter should be returned. Set to true if the filter is being generated
     /// for a maximal overlap discrete wavelet transform. Set to false if generating a scaling filter for the discrete wavelet transform.</param>
-    /// <returns></returns>
+    /// <returns>A quadrature mirror filter transformed set of wavelet coefficients.</returns>
     internal static double[] QMF(double[] x, bool inverse = false)
     {
 

@@ -7,18 +7,30 @@ using System.Threading.Tasks;
 
 namespace SpectralAveraging.NoiseEstimates
 {
+    /// <summary>
+    /// Class used to calculate Multi Resolution Support noise estimation. Algorithm is based on this paper:
+    /// Jean-Luc Starck and Fionn Murtagh (1998), Automatic Noise Estimation from the Multiresolution Support, Publications of the Royal Astronomical Society of the Pacific, vol. 110, pp. 193–199. 
+    /// </summary>
     public static class MRSNoiseEstimator
     {
         /// <summary>
         /// Method to calculate the estimate of the noise standard deviation using the Multi-Resolution
         /// Support methods defined by Jean‐Luc Starck and Fionn Murtagh (Feb. 1998). Calculates a Maximum Overlap
         /// Discrete wavelet transform, then creates a multi-resolution support to find a set of noise pixels. Takes the standard
-        /// deviation of these pixels to estimate the standard deviation of the noise. 
+        /// deviation of these only the noise pixels to use in estimating the standard deviation of the noise. 
         /// </summary>
+        /// <seealso cref="BooleanizeLevel"/>
+        /// <seealso cref="CreateMultiResolutionSupport"/>
+        /// <remarks>The Haar wavelet is the default, and I don't see a lot of reason that it would need to be different. It will be the fastest wavelet to use, as it is only two points.
+        /// Further, the other wavelet that I've implemented, the Db4, has similar estimates in noise, but is significantly slower. Since we're dealing with spectra that will include many points,
+        /// I think the speed is an important advantage supporting the Haar wavelet as the default.</remarks>
         /// <param name="signal">A time or frequency domain signal.</param>
-        /// <param name="epsilon">Determines threshold for convergence between two iterations.</param>
+        /// <param name="epsilon">Determines threshold for convergence between iterations.</param>
+        /// <param name="noiseEstimate">The noise estimate value for a the given signal.</param>
         /// <param name="maxIterations">Maximum number of iterations to perform.</param>
-        /// <returns></returns>
+        /// <param name="waveletType">Wavelet used in creating the multi-resolution support. Default is Haar, and I don't see any reason to make it different.</param>
+        /// <returns>A boolean value indicating if the algorithm converged on a value or not. Used to determine
+        /// if alternate noise estimation is required.</returns>
         public static bool MRSNoiseEstimation(double[] signal, double epsilon,
             out double noiseEstimate, int maxIterations = 25, 
             WaveletType waveletType = WaveletType.Haar)
@@ -70,14 +82,15 @@ namespace SpectralAveraging.NoiseEstimates
         }
 
         /// <summary>
-        /// Converts the ModWtOutput into a list of int arrays based on a noise estimate.  
+        /// Converts the ModWtOutput into a list of int arrays based on a noise estimate. Called once per iteration to determine
+        /// what is a noise pixel versus a signal pixel. 
         /// </summary>
         /// <param name="wtOutput">Output object of the Mod wavelet transform.</param>
-        /// <param name="noiseEstimate">The initial noise estimation of the signal.</param>
+        /// <param name="noiseEstimate">The initial noise estimation of the signal given for this iteration.</param>
         /// <param name="noiseThreshold">A multiple of the noise estimate. noiseThreshold * noiseEstimate
         /// is the cutoff value determining whether or not a pixel is signal or noise.</param>
         /// <returns>List<int[]>. Each element in the int[] is either a 0 or positive integer, representing a noise value (if 0)
-        /// or a signal value (if >9).</int></returns>
+        /// or a signal value (if int[i] > 0).</int></returns>
         private static List<int[]> BooleanizeLevels(ModWtOutput wtOutput, double noiseEstimate, double noiseThreshold)
         {
             List<int[]> booleanizedLevels = new();
@@ -89,12 +102,15 @@ namespace SpectralAveraging.NoiseEstimates
         }
 
         /// <summary>
-        /// Private method used to booleanize individual levels. 
+        /// Private method used to booleanize individual levels. For each pixel in the Level to be booleanized,
+        /// determines if the values of that pixel is singificant, i.e. > threshold. If the pixel is significant,
+        /// a one is added at that position to the output int[] array. 
         /// </summary>
         /// <param name="level">The level within a ModWtOuput.</param>
         /// <param name="noiseEstimate">Initial noise estimate of the signal.</param>
         /// <param name="threshold">Multiple of the noise estimate used to define the noise cutoff level.</param>
-        /// <returns></returns>
+        /// <returns>An integer array where each index corresponds to a position in the signal. If the signal at that position is significant
+        /// at the given level, the value at the index is >0.</returns>
         private static int[] BooleanizeLevel(Level level, double noiseEstimate, double threshold)
         {
             int[] results = new int[level.WaveletCoeff.Length];
@@ -113,7 +129,13 @@ namespace SpectralAveraging.NoiseEstimates
             }
             return results;
         }
-
+        /// <summary>
+        /// Returns a signal that is smoothed by subtracting the summed wavelet coefficients from the original signal. Used in each iteration of MRS noise estimation process.
+        /// Signal should be essentially noiseless. 
+        /// </summary>
+        /// <param name="originalSignal">The original signal before modwt.</param>
+        /// <param name="output">The ModWtOutput object containing the wavelet coefficients from the modwt of the original signal.</param>
+        /// <returns>The original signal - the sum of the wavelet coefficients</returns>
         private static double[] CreateSmoothedSignal(double[] originalSignal, ModWtOutput output)
         {
             double[] results = new double[originalSignal.Length];
@@ -148,7 +170,6 @@ namespace SpectralAveraging.NoiseEstimates
         /// Computes the standard deviation of the noise pixels of a signal given the signal, the
         /// output of the ModWt wavelet transform and the indexes generated from multi-resolution support. 
         /// </summary>
-        /// <param name="wtOutput">The output of the mod wavelet transform.</param>
         /// <param name="signal">A signal that has been smoothed by subtracting the wavelet coefficients from the original signal.</param>
         /// <param name="noiseIndices">An array of noise indices with either a zero or a positive integer value.
         /// Zero represents a noise pixel; positive integer represents a non-noise pixel.</param>
