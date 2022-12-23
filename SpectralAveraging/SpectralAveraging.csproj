@@ -13,6 +13,7 @@
     <Description>Spectral averaging package </Description>
     <IsPublishable>True</IsPublishable>
     <Platforms>x64</Platforms>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
